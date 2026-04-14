@@ -366,15 +366,6 @@
     <div class="teams-grid" id="teams-container">
       <div class="global-loader"><span class="ai-loader" style="border-color: var(--brand); border-bottom-color: transparent;"></span> Loading Teams...</div>
     </div>
-    
-    <div style="margin-top:2rem; background: var(--bg-card); border: 1px solid rgba(168, 85, 247, 0.3); border-radius: 12px; padding: 2rem; position: relative; overflow: hidden; box-shadow: 0 4px 16px rgba(168, 85, 247, 0.05);">
-       <div style="position: absolute; top:0; left:0; width:4px; height:100%; background: linear-gradient(180deg, #6366f1, #a855f7);"></div>
-       <div style="font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 20px; color: var(--brand); margin-bottom: 8px;">✨ <span class="ai-gradient-text">AI Tactics Coach</span></div>
-       <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px; line-height: 1.5; font-weight: 500;">Describe your available players or playstyle, and our AI will analyze and suggest the best formation and strategy for Season 4.</div>
-       <input type="text" id="tacticsInput" placeholder="e.g. We have very fast wingers, a tall striker, and a solid defensive midfielder..." style="margin-bottom: 12px; border-color: rgba(168, 85, 247, 0.3);">
-       <button type="button" class="ai-btn" id="aiTacticsBtn" onclick="generateTactics()">✨ Get Tactical Advice</button>
-       <div id="tacticsOutput" style="margin-top:16px; font-size:14px; color:var(--text-main); line-height:1.6; display:none; background:var(--bg-input); padding:16px; border-radius:8px; border-left: 3px solid #6366f1; white-space: pre-wrap;"></div>
-    </div>
   </div>
 </div>
 
@@ -1567,11 +1558,25 @@ function renderSupportersPage() {
 
     db_supporters.forEach(sup => {
         let photoUrl = getPbImageUrl(sup, sup.photo);
+        
+        // PocketBase er field name boro hater thekleo jate problem na hoy tai 2 bhabei check kora hocche
+        let sName = sup.name || sup.NAME || 'Anonymous';
+        let sBatch = sup.batch || sup.Batch || '';
+        let sMessage = sup.message ? sup.message.trim() : '';
+        let sConsent = sup.publish_consent; // Boolean (True/False)
+
+        // Consent theklei shudhu message dekhabe
+        let msgHtml = '';
+        if (sConsent === true && sMessage !== '') {
+            msgHtml = `<div style="font-size: 12px; color: var(--text-muted); margin-top: 12px; font-style: italic; line-height: 1.5; padding: 10px; background: rgba(0,0,0,0.02); border-radius: 8px; border: 1px solid var(--border);">"${sMessage}"</div>`;
+        }
+
         container.innerHTML += `
             <div class="supporter-card">
-                <img src="${photoUrl}" class="supporter-photo" alt="${sup.name}" crossorigin="anonymous">
-                <div class="supporter-name">${sup.name}</div>
-                <div class="supporter-batch">Batch: ${sup.batch}</div>
+                <img src="${photoUrl}" class="supporter-photo" alt="${sName}" crossorigin="anonymous">
+                <div class="supporter-name">${sName}</div>
+                <div class="supporter-batch">Batch: ${sBatch}</div>
+                ${msgHtml}
                 <div class="supporter-badge">⭐ EFL Supporter</div>
             </div>
         `;
@@ -1925,20 +1930,6 @@ async function generateBio() {
   
   btn.disabled = false; btn.innerHTML = '✨ Generate Random or Polish Current One';
   msg.textContent = 'Done!'; setTimeout(() => msg.style.display = 'none', 3000);
-}
-
-async function generateTactics() {
-  const input = document.getElementById('tacticsInput').value.trim();
-  const out = document.getElementById('tacticsOutput');
-  const btn = document.getElementById('aiTacticsBtn');
-  if (!input) return alert("Please describe players first.");
-
-  btn.disabled = true; btn.innerHTML = '<span class="ai-loader"></span> Analyzing...';
-  out.style.display = 'block'; out.innerHTML = 'Drawing tactical board...';
-
-  const prompt = `Suggest a brief football formation and strategy for: "${input}". Max 2 sentences.`;
-  out.innerHTML = await fetchGemini(prompt);
-  btn.disabled = false; btn.innerHTML = '✨ Get Tactical Advice';
 }
 </script>
 </body>
