@@ -1788,6 +1788,11 @@ function closeModal(modalId, event) {
 // ==========================================
 let isSubmitting = false; 
 
+// ==========================================
+// FORM SUBMISSION
+// ==========================================
+let isSubmitting = false; 
+
 async function submitForm() {
   if (isSubmitting) return; 
 
@@ -1818,7 +1823,26 @@ async function submitForm() {
   btn.innerHTML = '<span class="ai-loader"></span> Uploading Data to Server...';
 
   try {
+      // --- SMART & SIMPLE ID GENERATOR ---
+      // Convert to lowercase and remove spaces/special characters
+      let baseName = name.toLowerCase().replace(/[^a-z0-9]/g, '');
+
+      // PocketBase requires a minimum of 5 characters. Pad with 'x' if the name is too short.
+      if (baseName.length < 3) {
+          baseName = baseName.padEnd(3, 'x');
+      }
+
+      // Truncate to max 13 characters to leave room for the 2-digit random suffix (max total 15)
+      baseName = baseName.substring(0, 13);
+
+      // Generate a 2-digit random number (between 10 and 99)
+      let randomSuffix = Math.floor(10 + Math.random() * 90); 
+
+      // Final custom ID (e.g., madhu73)
+      let customId = baseName + randomSuffix;
+
       const formData = new FormData();
+      formData.append('id', customId);
       formData.append('name', name);
       formData.append('batch', batch);
       formData.append('position', pos);
@@ -1868,7 +1892,7 @@ async function submitForm() {
 
   } catch (error) {
       console.error("Submission Error: ", error);
-      alert("দুঃখিত, ডাটা সেভ করার সময় এরর হয়েছে। এরর মেসেজ: " + error.message);
+      alert("Sorry, there was an error saving the data. Error: " + error.message);
   } finally {
       isSubmitting = false; 
       btn.disabled = false;
