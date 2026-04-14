@@ -159,7 +159,7 @@
   .ts-name { font-weight: 700; font-size: 14px; color: var(--text-main); margin-bottom: 2px; }
   .ts-team { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; }
   .ts-goals { font-family: 'Montserrat', sans-serif; font-size: 20px; font-weight: 900; color: var(--brand); }
-  .export-btn { background: var(--bg-body); border: 1px solid var(--border); padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: 0.2s; color: var(--text-main); margin-top: 16px; align-self: center; }
+  .export-btn { background: var(--bg-body); border: 1px solid var(--border); padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; transition: 0.2s; color: var(--text-main); margin-top: 16px; align-self: center; }
   .export-btn:hover { background: var(--brand); color: #fff; border-color: var(--brand); }
 
   /* SUPPORTERS/DONORS STYLES */
@@ -202,13 +202,6 @@
   .committee-badge { border: 1px solid var(--border); padding: 12px; border-radius: 8px; font-size: 12px; background: var(--bg-body); }
   .committee-title { font-weight: 700; color: var(--text-main); }
   .committee-name { color: var(--text-muted); font-style: italic; margin-top: 4px; font-size: 11px; }
-
-  /* AI Features Styles */
-  .ai-btn { background: linear-gradient(135deg, #6366f1, #a855f7); color: white; border: none; padding: 8px 16px; border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s; margin-top: 8px; letter-spacing: 0.5px; }
-  .ai-btn:hover { opacity: 0.9; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(168, 85, 247, 0.25); }
-  .ai-loader { width: 14px; height: 14px; border: 2px solid #fff; border-bottom-color: transparent; border-radius: 50%; display: inline-block; animation: rotation 1s linear infinite; }
-  .ai-gradient-text { background: linear-gradient(135deg, #6366f1, #a855f7); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-  @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
   /* MODALS & DIRECTORY STYLES */
   .player-directory-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
@@ -608,10 +601,6 @@
           <span>Previous Football Experience</span>
         </label>
         <textarea id="f-exp" placeholder="Briefly describe your playing style or past experience. E.g. 'I am fast, played inter-batch last year, good at crossing...'"></textarea>
-        <div style="display:flex; align-items:center; gap:10px;">
-           <button type="button" class="ai-btn" id="aiBioBtn" onclick="generateBio()">✨ Generate Random or Polish Current One</button>
-           <span id="aiBioMsg" style="font-size:11px; color:var(--text-muted); display:none;">Crafting your bio...</span>
-        </div>
       </div>
       
       <div class="payment-box" id="payBox">
@@ -941,11 +930,36 @@ let db_teams = [];
 let db_players = [];
 let db_fixtures = [];
 let db_results = []; 
-let db_supporters = []; // New array for supporters
+let db_supporters = []; 
 
 let currentFilter = 'All';
 let currentFilteredPlayers = [];
 let auctionIndex = 0;
+
+// ==========================================
+// COLOR CONTRAST HELPERS (NEW)
+// ==========================================
+function isLightColor(color) {
+    if (!color) return false;
+    let hex = color.replace('#', '').trim();
+    if (hex.toLowerCase() === 'white') return true;
+    if (hex.length === 3) hex = hex.split('').map(c => c + c).join('');
+    if (hex.length !== 6) return false;
+    let r = parseInt(hex.substring(0, 2), 16);
+    let g = parseInt(hex.substring(2, 4), 16);
+    let b = parseInt(hex.substring(4, 6), 16);
+    let luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+    // Return true if color is very bright (white-ish)
+    return luminance > 0.8; 
+}
+
+function getSafeTextColor(bgColor) {
+    return isLightColor(bgColor) ? '#1e293b' : bgColor; 
+}
+
+function getSafeCrestTextColor(bgColor) {
+    return isLightColor(bgColor) ? '#1e293b' : '#ffffff'; 
+}
 
 function getPbImageUrl(record, fileName) {
   if (!fileName) return 'https://via.placeholder.com/200?text=No+Photo';
@@ -994,7 +1008,6 @@ async function fetchPBData() {
        db_results = resultsData.items || [];
     }
 
-    // Fetch Supporters Data
     const supportersRes = await fetch(`${PB_CONFIG.baseURL}/api/collections/supporters/records?sort=-created`, fetchOptions);
     if(supportersRes.ok) {
        const supportersData = await supportersRes.json();
@@ -1007,7 +1020,7 @@ async function fetchPBData() {
     renderFixturesPage(); 
     renderResultsPage(); 
     renderStandingsPage(); 
-    renderSupportersPage(); // Render Supporters Page
+    renderSupportersPage();
 
   } catch (error) {
     console.error("PocketBase Fetch Error:", error);
@@ -1035,7 +1048,10 @@ function renderTeamsPage() {
   db_teams.forEach(team => {
     const teamPlayers = db_players.filter(p => getPBLinkedTeamId(p) === team.id);
     const teamName = team.name || team.crest_text || 'Unnamed Team';
+    
     const crestBg = team.crest_bg || '#1d4ed8';
+    const safeTextColor = getSafeTextColor(crestBg);
+    const crestTextCol = getSafeCrestTextColor(crestBg);
     
     let bannerStyle = `linear-gradient(135deg, ${crestBg}CC, ${crestBg})`;
     
@@ -1047,14 +1063,14 @@ function renderTeamsPage() {
     container.innerHTML += `
       <div class="team-card" onclick="openTeamModal('${team.id}')">
         <div class="team-banner" style="background:${bannerStyle}">
-          <div class="team-crest" style="background:${crestBg}; border: 4px solid var(--bg-card); ${team.banner ? 'padding:0;' : ''}">
+          <div class="team-crest" style="background:${crestBg}; color:${crestTextCol}; border: 4px solid var(--bg-card); ${team.banner ? 'padding:0;' : ''}">
              ${crestHtml}
           </div>
         </div>
         <div class="team-info">
-          <div class="team-name" style="color:${crestBg}">${teamName}</div>
+          <div class="team-name" style="color:${safeTextColor}">${teamName}</div>
           <div class="team-meta"><span>Manager: <span class="tbd">${team.manager_name || 'TBD'}</span></span><span>Owner: <span class="tbd">${team.owner_name || 'TBD'}</span></span></div>
-          <div class="team-badge" style="background:${crestBg}20;color:${crestBg}">Season 4 Entry</div>
+          <div class="team-badge" style="background:${safeTextColor}15;color:${safeTextColor}">Season 4 Entry</div>
         </div>
         <div class="team-roster">
           <span class="roster-tag">${teamPlayers.length > 0 ? teamPlayers.length + ' Players Drafted' : 'Squad to be announced'}</span>
@@ -1090,8 +1106,11 @@ function renderPlayersPage() {
     const team = db_teams.find(t => t.id === getPBLinkedTeamId(player));
     const tName = team ? (team.name || team.crest_text || 'Unnamed Team') : 'Undrafted';
     
+    const crestBg = team ? (team.crest_bg || '#000') : '#000';
+    const safeTextColor = getSafeTextColor(crestBg);
+    
     const teamBadgeHTML = team 
-      ? `<div class="player-team-badge" style="background:${team.crest_bg || '#000'}20; color:${team.crest_bg || '#000'}; border: 1px solid ${team.crest_bg || '#000'}50;">${tName}</div>` 
+      ? `<div class="player-team-badge" style="background:${safeTextColor}15; color:${safeTextColor}; border: 1px solid ${safeTextColor}40;">${tName}</div>` 
       : `<div class="player-team-badge" style="background:var(--bg-input); color:var(--text-muted); border: 1px solid var(--border);">Undrafted</div>`;
 
     let photoUrl = getPbImageUrl(player, player.photo);
@@ -1144,6 +1163,9 @@ function renderFixturesPage() {
       const t1Name = t1.name || t1.crest_text || 'TBD';
       const t2Name = t2.name || t2.crest_text || 'TBD';
       
+      const t1CrestTextCol = getSafeCrestTextColor(t1.crest_bg);
+      const t2CrestTextCol = getSafeCrestTextColor(t2.crest_bg);
+      
       let t1CrestHtml = t1.banner ? `<img src="${getPbImageUrl(t1, t1.banner)}" class="crest-img" crossorigin="anonymous">` : (t1.crest_text || '?');
       let t2CrestHtml = t2.banner ? `<img src="${getPbImageUrl(t2, t2.banner)}" class="crest-img" crossorigin="anonymous">` : (t2.crest_text || '?');
 
@@ -1162,14 +1184,14 @@ function renderFixturesPage() {
           </div>
           <div class="fixture-body">
               <div class="fixture-team">
-                  <div class="fixture-crest" style="background:${t1.crest_bg}; ${t1.banner ? 'padding:0; border:2px solid transparent;' : ''}">${t1CrestHtml}</div>
+                  <div class="fixture-crest" style="background:${t1.crest_bg}; color:${t1CrestTextCol}; ${t1.banner ? 'padding:0; border:2px solid transparent;' : ''}">${t1CrestHtml}</div>
                   <div class="fixture-tname">${t1Name}</div>
               </div>
               <div class="fixture-center">
                   <div style="margin-top: 8px;">${scoreDisplay}</div>
               </div>
               <div class="fixture-team away">
-                  <div class="fixture-crest" style="background:${t2.crest_bg}; ${t2.banner ? 'padding:0; border:2px solid transparent;' : ''}">${t2CrestHtml}</div>
+                  <div class="fixture-crest" style="background:${t2.crest_bg}; color:${t2CrestTextCol}; ${t2.banner ? 'padding:0; border:2px solid transparent;' : ''}">${t2CrestHtml}</div>
                   <div class="fixture-tname">${t2Name}</div>
               </div>
           </div>
@@ -1213,6 +1235,9 @@ function renderResultsPage() {
 
       const t1Name = t1.name || t1.crest_text || 'TBD';
       const t2Name = t2.name || t2.crest_text || 'TBD';
+
+      const t1CrestTextCol = getSafeCrestTextColor(t1.crest_bg);
+      const t2CrestTextCol = getSafeCrestTextColor(t2.crest_bg);
 
       let t1CrestHtml = t1.banner ? `<img src="${getPbImageUrl(t1, t1.banner)}" class="crest-img" crossorigin="anonymous">` : (t1.crest_text || '?');
       let t2CrestHtml = t2.banner ? `<img src="${getPbImageUrl(t2, t2.banner)}" class="crest-img" crossorigin="anonymous">` : (t2.crest_text || '?');
@@ -1278,7 +1303,7 @@ function renderResultsPage() {
           <div class="fixture-body" style="align-items: flex-start;">
               <div class="fixture-team" style="flex-direction: column; align-items: flex-start;">
                   <div style="display: flex; align-items: center; gap: 12px;">
-                      <div class="fixture-crest" style="background:${t1.crest_bg}; ${t1.banner ? 'padding:0; border:2px solid transparent;' : ''}">${t1CrestHtml}</div>
+                      <div class="fixture-crest" style="background:${t1.crest_bg}; color:${t1CrestTextCol}; ${t1.banner ? 'padding:0; border:2px solid transparent;' : ''}">${t1CrestHtml}</div>
                       <div class="fixture-tname">${t1Name}</div>
                   </div>
                   <div class="result-scorer-list">
@@ -1290,7 +1315,7 @@ function renderResultsPage() {
               </div>
               <div class="fixture-team away" style="flex-direction: column; align-items: flex-end;">
                   <div style="display: flex; align-items: center; gap: 12px; flex-direction: row-reverse;">
-                      <div class="fixture-crest" style="background:${t2.crest_bg}; ${t2.banner ? 'padding:0; border:2px solid transparent;' : ''}">${t2CrestHtml}</div>
+                      <div class="fixture-crest" style="background:${t2.crest_bg}; color:${t2CrestTextCol}; ${t2.banner ? 'padding:0; border:2px solid transparent;' : ''}">${t2CrestHtml}</div>
                       <div class="fixture-tname">${t2Name}</div>
                   </div>
                   <div class="result-scorer-list right">
@@ -1406,6 +1431,7 @@ function renderStandingsPage() {
     standingsArr.forEach((stats, index) => {
         const team = stats.team;
         const crestBg = team.crest_bg || '#1d4ed8';
+        const crestTextCol = getSafeCrestTextColor(crestBg);
         const rankClass = index === 0 ? 'top-team' : '';
         const teamName = team.name || team.crest_text || 'Unnamed Team';
 
@@ -1417,7 +1443,7 @@ function renderStandingsPage() {
         <tr class="${rankClass}">
             <td><div class="st-rank">${index + 1}</div></td>
             <td class="st-team-cell">
-                <div class="st-crest" style="background:${crestBg}; ${team.banner ? 'padding:0; border:1px solid transparent;' : ''}">${crestHtml}</div>
+                <div class="st-crest" style="background:${crestBg}; color:${crestTextCol}; ${team.banner ? 'padding:0; border:1px solid transparent;' : ''}">${crestHtml}</div>
                 <div class="st-name">${teamName}</div>
             </td>
             <td>${stats.P}</td>
@@ -1487,6 +1513,7 @@ function downloadMatchCard(resultId) {
     }
 
     document.getElementById('erc-t1-crest').style.background = t1.crest_bg;
+    document.getElementById('erc-t1-crest').style.color = getSafeCrestTextColor(t1.crest_bg);
     let t1CrestHtml = t1.banner ? `<img src="${getPbImageUrl(t1, t1.banner)}" class="crest-img" crossorigin="anonymous">` : (t1.crest_text || 'T1');
     document.getElementById('erc-t1-crest').innerHTML = t1CrestHtml;
     if(t1.banner) document.getElementById('erc-t1-crest').style.padding = '0';
@@ -1494,6 +1521,7 @@ function downloadMatchCard(resultId) {
     document.getElementById('erc-t1-score').textContent = res.team1_score || 0;
 
     document.getElementById('erc-t2-crest').style.background = t2.crest_bg;
+    document.getElementById('erc-t2-crest').style.color = getSafeCrestTextColor(t2.crest_bg);
     let t2CrestHtml = t2.banner ? `<img src="${getPbImageUrl(t2, t2.banner)}" class="crest-img" crossorigin="anonymous">` : (t2.crest_text || 'T2');
     document.getElementById('erc-t2-crest').innerHTML = t2CrestHtml;
     if(t2.banner) document.getElementById('erc-t2-crest').style.padding = '0';
@@ -1560,16 +1588,16 @@ function renderSupportersPage() {
     db_supporters.forEach(sup => {
         let photoUrl = getPbImageUrl(sup, sup.photo);
         
-        // PocketBase er field name boro hater thekleo jate problem na hoy tai 2 bhabei check kora hocche
-        let sName = sup.name || sup.NAME || 'Anonymous';
-        let sBatch = sup.batch || sup.Batch || '';
-        let sMessage = sup.message ? sup.message.trim() : '';
-        let sConsent = sup.publish_consent; // Boolean (True/False)
+        // Handling case sensitivity robustly for user convenience
+        let sName = sup.name || sup.NAME || sup.Name || 'Anonymous';
+        let sBatch = sup.batch || sup.Batch || sup.BATCH || '';
+        let sMessage = sup.message || sup.Message || '';
+        // Boolean check (covers true boolean, or string 'true')
+        let sConsent = sup.publish_consent === true || sup.Publish_consent === true || sup.publish_consent === 'true';
 
-        // Consent theklei shudhu message dekhabe
         let msgHtml = '';
-        if (sConsent === true && sMessage !== '') {
-            msgHtml = `<div style="font-size: 12px; color: var(--text-muted); margin-top: 12px; font-style: italic; line-height: 1.5; padding: 10px; background: rgba(0,0,0,0.02); border-radius: 8px; border: 1px solid var(--border);">"${sMessage}"</div>`;
+        if (sConsent && sMessage.trim() !== '') {
+            msgHtml = `<div style="font-size: 12px; color: var(--text-muted); margin-top: 12px; font-style: italic; line-height: 1.5; padding: 10px; background: rgba(0,0,0,0.02); border-radius: 8px; border: 1px solid var(--border);">"${sMessage.trim()}"</div>`;
         }
 
         container.innerHTML += `
@@ -1640,10 +1668,13 @@ function openTeamModal(teamId) {
 
   const teamName = team.name || team.crest_text || 'Unnamed Team';
   const crestBg = team.crest_bg || '#1d4ed8';
+  const safeTextColor = getSafeTextColor(crestBg);
+  const crestTextCol = getSafeCrestTextColor(crestBg);
   let bannerStyle = `linear-gradient(135deg, ${crestBg}CC, ${crestBg})`;
 
   document.getElementById('tm-banner').style.background = bannerStyle;
   document.getElementById('tm-crest').style.background = crestBg;
+  document.getElementById('tm-crest').style.color = crestTextCol;
   
   if (team.banner) {
       document.getElementById('tm-crest').innerHTML = `<img src="${getPbImageUrl(team, team.banner)}" class="crest-img" crossorigin="anonymous">`;
@@ -1654,7 +1685,7 @@ function openTeamModal(teamId) {
   }
   
   document.getElementById('tm-name').textContent = teamName;
-  document.getElementById('tm-name').style.color = crestBg; 
+  document.getElementById('tm-name').style.color = safeTextColor; 
   
   document.getElementById('tm-manager').textContent = team.manager_name || 'TBD';
   const mgrImg = document.getElementById('tm-manager-img');
@@ -1678,7 +1709,7 @@ function openTeamModal(teamId) {
           <img src="${photoUrl}" class="player-photo-sm" alt="${p.name}" crossorigin="anonymous">
           <div class="player-info-sm">
             <div class="player-name-sm">${p.name}</div>
-            <div class="player-pos-sm" style="color: ${crestBg}">${(p.position||'').split('—')[0]}</div>
+            <div class="player-pos-sm" style="color: ${safeTextColor}">${(p.position||'').split('—')[0]}</div>
           </div>
         </div>
       `;
@@ -1722,11 +1753,13 @@ function openPlayerModal(playerId) {
   
   if (team) {
     const teamName = team.name || team.crest_text || 'Unnamed Team';
+    const safeTextColor = getSafeTextColor(team.crest_bg || '#6366f1');
+    
     teamBox.style.display = 'block';
-    teamBox.style.borderColor = team.crest_bg || '#6366f1';
-    teamBox.style.background = `${team.crest_bg || '#6366f1'}15`;
+    teamBox.style.borderColor = safeTextColor;
+    teamBox.style.background = `${safeTextColor}15`;
     document.getElementById('pm-team').textContent = teamName;
-    document.getElementById('pm-team').style.color = team.crest_bg || '#6366f1';
+    document.getElementById('pm-team').style.color = safeTextColor;
   } else {
     teamBox.style.display = 'none';
   }
@@ -1883,55 +1916,6 @@ function resetForm() {
   selectPay(document.querySelector('.pay-opt[data-type="digital"]'), 'digital');
 }
 
-// ==========================================
-// GEMINI API INTEGRATION (OBFUSCATED KEY)
-// ==========================================
-async function fetchGemini(prompt) {
-  const keyPart1 = "AIzaSyC5pP";
-  const keyPart2 = "fPxRaMJlFa";
-  const keyPart3 = "tY07FCBnF815H0PSe28";
-  const apiKey = keyPart1 + keyPart2 + keyPart3; 
-  
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
-  const payload = { contents: [{ parts: [{ text: prompt }] }] };
-
-  try {
-    const response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-    
-    if (response.status === 429) {
-        return "⚠️ Server is currently busy (Rate Limit). Please write your own details.";
-    }
-
-    const data = await response.json();
-    if (data.error) {
-        return "⚠️ AI service unavailable right now. Please write your own details manually.";
-    }
-
-    return data.candidates?.[0]?.content?.parts?.[0]?.text || "Unable to generate. Please write manually.";
-  } catch (e) {
-    return "⚠️ Server connection failed. Please write your details manually.";
-  }
-}
-
-async function generateBio() {
-  const name = document.getElementById('f-name').value.trim() || "A player";
-  const pos = document.getElementById('f-pos').value || "any position";
-  const exp = document.getElementById('f-exp').value.trim();
-  const btn = document.getElementById('aiBioBtn');
-  const msg = document.getElementById('aiBioMsg');
-  
-  btn.disabled = true; btn.innerHTML = '<span class="ai-loader"></span> Crafting...';
-  msg.style.display = 'inline-block'; msg.textContent = 'Generating...';
-
-  const prompt = exp 
-    ? `Write a 2-sentence scout report for football player ${name} (${pos}) based on: "${exp}".`
-    : `Write a short 1-sentence fictional scout report for football player ${name} (${pos}).`;
-
-  document.getElementById('f-exp').value = await fetchGemini(prompt);
-  
-  btn.disabled = false; btn.innerHTML = '✨ Generate Random or Polish Current One';
-  msg.textContent = 'Done!'; setTimeout(() => msg.style.display = 'none', 3000);
-}
 </script>
 </body>
 </html>
