@@ -66,12 +66,15 @@
   .section-line { flex: 1; height: 1px; background: var(--border); }
   .section-tag { font-size: 11px; color: var(--text-muted); font-weight: 700; letter-spacing: 2px; text-transform: uppercase; }
   
+  /* CREST IMG HELPER */
+  .crest-img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block; }
+
   /* TEAMS & PLAYERS GRID */
   .teams-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
   .team-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; transition: all .25s; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
   .team-card:hover { border-color: var(--brand); transform: translateY(-3px); box-shadow: 0 8px 24px rgba(17,24,39,0.08); }
   .team-banner { height: 80px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; background-size: cover !important; background-position: center !important;}
-  .team-crest { width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 18px; color: #fff; border: 2px solid rgba(255,255,255,0.3); text-transform: uppercase; }
+  .team-crest { width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 14px; color: #fff; border: 2px solid rgba(255,255,255,0.3); text-transform: uppercase; overflow: hidden; text-align: center; line-height: 1.1; }
   .team-info { padding: 1rem 1.25rem; }
   .team-name { font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 18px; letter-spacing: 0.5px; margin-bottom: 4px; text-transform: uppercase; }
   .team-meta { font-size: 12px; color: var(--text-muted); display: flex; gap: 12px; font-weight: 500; }
@@ -138,7 +141,7 @@
   .fixture-body { display: flex; align-items: center; justify-content: space-between; }
   .fixture-team { display: flex; align-items: center; gap: 12px; flex: 1; }
   .fixture-team.away { flex-direction: row-reverse; text-align: right; }
-  .fixture-crest { width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 14px; color: #fff; flex-shrink: 0; box-shadow: 0 2px 6px rgba(0,0,0,0.1);}
+  .fixture-crest { width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 12px; color: #fff; flex-shrink: 0; box-shadow: 0 2px 6px rgba(0,0,0,0.1); overflow: hidden; text-align: center; line-height: 1.1;}
   .fixture-tname { font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 16px; color: var(--text-main); text-transform: uppercase; }
   .fixture-center { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0 20px; min-width: 120px; }
   .fixture-score { font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 28px; color: var(--brand); letter-spacing: 2px; }
@@ -168,7 +171,7 @@
   .standings-table tr.top-team td { background: rgba(34, 197, 94, 0.05); }
   .st-team-cell { display: flex; align-items: center; gap: 12px; text-align: left; }
   .st-rank { font-family: 'Montserrat', sans-serif; font-weight: 800; color: var(--text-muted); width: 24px; }
-  .st-crest { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 9px; color: #fff; font-weight: 800; font-family: 'Montserrat'; flex-shrink: 0; }
+  .st-crest { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 8px; color: #fff; font-weight: 800; font-family: 'Montserrat'; flex-shrink: 0; overflow: hidden; text-align: center; line-height: 1.1;}
   .st-name { font-family: 'Montserrat', sans-serif; font-weight: 700; text-transform: uppercase; font-size: 13px; }
   .st-pts { font-family: 'Montserrat', sans-serif; font-weight: 900; color: var(--brand); font-size: 16px; background: rgba(17,24,39,0.05); padding: 4px 12px; border-radius: 6px; }
 
@@ -215,7 +218,7 @@
   .modal-close:hover { background: var(--accent); }
   
   .team-modal-header { height: 160px; background: linear-gradient(135deg, #1e3a8a, #1e40af); padding: 2rem; position: relative; border-radius: 16px 16px 0 0; }
-  .team-modal-crest { width: 80px; height: 80px; background: #1d4ed8; border-radius: 50%; border: 4px solid var(--bg-card); display: flex; align-items: center; justify-content: center; color: #fff; font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 24px; position: absolute; bottom: -40px; left: 2rem; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+  .team-modal-crest { width: 80px; height: 80px; background: #1d4ed8; border-radius: 50%; border: 4px solid var(--bg-card); display: flex; align-items: center; justify-content: center; color: #fff; font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 24px; position: absolute; bottom: -40px; left: 2rem; box-shadow: 0 4px 12px rgba(0,0,0,0.1); overflow: hidden; text-align: center; line-height: 1.1;}
   .team-modal-body { padding: 3.5rem 2rem 2rem; }
   .team-modal-name { font-family: 'Montserrat', sans-serif; font-size: 28px; font-weight: 900; color: var(--text-main); text-transform: uppercase; margin-bottom: 4px; line-height: 1.1; }
   .team-modal-meta { display: flex; gap: 16px; font-size: 13px; color: var(--text-muted); font-weight: 500; margin-bottom: 24px; }
@@ -825,7 +828,7 @@
           <div style="font-family: 'Montserrat', sans-serif; font-size: 30px; font-weight: 900; color: #fff; letter-spacing: 2px;">EFL SEASON 4</div>
           <div style="font-size: 9px; color: #cbd5e1; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 28px; font-weight: 700;">Jahangirnagar University · Dept. of English</div>
           <div style="width: 160px; height: 160px; margin: 0 auto 24px; border-radius: 50%; overflow: hidden; border: 4px solid #fff; background: #1e293b; box-shadow: 0 10px 25px rgba(0,0,0,0.4); position: relative;">
-              <img id="card-photo" src="" style="width: 100%; height: 100%; object-fit: cover; display: block;">
+              <img id="card-photo" src="" style="width: 100%; height: 100%; object-fit: cover; display: block;" crossorigin="anonymous">
           </div>
           <div id="card-name" style="font-family: 'Montserrat', sans-serif; font-size: 26px; font-weight: 900; text-transform: uppercase; line-height: 1.1; margin-bottom: 8px; color: #f8fafc;">PLAYER NAME</div>
           <div id="card-pos" style="font-size: 14px; color: #ef4444; font-weight: 800; margin-bottom: 24px; text-transform: uppercase; letter-spacing: 1px;">POSITION</div>
@@ -855,7 +858,7 @@
       <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 40px;">
           <!-- Team 1 -->
           <div style="display: flex; flex-direction: column; align-items: center; flex: 1;">
-              <div id="erc-t1-crest" style="width: 120px; height: 120px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 32px; color: #fff; border: 4px solid rgba(255,255,255,0.2); box-shadow: 0 10px 30px rgba(0,0,0,0.5); margin-bottom: 16px;">T1</div>
+              <div id="erc-t1-crest" style="width: 120px; height: 120px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 32px; color: #fff; border: 4px solid rgba(255,255,255,0.2); box-shadow: 0 10px 30px rgba(0,0,0,0.5); margin-bottom: 16px; overflow: hidden;">T1</div>
               <div id="erc-t1-name" style="font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 24px; text-transform: uppercase; text-align: center;">TEAM 1</div>
           </div>
           
@@ -870,7 +873,7 @@
 
           <!-- Team 2 -->
           <div style="display: flex; flex-direction: column; align-items: center; flex: 1;">
-              <div id="erc-t2-crest" style="width: 120px; height: 120px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 32px; color: #fff; border: 4px solid rgba(255,255,255,0.2); box-shadow: 0 10px 30px rgba(0,0,0,0.5); margin-bottom: 16px;">T2</div>
+              <div id="erc-t2-crest" style="width: 120px; height: 120px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 32px; color: #fff; border: 4px solid rgba(255,255,255,0.2); box-shadow: 0 10px 30px rgba(0,0,0,0.5); margin-bottom: 16px; overflow: hidden;">T2</div>
               <div id="erc-t2-name" style="font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 24px; text-transform: uppercase; text-align: center;">TEAM 2</div>
           </div>
       </div>
@@ -986,17 +989,22 @@ function renderTeamsPage() {
 
   db_teams.forEach(team => {
     const teamPlayers = db_players.filter(p => getPBLinkedTeamId(p) === team.id);
-    let bannerStyle = 'linear-gradient(135deg, #1e3a8a, #1e40af)';
-    if(team.banner) bannerStyle = `url(${getPbImageUrl(team, team.banner)})`;
-    else if(team.crest_bg) bannerStyle = `linear-gradient(135deg, ${team.crest_bg}, #111827)`;
-
+    const teamName = team.name || team.crest_text || 'Unnamed Team';
     const crestBg = team.crest_bg || '#1d4ed8';
-    const teamName = team.name || 'Unnamed Team';
     
+    let bannerStyle = `linear-gradient(135deg, ${crestBg}CC, ${crestBg})`;
+    
+    let crestHtml = team.crest_text || 'FC';
+    if (team.banner) {
+        crestHtml = `<img src="${getPbImageUrl(team, team.banner)}" class="crest-img" crossorigin="anonymous">`;
+    }
+
     container.innerHTML += `
       <div class="team-card" onclick="openTeamModal('${team.id}')">
         <div class="team-banner" style="background:${bannerStyle}">
-          <div class="team-crest" style="background:${crestBg}">${team.crest_text || 'FC'}</div>
+          <div class="team-crest" style="background:${crestBg}; border: 4px solid var(--bg-card); ${team.banner ? 'padding:0;' : ''}">
+             ${crestHtml}
+          </div>
         </div>
         <div class="team-info">
           <div class="team-name" style="color:${crestBg}">${teamName}</div>
@@ -1035,9 +1043,10 @@ function renderPlayersPage() {
 
   currentFilteredPlayers.forEach(player => {
     const team = db_teams.find(t => t.id === getPBLinkedTeamId(player));
+    const tName = team ? (team.name || team.crest_text || 'Unnamed Team') : 'Undrafted';
     
     const teamBadgeHTML = team 
-      ? `<div class="player-team-badge" style="background:${team.crest_bg || '#000'}20; color:${team.crest_bg || '#000'}; border: 1px solid ${team.crest_bg || '#000'}50;">${team.name}</div>` 
+      ? `<div class="player-team-badge" style="background:${team.crest_bg || '#000'}20; color:${team.crest_bg || '#000'}; border: 1px solid ${team.crest_bg || '#000'}50;">${tName}</div>` 
       : `<div class="player-team-badge" style="background:var(--bg-input); color:var(--text-muted); border: 1px solid var(--border);">Undrafted</div>`;
 
     let photoUrl = getPbImageUrl(player, player.photo);
@@ -1053,7 +1062,7 @@ function renderPlayersPage() {
     container.innerHTML += `
       <div class="player-card" onclick="openPlayerModal('${player.id}')">
         <div style="position:relative;">
-           <img src="${photoUrl}" class="player-photo" alt="${player.name}">
+           <img src="${photoUrl}" class="player-photo" alt="${player.name}" crossorigin="anonymous">
            ${displayCat ? `<div class="cat-badge ${catClass}" style="position:absolute; top:8px; right:8px;">${displayCat}</div>` : ''}
         </div>
         <div class="player-info">
@@ -1087,6 +1096,12 @@ function renderFixturesPage() {
       const t1 = db_teams.find(t => t.id === team1Id) || { name: 'TBD', crest_text: '?', crest_bg: '#94a3b8' };
       const t2 = db_teams.find(t => t.id === team2Id) || { name: 'TBD', crest_text: '?', crest_bg: '#94a3b8' };
 
+      const t1Name = t1.name || t1.crest_text || 'TBD';
+      const t2Name = t2.name || t2.crest_text || 'TBD';
+      
+      let t1CrestHtml = t1.banner ? `<img src="${getPbImageUrl(t1, t1.banner)}" class="crest-img" crossorigin="anonymous">` : (t1.crest_text || '?');
+      let t2CrestHtml = t2.banner ? `<img src="${getPbImageUrl(t2, t2.banner)}" class="crest-img" crossorigin="anonymous">` : (t2.crest_text || '?');
+
       let scoreDisplay = `<div class="fixture-vs">VS</div>`;
       let dateStr = 'TBA';
       if (fix.match_date) {
@@ -1102,15 +1117,15 @@ function renderFixturesPage() {
           </div>
           <div class="fixture-body">
               <div class="fixture-team">
-                  <div class="fixture-crest" style="background:${t1.crest_bg}">${t1.crest_text}</div>
-                  <div class="fixture-tname">${t1.name}</div>
+                  <div class="fixture-crest" style="background:${t1.crest_bg}; ${t1.banner ? 'padding:0; border:2px solid transparent;' : ''}">${t1CrestHtml}</div>
+                  <div class="fixture-tname">${t1Name}</div>
               </div>
               <div class="fixture-center">
                   <div style="margin-top: 8px;">${scoreDisplay}</div>
               </div>
               <div class="fixture-team away">
-                  <div class="fixture-crest" style="background:${t2.crest_bg}">${t2.crest_text}</div>
-                  <div class="fixture-tname">${t2.name}</div>
+                  <div class="fixture-crest" style="background:${t2.crest_bg}; ${t2.banner ? 'padding:0; border:2px solid transparent;' : ''}">${t2CrestHtml}</div>
+                  <div class="fixture-tname">${t2Name}</div>
               </div>
           </div>
       </div>`;
@@ -1150,6 +1165,12 @@ function renderResultsPage() {
       
       const t1 = db_teams.find(t => t.id === team1Id) || { name: 'TBD', crest_text: '?', crest_bg: '#94a3b8' };
       const t2 = db_teams.find(t => t.id === team2Id) || { name: 'TBD', crest_text: '?', crest_bg: '#94a3b8' };
+
+      const t1Name = t1.name || t1.crest_text || 'TBD';
+      const t2Name = t2.name || t2.crest_text || 'TBD';
+
+      let t1CrestHtml = t1.banner ? `<img src="${getPbImageUrl(t1, t1.banner)}" class="crest-img" crossorigin="anonymous">` : (t1.crest_text || '?');
+      let t2CrestHtml = t2.banner ? `<img src="${getPbImageUrl(t2, t2.banner)}" class="crest-img" crossorigin="anonymous">` : (t2.crest_text || '?');
 
       let multiGoalsMap = {};
       if (res.multi_goals) {
@@ -1212,8 +1233,8 @@ function renderResultsPage() {
           <div class="fixture-body" style="align-items: flex-start;">
               <div class="fixture-team" style="flex-direction: column; align-items: flex-start;">
                   <div style="display: flex; align-items: center; gap: 12px;">
-                      <div class="fixture-crest" style="background:${t1.crest_bg}">${t1.crest_text}</div>
-                      <div class="fixture-tname">${t1.name}</div>
+                      <div class="fixture-crest" style="background:${t1.crest_bg}; ${t1.banner ? 'padding:0; border:2px solid transparent;' : ''}">${t1CrestHtml}</div>
+                      <div class="fixture-tname">${t1Name}</div>
                   </div>
                   <div class="result-scorer-list">
                       ${t1ScorersUI.join('')}
@@ -1224,8 +1245,8 @@ function renderResultsPage() {
               </div>
               <div class="fixture-team away" style="flex-direction: column; align-items: flex-end;">
                   <div style="display: flex; align-items: center; gap: 12px; flex-direction: row-reverse;">
-                      <div class="fixture-crest" style="background:${t2.crest_bg}">${t2.crest_text}</div>
-                      <div class="fixture-tname">${t2.name}</div>
+                      <div class="fixture-crest" style="background:${t2.crest_bg}; ${t2.banner ? 'padding:0; border:2px solid transparent;' : ''}">${t2CrestHtml}</div>
+                      <div class="fixture-tname">${t2Name}</div>
                   </div>
                   <div class="result-scorer-list right">
                       ${t2ScorersUI.join('')}
@@ -1253,16 +1274,17 @@ function renderResultsPage() {
       let topScorersHtml = '';
       topScorersArr.forEach((item, index) => {
           const p = item.player;
-          const pTeam = db_teams.find(t => t.id === getPBLinkedTeamId(p)) || { name: 'Undrafted' };
+          const team = db_teams.find(t => t.id === getPBLinkedTeamId(p));
+          const pTeamName = team ? (team.name || team.crest_text || 'Unnamed') : 'Undrafted';
           let photoUrl = getPbImageUrl(p, p.photo);
 
           topScorersHtml += `
           <div class="top-scorer-card">
              <div class="ts-rank">#${index + 1}</div>
-             <img src="${photoUrl}" class="ts-photo">
+             <img src="${photoUrl}" class="ts-photo" crossorigin="anonymous">
              <div class="ts-info">
                 <div class="ts-name">${p.name}</div>
-                <div class="ts-team">${pTeam.name}</div>
+                <div class="ts-team">${pTeamName}</div>
              </div>
              <div class="ts-goals">${item.goals} <span style="font-size: 10px; color:var(--text-muted);">Goals</span></div>
           </div>`;
@@ -1282,7 +1304,6 @@ function renderStandingsPage() {
         return;
     }
 
-    // 1. Initialize standings map with all teams
     let standings = {};
     db_teams.forEach(team => {
         standings[team.id] = {
@@ -1292,7 +1313,6 @@ function renderStandingsPage() {
         };
     });
 
-    // 2. Calculate stats from Results
     db_results.forEach(res => {
         const fixtureId = Array.isArray(res.fixture) ? res.fixture[0] : res.fixture;
         const fixture = db_fixtures.find(f => f.id === fixtureId);
@@ -1326,34 +1346,34 @@ function renderStandingsPage() {
         }
     });
 
-    // 3. Goal Difference
     let standingsArr = Object.values(standings);
     standingsArr.forEach(teamStats => {
         teamStats.GD = teamStats.GF - teamStats.GA;
     });
 
-    // 4. Sorting: Primary(Points) -> Secondary(Goal Difference) -> Tertiary(Goals For)
     standingsArr.sort((a, b) => {
         if (b.Pts !== a.Pts) return b.Pts - a.Pts;
         if (b.GD !== a.GD) return b.GD - a.GD;
         return b.GF - a.GF;
     });
 
-    // 5. Render to UI
     let html = '';
     standingsArr.forEach((stats, index) => {
         const team = stats.team;
         const crestBg = team.crest_bg || '#1d4ed8';
         const rankClass = index === 0 ? 'top-team' : '';
+        const teamName = team.name || team.crest_text || 'Unnamed Team';
 
         const gdDisplay = stats.GD > 0 ? `+${stats.GD}` : stats.GD;
+        
+        let crestHtml = team.banner ? `<img src="${getPbImageUrl(team, team.banner)}" class="crest-img" crossorigin="anonymous">` : (team.crest_text || 'FC');
 
         html += `
         <tr class="${rankClass}">
             <td><div class="st-rank">${index + 1}</div></td>
             <td class="st-team-cell">
-                <div class="st-crest" style="background:${crestBg}">${team.crest_text || 'FC'}</div>
-                <div class="st-name">${team.name || 'Unnamed Team'}</div>
+                <div class="st-crest" style="background:${crestBg}; ${team.banner ? 'padding:0; border:1px solid transparent;' : ''}">${crestHtml}</div>
+                <div class="st-name">${teamName}</div>
             </td>
             <td>${stats.P}</td>
             <td>${stats.W}</td>
@@ -1366,7 +1386,7 @@ function renderStandingsPage() {
         </tr>`;
     });
 
-    tbody.innerHTML = html;
+    document.getElementById('standings-body').innerHTML = html;
 }
 
 function downloadStandings() {
@@ -1406,6 +1426,9 @@ function downloadMatchCard(resultId) {
     const t1 = db_teams.find(t => t.id === team1Id) || { name: 'T1', crest_text: 'T1', crest_bg: '#111827' };
     const t2 = db_teams.find(t => t.id === team2Id) || { name: 'T2', crest_text: 'T2', crest_bg: '#111827' };
 
+    const t1Name = t1.name || t1.crest_text || 'T1';
+    const t2Name = t2.name || t2.crest_text || 'T2';
+
     let multiGoalsMap = {};
     if (res.multi_goals) {
         res.multi_goals.split(',').forEach(item => {
@@ -1419,13 +1442,17 @@ function downloadMatchCard(resultId) {
     }
 
     document.getElementById('erc-t1-crest').style.background = t1.crest_bg;
-    document.getElementById('erc-t1-crest').textContent = t1.crest_text;
-    document.getElementById('erc-t1-name').textContent = t1.name;
+    let t1CrestHtml = t1.banner ? `<img src="${getPbImageUrl(t1, t1.banner)}" class="crest-img" crossorigin="anonymous">` : (t1.crest_text || 'T1');
+    document.getElementById('erc-t1-crest').innerHTML = t1CrestHtml;
+    if(t1.banner) document.getElementById('erc-t1-crest').style.padding = '0';
+    document.getElementById('erc-t1-name').textContent = t1Name;
     document.getElementById('erc-t1-score').textContent = res.team1_score || 0;
 
     document.getElementById('erc-t2-crest').style.background = t2.crest_bg;
-    document.getElementById('erc-t2-crest').textContent = t2.crest_text;
-    document.getElementById('erc-t2-name').textContent = t2.name;
+    let t2CrestHtml = t2.banner ? `<img src="${getPbImageUrl(t2, t2.banner)}" class="crest-img" crossorigin="anonymous">` : (t2.crest_text || 'T2');
+    document.getElementById('erc-t2-crest').innerHTML = t2CrestHtml;
+    if(t2.banner) document.getElementById('erc-t2-crest').style.padding = '0';
+    document.getElementById('erc-t2-name').textContent = t2Name;
     document.getElementById('erc-t2-score').textContent = res.team2_score || 0;
 
     let t1ScorersHtml = '';
@@ -1466,7 +1493,7 @@ function downloadMatchCard(resultId) {
     
     html2canvas(cardEl, { scale: 2, useCORS: true, backgroundColor: null }).then(canvas => {
         const link = document.createElement('a');
-        link.download = `EFL_S4_Result_${t1.name}_vs_${t2.name}.png`;
+        link.download = `EFL_S4_Result_${t1Name}_vs_${t2Name}.png`;
         link.href = canvas.toDataURL('image/png');
         link.click();
         cardEl.parentElement.style.top = "-10000px";
@@ -1528,16 +1555,22 @@ function openTeamModal(teamId) {
   const team = db_teams.find(t => t.id === teamId);
   if (!team) return;
 
-  let bannerStyle = 'linear-gradient(135deg, #1e3a8a, #1e40af)';
-  if(team.banner) bannerStyle = `url(${getPbImageUrl(team, team.banner)})`;
-  else if(team.crest_bg) bannerStyle = `linear-gradient(135deg, ${team.crest_bg}, #111827)`;
-
+  const teamName = team.name || team.crest_text || 'Unnamed Team';
   const crestBg = team.crest_bg || '#1d4ed8';
+  let bannerStyle = `linear-gradient(135deg, ${crestBg}CC, ${crestBg})`;
 
   document.getElementById('tm-banner').style.background = bannerStyle;
   document.getElementById('tm-crest').style.background = crestBg;
-  document.getElementById('tm-crest').textContent = team.crest_text || 'FC';
-  document.getElementById('tm-name').textContent = team.name || 'Unnamed Team';
+  
+  if (team.banner) {
+      document.getElementById('tm-crest').innerHTML = `<img src="${getPbImageUrl(team, team.banner)}" class="crest-img" crossorigin="anonymous">`;
+      document.getElementById('tm-crest').style.padding = '0';
+  } else {
+      document.getElementById('tm-crest').innerHTML = team.crest_text || 'FC';
+      document.getElementById('tm-crest').style.padding = '';
+  }
+  
+  document.getElementById('tm-name').textContent = teamName;
   document.getElementById('tm-name').style.color = crestBg; 
   
   document.getElementById('tm-manager').textContent = team.manager_name || 'TBD';
@@ -1559,7 +1592,7 @@ function openTeamModal(teamId) {
       let photoUrl = getPbImageUrl(p, p.photo);
       playerContainer.innerHTML += `
         <div class="player-card-sm" onclick="openPlayerModal('${p.id}'); event.stopPropagation();">
-          <img src="${photoUrl}" class="player-photo-sm" alt="${p.name}">
+          <img src="${photoUrl}" class="player-photo-sm" alt="${p.name}" crossorigin="anonymous">
           <div class="player-info-sm">
             <div class="player-name-sm">${p.name}</div>
             <div class="player-pos-sm" style="color: ${crestBg}">${(p.position||'').split('—')[0]}</div>
@@ -1605,10 +1638,11 @@ function openPlayerModal(playerId) {
   const teamBox = document.getElementById('pm-team-box');
   
   if (team) {
+    const teamName = team.name || team.crest_text || 'Unnamed Team';
     teamBox.style.display = 'block';
     teamBox.style.borderColor = team.crest_bg || '#6366f1';
     teamBox.style.background = `${team.crest_bg || '#6366f1'}15`;
-    document.getElementById('pm-team').textContent = team.name;
+    document.getElementById('pm-team').textContent = teamName;
     document.getElementById('pm-team').style.color = team.crest_bg || '#6366f1';
   } else {
     teamBox.style.display = 'none';
