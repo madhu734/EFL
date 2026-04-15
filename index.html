@@ -21,7 +21,7 @@
     --text-muted: #6B7280;   
     --border: #E5E7EB;       
     --accent: #E63946;       
-    --glass-bg: rgba(255, 255, 255, 0.90);
+    --glass-bg: rgba(255, 255, 255, 0.85);
   }
 
   /* DARK MODE VARIABLES */
@@ -58,22 +58,23 @@
     transition: background-color 0.3s, border-color 0.3s;
     flex-wrap: wrap;
   }
-  .nav-logo { display: flex; align-items: center; gap: 10px; cursor: pointer; flex-shrink: 0; padding: 10px 0;}
+  .nav-logo { display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 10px 0;}
   .logo-img { height: 50px; width: auto; object-fit: contain; }
   .nav-title { font-family: 'Montserrat', sans-serif; font-weight: 800; text-transform: uppercase; font-size: 20px; letter-spacing: 1px; color: var(--brand); line-height: 1.1; }
   .nav-sub { font-size: 10px; color: var(--text-muted); letter-spacing: 1px; text-transform: uppercase; margin-top: 2px; font-weight: 600; }
   
   /* WRAPPED NAV LINKS FOR MOBILE UX */
-  .nav-links { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; flex: 1; padding: 10px 15px;}
+  .nav-links { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; padding: 10px 0;}
+  .nav-links::-webkit-scrollbar { display: none; }
   
-  .nav-btn { background: var(--bg-card); border: 1px solid var(--border); color: var(--text-muted); font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; padding: 8px 14px; border-radius: 6px; cursor: pointer; letter-spacing: 0.5px; transition: all .2s; white-space: nowrap; display: flex; align-items: center; gap: 6px; }
+  .nav-btn { background: var(--bg-card); border: 1px solid var(--border); color: var(--text-muted); font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; padding: 6px 12px; border-radius: 6px; cursor: pointer; letter-spacing: 0.5px; transition: all .2s; white-space: nowrap; display: flex; align-items: center; gap: 6px; }
   .nav-btn:hover, .nav-btn.active { color: var(--brand); background: var(--bg-body); border-color: var(--brand); }
   
-  .nav-actions { display: flex; align-items: center; gap: 10px; flex-shrink: 0; padding: 10px 0;}
-  .nav-cta { background: #E63946; color: #fff; font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 700; padding: 10px 18px; border-radius: 6px; cursor: pointer; border: none; letter-spacing: 1px; text-transform: uppercase; transition: all .2s; }
+  .nav-actions { display: flex; align-items: center; gap: 10px; padding: 10px 0;}
+  .nav-cta { background: #E63946; color: #fff; font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 700; padding: 8px 16px; border-radius: 6px; cursor: pointer; border: none; letter-spacing: 1px; text-transform: uppercase; transition: all .2s; }
   .nav-cta:hover { background: #d90429; box-shadow: 0 4px 12px rgba(230, 57, 70, 0.3); }
   
-  .theme-toggle-btn { background: var(--bg-input); border: 1px solid var(--border); color: var(--text-main); font-size: 16px; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s; flex-shrink: 0;}
+  .theme-toggle-btn { background: var(--bg-input); border: 1px solid var(--border); color: var(--text-main); font-size: 16px; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s; }
   .theme-toggle-btn:hover { background: var(--border); transform: rotate(15deg); }
 
   .page { display: none; min-height: calc(100vh - 70px); }
@@ -81,7 +82,7 @@
   @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
   /* HERO SECTION */
-  .hero { background: var(--bg-card); padding: 5rem 2rem 4rem; text-align: center; position: relative; overflow: hidden; border-bottom: 1px solid var(--border); transition: background-color 0.3s;}
+  .hero { background: var(--bg-card); padding: 5rem 2rem 4rem; text-align: center; position: relative; overflow: hidden; border-bottom: 1px solid var(--border); transition: background-color 0.3s; }
   .hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 80% 60% at 50% 100%, rgba(17,24,39,0.03), transparent); pointer-events: none; }
   .hero-season { font-size: 11px; letter-spacing: 4px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 1rem; font-weight: 700; position: relative; z-index: 1; }
   .hero-title { font-family: 'Montserrat', sans-serif; font-weight: 900; text-transform: uppercase; font-size: clamp(48px, 8vw, 84px); letter-spacing: 2px; line-height: 1.1; margin-bottom: 1.5rem; background: linear-gradient(180deg, var(--brand) 40%, var(--text-muted)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; position: relative; z-index: 1; }
@@ -113,12 +114,12 @@
 
   /* TEAMS & PLAYERS GRID */
   .teams-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
-  .team-card { background: var(--bg-card); border: 1.5px solid var(--border); border-radius: 12px; overflow: hidden; transition: all .3s ease; cursor: pointer; box-shadow: 0 6px 16px rgba(0,0,0,0.06); }
-  .team-card:hover { transform: translateY(-4px); box-shadow: 0 14px 28px rgba(0,0,0,0.12); border-color: var(--brand);}
+  .team-card { background: var(--bg-card); border: 1.5px solid var(--text-muted); border-radius: 12px; overflow: hidden; transition: all .3s ease; cursor: pointer; box-shadow: 0 6px 16px rgba(0,0,0,0.06); }
+  .team-card:hover { transform: translateY(-4px); box-shadow: 0 14px 28px rgba(0,0,0,0.12); border-color: var(--brand); }
   .team-banner { height: 80px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; background-size: cover !important; background-position: center !important;}
   .team-crest { width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 14px; color: #fff; border: 2px solid rgba(255,255,255,0.3); text-transform: uppercase; overflow: hidden; text-align: center; line-height: 1.1; }
   .team-info { padding: 1rem 1.25rem; }
-  .team-name { font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 18px; letter-spacing: 0.5px; margin-bottom: 4px; text-transform: uppercase; color: var(--text-main) !important;}
+  .team-name { font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 18px; letter-spacing: 0.5px; margin-bottom: 4px; text-transform: uppercase; color: var(--text-main); }
   .team-meta { font-size: 12px; color: var(--text-muted); display: flex; gap: 12px; font-weight: 500; }
   .team-badge { font-size: 11px; padding: 4px 10px; border-radius: 20px; font-weight: 600; letter-spacing: 0.5px; display: inline-block; margin-top: 8px; }
   .team-roster { padding: 0.75rem 1.25rem; border-top: 1px solid var(--border); display: flex; gap: 8px; flex-wrap: wrap; background: var(--bg-input); }
@@ -246,7 +247,7 @@
 
   /* MODALS & DIRECTORY STYLES */
   .player-directory-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
-  .player-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; text-align: center; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
+  .player-card { background: var(--bg-card); border: 1.5px solid var(--text-muted); border-radius: 12px; overflow: hidden; text-align: center; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
   .player-card:hover { border-color: var(--brand); transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
   .player-photo { width: 100%; height: 200px; background: var(--bg-input); object-fit: cover; }
   .player-info { padding: 16px; }
@@ -275,13 +276,14 @@
   .cat-A { background: #3B82F6; color: #fff; }
   .cat-B { background: #10B981; color: #fff; }
   .cat-C { background: #8B5CF6; color: #fff; }
+  .cat-GK { background: #0284C7; color: #fff; }
   .cat-None { background: var(--border); color: var(--text-muted); }
   
   .manager-owner-info { display: flex; align-items: center; gap: 8px; }
   .avatar-sm { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; border: 2px solid var(--bg-card); background: var(--border); }
 
   .player-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 16px; margin-top: 1rem; }
-  .player-card-sm { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; text-align: center; background: var(--bg-input); transition: transform 0.2s; cursor: pointer;}
+  .player-card-sm { border: 1.5px solid var(--text-muted); border-radius: 8px; overflow: hidden; text-align: center; background: var(--bg-input); transition: transform 0.2s; cursor: pointer;}
   .player-card-sm:hover { transform: translateY(-3px); border-color: var(--brand); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
   .player-photo-sm { width: 100%; height: 160px; background: var(--bg-body); object-fit: cover; display: block; }
   .player-info-sm { padding: 12px 10px; }
@@ -430,6 +432,7 @@
           <button class="cat-btn" onclick="setCategoryFilter('A', this)">Category A</button>
           <button class="cat-btn" onclick="setCategoryFilter('B', this)">Category B</button>
           <button class="cat-btn" onclick="setCategoryFilter('C', this)">Category C</button>
+          <button class="cat-btn" onclick="setCategoryFilter('GK', this)">GK</button>
         </div>
         <button class="auction-btn" onclick="startAuctionMode()">
           <span style="font-size:16px;">🖥️</span> Presentation Mode
@@ -640,7 +643,7 @@
         <div class="photo-upload" onclick="document.getElementById('photoInput').click()" id="photoBox">
           <span class="photo-icon" id="photoIcon">📷</span>
           <div class="photo-text" id="photoText">Click to upload your photo</div>
-          <div class="photo-sub">JPG, PNG or WEBP · Max 20MB · Clear face photo recommended</div>
+          <div class="photo-sub">JPG, PNG or WEBP · Max 20MB · This Photo will be in your profile and will be presented during Auction. (Can be changed later via contacting through WhatsApp support section)</div>
         </div>
         <div class="error-msg" id="photoError">Profile photo is required</div>
         <input type="file" id="photoInput" accept="image/*" style="display:none" onchange="handlePhoto(this)">
@@ -987,28 +990,7 @@ let currentFilteredPlayers = [];
 let auctionIndex = 0;
 
 // ==========================================
-// THEME (DARK/LIGHT MODE) LOGIC
-// ==========================================
-function toggleTheme() {
-    const currentTheme = document.documentElement.getAttribute('data-theme');
-    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-    
-    document.documentElement.setAttribute('data-theme', newTheme);
-    localStorage.setItem('theme', newTheme);
-    
-    // Update button icon
-    document.getElementById('themeToggleBtn').textContent = newTheme === 'dark' ? '☀️' : '🌙';
-}
-
-// Load saved theme on startup
-window.addEventListener('DOMContentLoaded', () => {
-    const savedTheme = localStorage.getItem('theme') || 'light';
-    document.documentElement.setAttribute('data-theme', savedTheme);
-    document.getElementById('themeToggleBtn').textContent = savedTheme === 'dark' ? '☀️' : '🌙';
-});
-
-// ==========================================
-// COLOR CONTRAST HELPERS
+// COLOR CONTRAST HELPERS (NEW)
 // ==========================================
 function isLightColor(color) {
     if (!color) return false;
@@ -1020,6 +1002,7 @@ function isLightColor(color) {
     let g = parseInt(hex.substring(2, 4), 16);
     let b = parseInt(hex.substring(4, 6), 16);
     let luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+    // Return true if color is very bright (white-ish)
     return luminance > 0.8; 
 }
 
@@ -1042,6 +1025,28 @@ function getPBLinkedTeamId(player) {
   if (Array.isArray(t)) return t.length > 0 ? t[0] : null;
   return t;
 }
+
+// ==========================================
+// THEME (DARK/LIGHT MODE) LOGIC
+// ==========================================
+function toggleTheme() {
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    
+    document.documentElement.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+    
+    // Update button icon
+    document.getElementById('themeToggleBtn').textContent = newTheme === 'dark' ? '☀️' : '🌙';
+}
+
+// Load saved theme on startup
+window.addEventListener('DOMContentLoaded', () => {
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    document.getElementById('themeToggleBtn').textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+});
+
 
 // ==========================================
 // DATA FETCHING
@@ -1138,7 +1143,7 @@ function renderTeamsPage() {
           </div>
         </div>
         <div class="team-info">
-          <div class="team-name">${teamName}</div>
+          <div class="team-name" style="color:${safeTextColor}">${teamName}</div>
           <div class="team-meta"><span>Manager: <span class="tbd">${team.manager_name || 'TBD'}</span></span><span>Owner: <span class="tbd">${team.owner_name || 'TBD'}</span></span></div>
           <div class="team-badge" style="background:${safeTextColor}15;color:${safeTextColor}">Season 4 Entry</div>
         </div>
@@ -1196,6 +1201,7 @@ function renderPlayersPage() {
     else if (/^A$/i.test(rawCat)) { displayCat = 'A'; catClass = 'cat-A'; }
     else if (/^B$/i.test(rawCat)) { displayCat = 'B'; catClass = 'cat-B'; }
     else if (/^C$/i.test(rawCat)) { displayCat = 'C'; catClass = 'cat-C'; }
+    else if (/^GK$/i.test(rawCat)) { displayCat = 'GK'; catClass = 'cat-GK'; }
 
     container.innerHTML += `
       <div class="player-card" onclick="openPlayerModal('${player.id}')">
@@ -1712,6 +1718,7 @@ function updateAuctionModal() {
     else if (rawCat === 'A') displayCat = 'CATEGORY A';
     else if (rawCat === 'B') displayCat = 'CATEGORY B';
     else if (rawCat === 'C') displayCat = 'CATEGORY C';
+    else if (rawCat === 'GK') displayCat = 'GOALKEEPER';
 
     document.getElementById('auc-cat').textContent = displayCat ? displayCat : "UNCATEGORIZED";
     document.getElementById('auc-counter').textContent = (auctionIndex + 1) + " / " + currentFilteredPlayers.length;
@@ -1813,6 +1820,7 @@ function openPlayerModal(playerId) {
   else if (/^A$/i.test(rawCat)) { displayCat = 'A'; catClass = 'cat-A'; }
   else if (/^B$/i.test(rawCat)) { displayCat = 'B'; catClass = 'cat-B'; }
   else if (/^C$/i.test(rawCat)) { displayCat = 'C'; catClass = 'cat-C'; }
+  else if (/^GK$/i.test(rawCat)) { displayCat = 'GK'; catClass = 'cat-GK'; }
 
   if (displayCat) {
      catBadge.textContent = "Category: " + displayCat;
@@ -1896,12 +1904,21 @@ async function submitForm() {
 
   try {
       // --- SMART & SIMPLE ID GENERATOR ---
+      // Convert to lowercase and remove spaces/special characters
       let baseName = name.toLowerCase().replace(/[^a-z0-9]/g, '');
+
+      // PocketBase requires a minimum of 5 characters. Pad with 'x' if the name is too short.
       if (baseName.length < 3) {
           baseName = baseName.padEnd(3, 'x');
       }
+
+      // Truncate to max 13 characters to leave room for the 2-digit random suffix (max total 15)
       baseName = baseName.substring(0, 13);
+
+      // Generate a 2-digit random number (between 10 and 99)
       let randomSuffix = Math.floor(10 + Math.random() * 90); 
+
+      // Final custom ID (e.g., madhu73)
       let customId = baseName + randomSuffix;
 
       const formData = new FormData();
@@ -1916,6 +1933,13 @@ async function submitForm() {
       formData.append('payment_method', payType);
       formData.append('trx_id', trxId);
       formData.append('photo', photoInput.files[0]);
+      
+      // Auto GK Category logic based on selected position
+      if (pos === 'Goalkeeper') {
+          formData.append('category', 'GK');
+          // Just in case, adding both variations used previously
+          formData.append('Catagory', 'GK'); 
+      }
 
       const recordRes = await fetch(`${PB_CONFIG.baseURL}/api/collections/players/records`, {
           method: 'POST',
