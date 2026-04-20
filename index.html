@@ -117,7 +117,7 @@
   
   .crest-img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block; }
 
-  /* TEAMS & PLAYERS GRID (Premium Hovers added) */
+  /* TEAMS & PLAYERS GRID */
   .teams-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
   .team-card { background: var(--bg-card); border: 1.5px solid var(--text-muted); border-radius: 12px; overflow: hidden; transition: all .3s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.04); }
   .team-card:hover { transform: translateY(-6px); box-shadow: 0 16px 32px rgba(0,0,0,0.12); border-color: var(--brand); }
@@ -131,7 +131,7 @@
   .roster-tag { font-size: 11px; background: var(--border); padding: 4px 10px; border-radius: 4px; color: var(--text-muted); font-weight: 500; }
   .tbd { color: var(--text-muted); font-style: italic; }
 
-  /* FORMS & REGISTRATION (Fixed Form Layout) */
+  /* FORMS & REGISTRATION */
   .reg-wrap { max-width: 680px; margin: 0 auto; padding: 2.5rem 2rem; }
   .reg-header { text-align: center; margin-bottom: 2.5rem; padding-bottom: 2rem; border-bottom: 1px solid var(--border); }
   .reg-title { font-family: 'Montserrat', sans-serif; font-weight: 800; text-transform: uppercase; font-size: 32px; letter-spacing: 1px; margin-bottom: 8px; color: var(--text-main); }
@@ -141,7 +141,6 @@
   .form-group { display: flex; flex-direction: column; position: relative; margin-bottom: 6px; }
   .form-group.full { grid-column: 1 / -1; }
   
-  /* Standard cleanly separated labels */
   .form-group label { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); font-weight: 700; margin-bottom: 8px; display: block; }
   .form-group label span { color: var(--accent); }
   
@@ -271,7 +270,7 @@
   .modal-content { background: var(--bg-card); width: 100%; max-width: 800px; max-height: 90vh; border-radius: 16px; overflow-y: auto; position: relative; transform: translateY(20px); transition: transform 0.3s; box-shadow: 0 10px 40px rgba(0,0,0,0.3); border: 1px solid var(--border); }
   .modal-content.sm { max-width: 450px; }
   .modal-overlay.active .modal-content { transform: translateY(0); }
-  .modal-close { position: absolute; top: 16px; right: 16px; background: rgba(0,0,0,0.5); color: #fff; border: none; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px; z-index: 10; transition: background 0.2s; }
+  .modal-close { position: absolute; top: 16px; right: 16px; background: rgba(0,0,0,0.5); color: #fff; border: none; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px; z-index: 30; transition: background 0.2s; }
   .modal-close:hover { background: var(--accent); }
   
   .team-modal-header { height: 160px; background: linear-gradient(135deg, #1e3a8a, #1e40af); padding: 2rem; position: relative; border-radius: 16px 16px 0 0; }
@@ -313,9 +312,23 @@
   .auction-nav-btn:hover:not(:disabled) { background: var(--border); }
   .auction-nav-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-  /* VIDEO PLAYER CONTAINER (Updated for HLS HTML5 Player) */
+  /* VIDEO PLAYER & TV OVERLAY STYLES */
   .video-container { width: 100%; max-width: 900px; background: #000; border-radius: 12px; overflow: hidden; aspect-ratio: 16/9; position: relative; margin: 0 auto; box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
   .video-container video { width: 100%; height: 100%; object-fit: contain; border: none; }
+  
+  .tv-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 20; display: none; }
+  .tv-logo { position: absolute; top: 20px; right: 20px; height: 40px; width: auto; opacity: 0.9; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)); }
+  .tv-scoreboard { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); display: flex; align-items: stretch; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(8px); border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.5); font-family: 'Montserrat', sans-serif; color: #fff; }
+  .sb-team { display: flex; align-items: center; gap: 8px; padding: 6px 12px; background: rgba(255,255,255,0.05); }
+  .sb-team-name { font-weight: 800; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; width: 45px; text-align: center;}
+  .sb-crest { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 8px; font-weight: 800; color: #fff; border: 1px solid rgba(255,255,255,0.2); overflow: hidden; }
+  .sb-score-box { display: flex; align-items: center; background: var(--accent); padding: 0 16px; font-weight: 900; font-size: 18px; letter-spacing: 1px; }
+  .sb-live-badge { position: absolute; top: 100%; left: 50%; transform: translate(-50%, -50%); background: #ef4444; color: #fff; font-size: 9px; font-weight: 800; padding: 2px 8px; border-radius: 10px; text-transform: uppercase; letter-spacing: 1px; animation: pulse-live 2s infinite; }
+  
+  @media(max-width: 600px) {
+      .tv-logo { top: 10px; right: 10px; height: 25px; }
+      .tv-scoreboard { top: 10px; transform: translateX(-50%) scale(0.85); }
+  }
 
   .fixtures-wrap, .about-wrap, .results-wrap, .standings-wrap, .supporters-wrap { max-width: 1000px; margin: 0 auto; padding: 2.5rem 2rem; }
   .coming-soon-box { background: var(--bg-card); border: 1px dashed var(--border); border-radius: 16px; padding: 4rem 2rem; text-align: center; }
@@ -941,7 +954,7 @@
   <div class="modal-content" style="background: transparent; box-shadow: none; border: none; max-width: 900px;" onclick="event.stopPropagation()">
     <button class="modal-close" style="top: -40px; right: 0; background: var(--accent);" onclick="closeVideoModal()">×</button>
     <div class="video-container" id="video-container-box">
-       <!-- Video Tag will be injected here by JS -->
+       <!-- Video Tag and TV Overlay will be injected here by JS -->
     </div>
   </div>
 </div>
@@ -1030,7 +1043,6 @@
 </div>
 
 <script>
-
 // ==========================================
 // POCKETBASE CONFIGURATION
 // ==========================================
@@ -1049,6 +1061,9 @@ let searchQuery = '';
 let currentFilteredPlayers = [];
 let auctionIndex = 0;
 let currentHls = null; // Global variable to track HLS instance
+
+let liveScoreInterval = null; // Global variable to track Live Score Polling Interval
+let currentLiveFixtureId = null;
 
 // ==========================================
 // THEME (DARK/LIGHT MODE) LOGIC
@@ -2100,18 +2115,90 @@ function closeModal(modalId, event) {
 }
 
 // ==========================================
-// VIDEO PLAYER LOGIC (HLS LIVE & HIGHLIGHTS)
+// VIDEO PLAYER LOGIC (HLS LIVE, OVERLAY & HIGHLIGHTS)
 // ==========================================
+function renderScoreboardUI(fixture) {
+    const sb = document.getElementById('tv-scoreboard');
+    if(!sb) return;
+
+    const t1Id = Array.isArray(fixture.team1) ? fixture.team1[0] : fixture.team1;
+    const t2Id = Array.isArray(fixture.team2) ? fixture.team2[0] : fixture.team2;
+    
+    const t1 = db_teams.find(t => t.id === t1Id) || {};
+    const t2 = db_teams.find(t => t.id === t2Id) || {};
+
+    let t1Short = t1.short_name ? t1.short_name.substring(0,4) : (t1.name ? t1.name.substring(0,3) : 'T1');
+    let t2Short = t2.short_name ? t2.short_name.substring(0,4) : (t2.name ? t2.name.substring(0,3) : 'T2');
+
+    let t1Crest = t1.banner ? `<img src="${getPbImageUrl(t1, t1.banner)}" style="width:100%;height:100%;object-fit:cover;" crossorigin="anonymous">` : (t1.crest_text || 'T1');
+    let t2Crest = t2.banner ? `<img src="${getPbImageUrl(t2, t2.banner)}" style="width:100%;height:100%;object-fit:cover;" crossorigin="anonymous">` : (t2.crest_text || 'T2');
+
+    let score1 = fixture.live_score_t1 || 0;
+    let score2 = fixture.live_score_t2 || 0;
+
+    sb.innerHTML = `
+        <div class="sb-team">
+            <div class="sb-crest" style="background:${t1.crest_bg||'#333'};color:${getSafeCrestTextColor(t1.crest_bg||'#333')}">${t1Crest}</div>
+            <div class="sb-team-name">${t1Short}</div>
+        </div>
+        <div class="sb-score-box">
+            <span id="live-s1">${score1}</span> <span style="margin:0 6px;opacity:0.5">-</span> <span id="live-s2">${score2}</span>
+        </div>
+        <div class="sb-team">
+            <div class="sb-team-name">${t2Short}</div>
+            <div class="sb-crest" style="background:${t2.crest_bg||'#333'};color:${getSafeCrestTextColor(t2.crest_bg||'#333')}">${t2Crest}</div>
+        </div>
+        <div class="sb-live-badge">LIVE</div>
+    `;
+    sb.style.display = 'flex';
+}
+
+async function fetchLiveScore(fixId) {
+    try {
+        const res = await fetch(`${PB_CONFIG.baseURL}/api/collections/fixtures/records/${fixId}?fields=live_score_t1,live_score_t2`, { cache: 'no-store' });
+        if(res.ok) {
+            const data = await res.json();
+            const s1El = document.getElementById('live-s1');
+            const s2El = document.getElementById('live-s2');
+            if(s1El && s2El) {
+                s1El.textContent = data.live_score_t1 || 0;
+                s2El.textContent = data.live_score_t2 || 0;
+            }
+        }
+    } catch(e) {
+        console.error("Failed to fetch live score", e);
+    }
+}
+
 function playLiveStream() {
     const container = document.getElementById('video-container-box');
-    container.innerHTML = `<video id="main-video-player" controls class="video-player" autoplay></video>`;
+    
+    // Inject Video Player and TV Overlay UI
+    let overlayHtml = `
+    <div class="tv-overlay" id="tv-overlay" style="display: block;">
+        <img src="https://i.postimg.cc/1tbYp88M/EFLTV.png" class="tv-logo" alt="EFL TV" crossorigin="anonymous">
+        <div class="tv-scoreboard" id="tv-scoreboard" style="display: none;">
+            <!-- Scoreboard injected dynamically -->
+        </div>
+    </div>`;
+
+    container.innerHTML = `<video id="main-video-player" controls class="video-player" autoplay playsinline></video>` + overlayHtml;
     const videoElement = document.getElementById('main-video-player');
+    
+    // Dynamic PocketBase Connection for Live Scoreboard
+    const liveFix = db_fixtures.find(f => f.is_live === true || f.is_live === 'true');
+    if (liveFix) {
+        currentLiveFixtureId = liveFix.id;
+        renderScoreboardUI(liveFix);
+        // Start polling every 10 seconds for updated score
+        liveScoreInterval = setInterval(() => fetchLiveScore(liveFix.id), 10000);
+    }
     
     showModal('videoModal');
     
     const videoSrc = 'https://live.tmadhu.me/live/efls4/index.m3u8';
     
-    if (Hls.isSupported()) {
+    if (typeof Hls !== 'undefined' && Hls.isSupported()) {
         if(currentHls) { currentHls.destroy(); }
         currentHls = new Hls();
         currentHls.loadSource(videoSrc);
@@ -2133,8 +2220,8 @@ function playLiveStream() {
 function playHighlight(url) {
     const container = document.getElementById('video-container-box');
     
-    // Regular HTML5 Video Player for stored highlights
-    container.innerHTML = `<video controls class="video-player" autoplay src="${url}"></video>`;
+    // Regular HTML5 Video Player for stored highlights (No Overlay)
+    container.innerHTML = `<video controls class="video-player" autoplay playsinline src="${url}"></video>`;
     
     showModal('videoModal');
 }
@@ -2142,9 +2229,14 @@ function playHighlight(url) {
 function closeVideoModal(event) {
     if (event && event.target !== document.getElementById('videoModal') && !event.target.classList.contains('modal-close')) return;
     
-    if (currentHls) {
+    // Cleanup HLS and Score Polling
+    if (typeof currentHls !== 'undefined' && currentHls) {
         currentHls.destroy();
         currentHls = null;
+    }
+    if (liveScoreInterval) {
+        clearInterval(liveScoreInterval);
+        liveScoreInterval = null;
     }
     
     document.getElementById('video-container-box').innerHTML = ''; 
