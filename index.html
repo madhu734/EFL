@@ -7,9 +7,10 @@
 <link rel="icon" type="image/png" href="https://i.postimg.cc/j5DTGgSg/EFL.png">
 <!-- Modern, Premium Font Pairing: Montserrat for headings, Inter for body -->
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@600;700;800;900&display=swap" rel="stylesheet">
-<!-- HTML2Canvas & FLV.js for Exporting and Live Streaming -->
+<!-- HTML2Canvas for Exporting Cards -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/flv.js/1.6.2/flv.min.js"></script>
+<!-- HLS.js for Live Streaming -->
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -312,9 +313,9 @@
   .auction-nav-btn:hover:not(:disabled) { background: var(--border); }
   .auction-nav-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-  /* VIDEO PLAYER CONTAINER */
+  /* VIDEO PLAYER CONTAINER (Updated for HLS HTML5 Player) */
   .video-container { width: 100%; max-width: 900px; background: #000; border-radius: 12px; overflow: hidden; aspect-ratio: 16/9; position: relative; margin: 0 auto; box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
-  .video-player { width: 100%; height: 100%; object-fit: contain; }
+  .video-container video { width: 100%; height: 100%; object-fit: contain; border: none; }
 
   .fixtures-wrap, .about-wrap, .results-wrap, .standings-wrap, .supporters-wrap { max-width: 1000px; margin: 0 auto; padding: 2.5rem 2rem; }
   .coming-soon-box { background: var(--bg-card); border: 1px dashed var(--border); border-radius: 16px; padding: 4rem 2rem; text-align: center; }
@@ -935,12 +936,12 @@
   </div>
 </div>
 
-<!-- VIDEO PLAYER MODAL FOR LIVE & HIGHLIGHTS -->
+<!-- VIDEO PLAYER MODAL FOR HLS LIVE & HIGHLIGHTS -->
 <div class="modal-overlay" id="videoModal" onclick="closeVideoModal(event)">
   <div class="modal-content" style="background: transparent; box-shadow: none; border: none; max-width: 900px;" onclick="event.stopPropagation()">
     <button class="modal-close" style="top: -40px; right: 0; background: var(--accent);" onclick="closeVideoModal()">×</button>
-    <div class="video-container">
-       <video id="main-video-player" controls class="video-player" autoplay></video>
+    <div class="video-container" id="video-container-box">
+       <!-- Video Tag will be injected here by JS -->
     </div>
   </div>
 </div>
@@ -1029,6 +1030,7 @@
 </div>
 
 <script>
+
 // ==========================================
 // POCKETBASE CONFIGURATION
 // ==========================================
@@ -1046,7 +1048,7 @@ let currentFilter = 'All';
 let searchQuery = '';
 let currentFilteredPlayers = [];
 let auctionIndex = 0;
-let flvPlayer = null; 
+let currentHls = null; // Global variable to track HLS instance
 
 // ==========================================
 // THEME (DARK/LIGHT MODE) LOGIC
@@ -2098,58 +2100,54 @@ function closeModal(modalId, event) {
 }
 
 // ==========================================
-// VIDEO PLAYER LOGIC (LIVE & HIGHLIGHTS)
+// VIDEO PLAYER LOGIC (HLS LIVE & HIGHLIGHTS)
 // ==========================================
 function playLiveStream() {
+    const container = document.getElementById('video-container-box');
+    container.innerHTML = `<video id="main-video-player" controls class="video-player" autoplay></video>`;
     const videoElement = document.getElementById('main-video-player');
+    
     showModal('videoModal');
     
-    if (flvjs.isSupported()) {
-        flvPlayer = flvjs.createPlayer({
-            type: 'flv',
-            isLive: true,
-            hasAudio: true,
-            url: 'wss://live.tmadhu.me/live/efls4.flv'
+    const videoSrc = 'https://live.tmadhu.me/live/efls4.m3u8';
+    
+    if (Hls.isSupported()) {
+        if(currentHls) { currentHls.destroy(); }
+        currentHls = new Hls();
+        currentHls.loadSource(videoSrc);
+        currentHls.attachMedia(videoElement);
+        currentHls.on(Hls.Events.MANIFEST_PARSED, function() {
+            videoElement.play().catch(e => console.log("Autoplay prevented", e));
         });
-        flvPlayer.attachMediaElement(videoElement);
-        flvPlayer.load();
-        flvPlayer.play();
+    } else if (videoElement.canPlayType('application/vnd.apple.mpegurl')) {
+        // Native HLS support (Safari)
+        videoElement.src = videoSrc;
+        videoElement.addEventListener('loadedmetadata', function() {
+            videoElement.play().catch(e => console.log("Autoplay prevented", e));
+        });
     } else {
-        alert("দুঃখিত, আপনার ব্রাউজার FLV লাইভ স্ট্রিম সাপোর্ট করছে না।");
+        alert("দুঃখিত, আপনার ব্রাউজার HLS লাইভ স্ট্রিম সাপোর্ট করছে না।");
     }
 }
 
 function playHighlight(url) {
-    const videoElement = document.getElementById('main-video-player');
-    showModal('videoModal');
+    const container = document.getElementById('video-container-box');
     
-    if (flvPlayer) {
-        flvPlayer.pause();
-        flvPlayer.unload();
-        flvPlayer.detachMediaElement();
-        flvPlayer.destroy();
-        flvPlayer = null;
-    }
-
-    videoElement.src = url;
-    videoElement.play();
+    // Regular HTML5 Video Player for stored highlights
+    container.innerHTML = `<video controls class="video-player" autoplay src="${url}"></video>`;
+    
+    showModal('videoModal');
 }
 
 function closeVideoModal(event) {
     if (event && event.target !== document.getElementById('videoModal') && !event.target.classList.contains('modal-close')) return;
     
-    const videoElement = document.getElementById('main-video-player');
-    videoElement.pause();
-    videoElement.src = '';
-    
-    if (flvPlayer) {
-        flvPlayer.pause();
-        flvPlayer.unload();
-        flvPlayer.detachMediaElement();
-        flvPlayer.destroy();
-        flvPlayer = null;
+    if (currentHls) {
+        currentHls.destroy();
+        currentHls = null;
     }
     
+    document.getElementById('video-container-box').innerHTML = ''; 
     closeModal('videoModal');
 }
 
