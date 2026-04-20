@@ -260,6 +260,10 @@
   .player-name { font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 16px; color: var(--text-main); margin-bottom: 4px; }
   .player-pos { font-size: 12px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; }
   .player-team-badge { display: inline-block; margin-top: 10px; font-size: 10px; padding: 4px 10px; border-radius: 20px; font-weight: 700; }
+  
+  /* INSTANT PRESENTATION BUTTON */
+  .instant-present-btn { position: absolute; top: 8px; left: 8px; background: rgba(0,0,0,0.6); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; width: 32px; height: 32px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 10; transition: all 0.2s; font-size: 14px; backdrop-filter: blur(4px); }
+  .instant-present-btn:hover { background: var(--brand); transform: scale(1.1); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
 
   .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(4px); z-index: 1000; display: none; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s; padding: 1rem; }
   .modal-overlay.active { display: flex; opacity: 1; }
@@ -457,6 +461,10 @@
     </div>
     
     <div class="player-filter-bar animate-on-scroll" style="flex-direction: column; align-items: flex-start; gap: 16px;">
+      <!-- Search Input -->
+      <div style="width: 100%; position: relative;">
+         <input type="text" id="player-search" placeholder="🔍 Search players by name..." style="width: 100%; padding: 12px 16px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-input); font-size: 14px; font-family: 'Inter', sans-serif; color: var(--text-main); outline: none; transition: border 0.2s;">
+      </div>
       <div style="display: flex; justify-content: space-between; width: 100%; align-items: center; flex-wrap: wrap; gap: 10px;">
         <div class="category-buttons">
           <button class="cat-btn active" onclick="setCategoryFilter('All', this)">All Players</button>
@@ -1005,6 +1013,15 @@
           </div>
       </div>
       
+      <!-- Player of the Match (Export Card) -->
+      <div id="erc-motm-container" style="display: none; text-align: center; margin-top: 30px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px;">
+          <div style="font-size: 12px; color: #f59e0b; text-transform: uppercase; font-weight: 800; letter-spacing: 2px; margin-bottom: 12px;">🏅 Player of the Match</div>
+          <div style="display: inline-flex; align-items: center; gap: 12px; background: rgba(0,0,0,0.3); padding: 8px 24px; border-radius: 40px; border: 1px solid rgba(245,158,11,0.3);">
+              <img id="erc-motm-photo" src="" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid #f59e0b;" crossorigin="anonymous">
+              <span id="erc-motm-name" style="font-family: 'Montserrat', sans-serif; font-size: 18px; font-weight: 800; color: #fff;">NAME</span>
+          </div>
+      </div>
+      
       <div style="text-align: center; font-size: 12px; color: #64748b; margin-top: 40px; letter-spacing: 2px; text-transform: uppercase; font-weight: 700;">
           Jahangirnagar University · Dept. of English
       </div>
@@ -1026,6 +1043,7 @@ let db_results = [];
 let db_supporters = []; 
 
 let currentFilter = 'All';
+let searchQuery = '';
 let currentFilteredPlayers = [];
 let auctionIndex = 0;
 let flvPlayer = null; 
@@ -1054,6 +1072,14 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 // ==========================================
+// SEARCH LOGIC FOR PLAYERS
+// ==========================================
+document.getElementById('player-search').addEventListener('input', function(e) {
+    searchQuery = e.target.value.toLowerCase();
+    renderPlayersPage();
+});
+
+// ==========================================
 // SCROLL ANIMATION LOGIC (Intersection Observer)
 // ==========================================
 function observeElements() {
@@ -1077,7 +1103,7 @@ function observeElements() {
 }
 
 // ==========================================
-// DATA PROCESSING HELPERS (NEW & BULLETPROOF)
+// DATA PROCESSING HELPERS
 // ==========================================
 function extractScorers(res, teamPrefix) {
     let ids = [];
@@ -1085,7 +1111,6 @@ function extractScorers(res, teamPrefix) {
     for (let i = 1; i <= 6; i++) {
         let val = res[`${teamPrefix}_goal_${i}`];
         if (val) {
-            // Handle both Array (multi-select relation) or String (single relation / plain text)
             if (Array.isArray(val)) ids.push(...val);
             else ids.push(val);
         }
@@ -1178,7 +1203,6 @@ async function fetchPBData() {
     renderStandingsPage(); 
     renderSupportersPage();
     
-    // Call observer after rendering dynamically
     setTimeout(observeElements, 500);
 
   } catch (error) {
@@ -1220,7 +1244,7 @@ function renderTeamsPage() {
     }
 
     container.innerHTML += `
-      <div class="team-card" onclick="openTeamModal('${team.id}')">
+      <div class="team-card animate-on-scroll" onclick="openTeamModal('${team.id}')">
         <div class="team-banner" style="background:${bannerStyle}">
           <div class="team-crest" style="background:${crestBg}; color:${crestTextCol}; border: 4px solid var(--bg-card); ${team.banner ? 'padding:0;' : ''}">
              ${crestHtml}
@@ -1252,12 +1276,15 @@ function renderPlayersPage() {
   const container = document.getElementById('players-container');
   container.innerHTML = '';
   
-  currentFilteredPlayers = currentFilter === 'All' 
-    ? db_players 
-    : db_players.filter(p => (p.Catagory || p.category || '').trim().toUpperCase() === currentFilter.toUpperCase());
+  // Filtering logic by category AND search query
+  currentFilteredPlayers = db_players.filter(p => {
+      const matchesCat = currentFilter === 'All' ? true : (p.Catagory || p.category || '').trim().toUpperCase() === currentFilter.toUpperCase();
+      const matchesSearch = p.name.toLowerCase().includes(searchQuery);
+      return matchesCat && matchesSearch;
+  });
 
   if (currentFilteredPlayers.length === 0) {
-    container.innerHTML = '<div style="grid-column: 1/-1; padding: 2rem; text-align: center; color: var(--text-muted); font-size: 13px; border: 1px dashed var(--border); border-radius: 8px;">No players found in this category.</div>';
+    container.innerHTML = '<div style="grid-column: 1/-1; padding: 2rem; text-align: center; color: var(--text-muted); font-size: 13px; border: 1px dashed var(--border); border-radius: 8px;">No players found matching your search.</div>';
     return;
   }
 
@@ -1288,7 +1315,10 @@ function renderPlayersPage() {
     else if (/^GK$/i.test(rawCat)) { displayCat = 'GK'; catClass = 'cat-GK'; }
 
     container.innerHTML += `
-      <div class="player-card">
+      <div class="player-card animate-on-scroll" style="position: relative;">
+        <!-- Instant Presentation Button -->
+        <button onclick="presentSinglePlayer('${player.id}', event)" class="instant-present-btn" title="Present Player">🖥️</button>
+        
         <div style="position:relative;" onclick="openPlayerModal('${player.id}')">
            <img src="${photoUrl}" class="player-photo" alt="${player.name}" crossorigin="anonymous">
            ${displayCat ? `<div class="cat-badge ${catClass}" style="position:absolute; top:8px; right:8px;">${displayCat}</div>` : ''}
@@ -1348,7 +1378,7 @@ function renderFixturesPage() {
       }
 
       html += `
-      <div class="fixture-card">
+      <div class="fixture-card animate-on-scroll">
           <div class="fixture-header">
               <span>${fix.match_type || 'League Match'}</span>
               <span>${dateStr}</span>
@@ -1399,7 +1429,6 @@ function renderResultsPage() {
       const fixtureId = Array.isArray(res.fixture) ? res.fixture[0] : res.fixture;
       const fixture = db_fixtures.find(f => f.id === fixtureId);
       
-      // If fixture is not linked properly in the database, warn the user and skip it safely
       if (!fixture) {
           console.warn("Skipping a result record because Fixture is missing or unlinked: ", res);
           return;
@@ -1420,11 +1449,9 @@ function renderResultsPage() {
       let t1CrestHtml = t1.banner ? `<img src="${getPbImageUrl(t1, t1.banner)}" class="crest-img" crossorigin="anonymous">` : (t1.crest_text || '?');
       let t2CrestHtml = t2.banner ? `<img src="${getPbImageUrl(t2, t2.banner)}" class="crest-img" crossorigin="anonymous">` : (t2.crest_text || '?');
 
-      // Robust check for Scores (Supports both 'team1_score' and 't1_score' just in case)
       const score1 = parseInt(res.team1_score !== undefined ? res.team1_score : res.t1_score) || 0;
       const score2 = parseInt(res.team2_score !== undefined ? res.team2_score : res.t2_score) || 0;
 
-      // Extract Goals Team 1
       let t1ScorersRaw = extractScorers(res, 't1');
       let t1Counts = {};
       t1ScorersRaw.forEach(val => { 
@@ -1438,7 +1465,6 @@ function renderResultsPage() {
 
       let t1ScorersUI = [];
       Object.keys(t1Counts).forEach(playerRef => {
-          // Finds player by ID OR by direct Name text (Fallback if they used text fields instead of relation)
           const player = db_players.find(p => p.id === playerRef || (p.name && p.name.toLowerCase() === String(playerRef).toLowerCase()));
           let goalsScored = t1Counts[playerRef];
           let suffix = goalsScored > 1 ? ` (${goalsScored})` : '';
@@ -1452,11 +1478,10 @@ function renderResultsPage() {
                   t1ScorersUI.push(`<span class="scorer-item-og">⚽ ${player.name} (og)${suffix}</span>`);
               }
           } else {
-              t1ScorersUI.push(`<span>⚽ ${playerRef}${suffix}</span>`); // Fallback for raw text
+              t1ScorersUI.push(`<span>⚽ ${playerRef}${suffix}</span>`);
           }
       });
 
-      // Extract Goals Team 2
       let t2ScorersRaw = extractScorers(res, 't2');
       let t2Counts = {};
       t2ScorersRaw.forEach(val => { 
@@ -1483,7 +1508,7 @@ function renderResultsPage() {
                   t2ScorersUI.push(`<span class="scorer-item-og">${player.name} (og)${suffix} ⚽</span>`);
               }
           } else {
-              t2ScorersUI.push(`<span>${playerRef}${suffix} ⚽</span>`); // Fallback for raw text
+              t2ScorersUI.push(`<span>${playerRef}${suffix} ⚽</span>`);
           }
       });
 
@@ -1493,8 +1518,28 @@ function renderResultsPage() {
           highlightHtml = `<button class="highlight-btn" onclick="playHighlight('${highlightUrl}')">▶️ Watch Highlights</button>`;
       }
 
+      // 🏅 Player of the Match logic
+      let motmId = res.motm || res.potm;
+      let motmHtml = '';
+      if (motmId) {
+          let id = Array.isArray(motmId) ? motmId[0] : motmId;
+          let motmPlayer = db_players.find(p => p.id === id || (p.name && p.name.toLowerCase() === String(id).toLowerCase()));
+          if (motmPlayer) {
+              let motmPhoto = getPbImageUrl(motmPlayer, motmPlayer.photo);
+              motmHtml = `
+              <div style="width: 100%; display: flex; justify-content: center; margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--border);">
+                  <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); padding: 4px 12px; border-radius: 20px;">
+                      <span style="font-size: 14px;">🏅</span>
+                      <span style="font-size: 10px; font-weight: 800; color: #B45309; text-transform: uppercase; letter-spacing: 0.5px;">Player of the Match:</span>
+                      <img src="${motmPhoto}" style="width: 20px; height: 20px; border-radius: 50%; object-fit: cover; border: 1px solid #B45309;" crossorigin="anonymous">
+                      <span style="font-size: 12px; font-weight: 700; color: var(--text-main);">${motmPlayer.name}</span>
+                  </div>
+              </div>`;
+          }
+      }
+
       resultsHtml += `
-      <div class="fixture-card">
+      <div class="fixture-card animate-on-scroll">
           <div class="fixture-header">
               <span>${fixture.match_type || 'Match Result'}</span>
               <span style="color:var(--brand);">Full Time</span>
@@ -1522,6 +1567,9 @@ function renderResultsPage() {
                   </div>
               </div>
           </div>
+          
+          ${motmHtml} <!-- Player of the match UI -->
+          
           <div style="display:flex; justify-content:center; gap:12px; flex-wrap:wrap; margin-top:8px;">
               ${highlightHtml}
               <button class="export-btn" onclick="downloadMatchCard('${res.id}')">
@@ -1790,6 +1838,23 @@ function downloadMatchCard(resultId) {
     });
     document.getElementById('erc-t2-scorers').innerHTML = t2ScorersHtml;
 
+    // Export Card MOTM Update
+    let motmId = res.motm || res.potm;
+    let motmContainer = document.getElementById('erc-motm-container');
+    if (motmId) {
+        let id = Array.isArray(motmId) ? motmId[0] : motmId;
+        let motmPlayer = db_players.find(p => p.id === id || (p.name && p.name.toLowerCase() === String(id).toLowerCase()));
+        if (motmPlayer) {
+            document.getElementById('erc-motm-photo').src = getPbImageUrl(motmPlayer, motmPlayer.photo);
+            document.getElementById('erc-motm-name').textContent = motmPlayer.name;
+            motmContainer.style.display = 'block';
+        } else {
+            motmContainer.style.display = 'none';
+        }
+    } else {
+        motmContainer.style.display = 'none';
+    }
+
     const cardEl = document.getElementById('export-result-card');
     cardEl.parentElement.style.top = "0";
     cardEl.parentElement.style.zIndex = "-1";
@@ -1829,7 +1894,7 @@ function renderSupportersPage() {
         }
 
         container.innerHTML += `
-            <div class="supporter-card">
+            <div class="supporter-card animate-on-scroll">
                 <img src="${photoUrl}" class="supporter-photo" alt="${sName}" crossorigin="anonymous">
                 <div class="supporter-name">${sName}</div>
                 <div class="supporter-batch">Batch: ${sBatch}</div>
@@ -1846,10 +1911,25 @@ function renderSupportersPage() {
 // ==========================================
 function startAuctionMode() {
     if(currentFilteredPlayers.length === 0) {
-        alert("No players available to present in the selected category.");
+        alert("No players available to present in the selected category/search.");
         return;
     }
     auctionIndex = 0;
+    updateAuctionModal();
+    showModal('auctionModal');
+}
+
+function presentSinglePlayer(playerId, event) {
+    event.stopPropagation(); 
+    
+    let idx = currentFilteredPlayers.findIndex(p => p.id === playerId);
+    
+    if (idx === -1) {
+       currentFilteredPlayers = [db_players.find(p => p.id === playerId)];
+       idx = 0;
+    }
+    
+    auctionIndex = idx;
     updateAuctionModal();
     showModal('auctionModal');
 }
@@ -2029,7 +2109,7 @@ function playLiveStream() {
             type: 'flv',
             isLive: true,
             hasAudio: true,
-            url: 'https://live.tmadhu.me/live/efls4.flv'
+            url: 'wss://live.tmadhu.me/live/efls4.flv'
         });
         flvPlayer.attachMediaElement(videoElement);
         flvPlayer.load();
