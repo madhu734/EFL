@@ -318,16 +318,17 @@
   
   .tv-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 20; display: none; }
   .tv-logo { position: absolute; top: 20px; right: 20px; height: 40px; width: auto; opacity: 0.9; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)); }
-  .tv-scoreboard { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); display: flex; align-items: stretch; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(8px); border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.5); font-family: 'Montserrat', sans-serif; color: #fff; }
-  .sb-team { display: flex; align-items: center; gap: 8px; padding: 6px 12px; background: rgba(255,255,255,0.05); }
-  .sb-team-name { font-weight: 800; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; width: 45px; text-align: center;}
-  .sb-crest { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 8px; font-weight: 800; color: #fff; border: 1px solid rgba(255,255,255,0.2); overflow: hidden; }
-  .sb-score-box { display: flex; align-items: center; background: var(--accent); padding: 0 16px; font-weight: 900; font-size: 18px; letter-spacing: 1px; }
-  .sb-live-badge { position: absolute; top: 100%; left: 50%; transform: translate(-50%, -50%); background: #ef4444; color: #fff; font-size: 9px; font-weight: 800; padding: 2px 8px; border-radius: 10px; text-transform: uppercase; letter-spacing: 1px; animation: pulse-live 2s infinite; }
+  .tv-scoreboard { position: absolute; top: 25px; left: 30px; display: flex; flex-direction: column; align-items: center; font-family: 'Montserrat', sans-serif; color: #fff; }
+  .sb-wrapper { display: flex; align-items: stretch; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); }
+  .sb-team { display: flex; align-items: center; gap: 8px; padding: 6px 12px; transition: background 0.3s; }
+  .sb-team-name { font-weight: 800; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; min-width: 45px; text-align: center; }
+  .sb-crest { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 8px; font-weight: 800; border: 1px solid rgba(255,255,255,0.4); overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.2); background: rgba(0,0,0,0.15); color: inherit; }
+  .sb-score-box { display: flex; align-items: center; background: rgba(15, 23, 42, 0.95); padding: 0 16px; font-weight: 900; font-size: 18px; letter-spacing: 1px; color: #fff; }
+  .sb-live-badge { background: #ef4444; color: #fff; font-size: 10px; font-weight: 800; padding: 3px 12px; border-radius: 0 0 6px 6px; text-transform: uppercase; letter-spacing: 2px; animation: pulse-live 2s infinite; margin-top: -1px; box-shadow: 0 4px 8px rgba(0,0,0,0.3); }
   
   @media(max-width: 600px) {
       .tv-logo { top: 10px; right: 10px; height: 25px; }
-      .tv-scoreboard { top: 10px; transform: translateX(-50%) scale(0.85); }
+      .tv-scoreboard { top: 15px; left: 15px; transform: scale(0.85); transform-origin: top left; }
   }
 
   .fixtures-wrap, .about-wrap, .results-wrap, .standings-wrap, .supporters-wrap { max-width: 1000px; margin: 0 auto; padding: 2.5rem 2rem; }
@@ -2136,17 +2137,25 @@ function renderScoreboardUI(fixture) {
     let score1 = fixture.live_score_t1 || 0;
     let score2 = fixture.live_score_t2 || 0;
 
+    // Dynamic Team Colors
+    let bg1 = t1.crest_bg || 'rgba(15, 23, 42, 0.85)';
+    let bg2 = t2.crest_bg || 'rgba(15, 23, 42, 0.85)';
+    let color1 = getSafeCrestTextColor(t1.crest_bg || '#0f172a');
+    let color2 = getSafeCrestTextColor(t2.crest_bg || '#0f172a');
+
     sb.innerHTML = `
-        <div class="sb-team">
-            <div class="sb-crest" style="background:${t1.crest_bg||'#333'};color:${getSafeCrestTextColor(t1.crest_bg||'#333')}">${t1Crest}</div>
-            <div class="sb-team-name">${t1Short}</div>
-        </div>
-        <div class="sb-score-box">
-            <span id="live-s1">${score1}</span> <span style="margin:0 6px;opacity:0.5">-</span> <span id="live-s2">${score2}</span>
-        </div>
-        <div class="sb-team">
-            <div class="sb-team-name">${t2Short}</div>
-            <div class="sb-crest" style="background:${t2.crest_bg||'#333'};color:${getSafeCrestTextColor(t2.crest_bg||'#333')}">${t2Crest}</div>
+        <div class="sb-wrapper">
+            <div class="sb-team" style="background: ${bg1}; color: ${color1};">
+                <div class="sb-crest">${t1Crest}</div>
+                <div class="sb-team-name">${t1Short}</div>
+            </div>
+            <div class="sb-score-box">
+                <span id="live-s1">${score1}</span> <span style="margin:0 6px;opacity:0.5">-</span> <span id="live-s2">${score2}</span>
+            </div>
+            <div class="sb-team" style="background: ${bg2}; color: ${color2};">
+                <div class="sb-team-name">${t2Short}</div>
+                <div class="sb-crest">${t2Crest}</div>
+            </div>
         </div>
         <div class="sb-live-badge">LIVE</div>
     `;
@@ -2176,7 +2185,7 @@ function playLiveStream() {
     // Inject Video Player and TV Overlay UI
     let overlayHtml = `
     <div class="tv-overlay" id="tv-overlay" style="display: block;">
-        <img src="https://i.postimg.cc/2jQ4d0X1/efltvt.png" class="tv-logo" alt="EFL TV" crossorigin="anonymous">
+        <img src="https://i.postimg.cc/1tbYp88M/EFLTV.png" class="tv-logo" alt="EFL TV" crossorigin="anonymous">
         <div class="tv-scoreboard" id="tv-scoreboard" style="display: none;">
             <!-- Scoreboard injected dynamically -->
         </div>
