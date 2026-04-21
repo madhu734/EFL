@@ -410,19 +410,19 @@
       <button class="theme-toggle-btn" onclick="toggleTheme()" id="themeToggleBtn" title="Toggle Dark/Light Mode">🌙</button>
       <span id="themeToggleText" style="font-size: 9px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Dark</span>
     </div>
-    <button class="nav-cta" onclick="showPage('register')">Register Now</button>
+    <button class="nav-cta" style="background: var(--text-muted); cursor: default; box-shadow: none;" disabled>Registration Closed</button>
   </div>
 </nav>
 
 <!-- HOME -->
 <div id="page-home" class="page active">
   <div class="hero">
-    <div class="hero-badge animate-on-scroll"><span class="pulse"></span> Season 4 — Registration Open</div>
+    <div class="hero-badge animate-on-scroll"><span class="pulse" style="background: #10B981;"></span> Season 4</div>
     <div class="hero-season animate-on-scroll">Jahangirnagar University · Department of English</div>
     <div class="hero-title animate-on-scroll">English<br>Football<br>League</div>
     <div class="hero-sub animate-on-scroll">The most anticipated football tournament of the Department of English is back. Six elite squads. One champion. Season 4 begins soon.</div>
     <div class="hero-actions animate-on-scroll">
-      <button class="btn-primary" onclick="showPage('register')">Register as Player or Enthusiast</button>
+      <button class="btn-primary" onclick="window.open('https://eflsupport.duckdns.org', '_blank')" style="text-transform: none;">Register as a supporter of the tournament/any team (not player)</button>
       <button class="btn-outline" onclick="showPage('teams')">View All Teams</button>
     </div>
   </div>
@@ -636,7 +636,14 @@
       <div style="font-size:13px;color:var(--text-muted);font-weight:500;">Fill in your details below to register for EFL Season 4. All fields marked * are required.</div>
     </div>
     
-    <div class="reg-form animate-on-scroll" id="regForm">
+    <div class="reg-form animate-on-scroll" id="regFormClosed" style="text-align: center; padding: 4rem 2rem;">
+      <div style="font-size: 48px; margin-bottom: 16px;">🔒</div>
+      <div style="font-family: 'Montserrat', sans-serif; font-size: 24px; font-weight: 800; margin-bottom: 12px; color: var(--text-main);">Registration Closed</div>
+      <div style="color: var(--text-muted); font-size: 14px; margin-bottom: 24px; line-height: 1.6;">Player registration for EFL Season 4 has officially ended. Thank you for the overwhelming response!</div>
+      <button class="submit-btn" onclick="window.open('https://eflsupport.duckdns.org', '_blank')" style="width: auto; padding: 12px 32px; text-transform: none;">Register as a Supporter</button>
+    </div>
+
+    <div class="reg-form animate-on-scroll" id="regForm" style="display: none;">
       <div class="form-error-summary" id="formErrorSummary">Please check the highlighted fields and fill them correctly.</div>
       
       <div class="form-row">
