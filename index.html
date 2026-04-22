@@ -5,8 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>EFL Season 4 — Jahangirnagar University · Dept. of English</title>
 <link rel="icon" type="image/png" href="https://i.postimg.cc/j5DTGgSg/EFL.png">
+<!-- Modern, Premium Font Pairing: Montserrat for headings, Inter for body -->
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@600;700;800;900&display=swap" rel="stylesheet">
+<!-- HTML2Canvas for Exporting Cards -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<!-- HLS.js for Live Streaming -->
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 
 <style>
@@ -394,6 +397,7 @@
     <button class="nav-btn" onclick="showPage('about', this)">ℹ️ About</button>
   </div>
   <div class="nav-actions">
+    <!-- App Download Button -->
     <div style="display: flex; flex-direction: column; align-items: center; gap: 2px; margin-right: 10px;">
       <a href="https://github.com/madhu734/EFL/releases/download/SP/EFL.apk" class="nav-btn" style="text-decoration: none; border: 1.5px solid #10B981; color: #10B981; background: rgba(16, 185, 129, 0.05);" title="Download EFL Season 4 Android App">
         📱 Download App
@@ -401,6 +405,7 @@
       <span style="font-size: 7.5px; color: var(--text-muted); text-align: center; max-width: 125px; line-height: 1.3;">*(Only Android, may show harmful warning, but can be ignored and continued anyway)</span>
     </div>
 
+    <!-- Theme Toggle Button -->
     <div style="display: flex; flex-direction: column; align-items: center; gap: 2px; margin-right: 10px;">
       <button class="theme-toggle-btn" onclick="toggleTheme()" id="themeToggleBtn" title="Toggle Dark/Light Mode">🌙</button>
       <span id="themeToggleText" style="font-size: 9px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Dark</span>
@@ -409,6 +414,7 @@
   </div>
 </nav>
 
+<!-- HOME -->
 <div id="page-home" class="page active">
   <div class="hero">
     <div class="hero-badge animate-on-scroll"><span class="pulse" style="background: #10B981;"></span> Season 4</div>
@@ -454,6 +460,7 @@
     </div>
 </div>
 
+<!-- TEAMS (Dynamic) -->
 <div id="page-teams" class="page">
   <div class="section">
     <div class="section-header animate-on-scroll">
@@ -467,6 +474,7 @@
   </div>
 </div>
 
+<!-- PLAYERS DIRECTORY -->
 <div id="page-players" class="page">
   <div class="section">
     <div class="section-header animate-on-scroll">
@@ -476,6 +484,7 @@
     </div>
     
     <div class="player-filter-bar animate-on-scroll" style="flex-direction: column; align-items: flex-start; gap: 16px;">
+      <!-- Search Input -->
       <div style="width: 100%; position: relative;">
          <input type="text" id="player-search" placeholder="🔍 Search players by name..." style="width: 100%; padding: 12px 16px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-input); font-size: 14px; font-family: 'Inter', sans-serif; color: var(--text-main); outline: none; transition: border 0.2s;">
       </div>
@@ -500,6 +509,7 @@
   </div>
 </div>
 
+<!-- FIXTURES PAGE -->
 <div id="page-fixtures" class="page">
   <div class="fixtures-wrap">
     <div class="section-header animate-on-scroll">
@@ -513,6 +523,7 @@
   </div>
 </div>
 
+<!-- RESULTS & STATS PAGE -->
 <div id="page-results" class="page">
   <div class="results-wrap">
     <div class="section-header animate-on-scroll">
@@ -522,6 +533,7 @@
     </div>
     
     <div class="results-layout animate-on-scroll" style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px;">
+       <!-- Left Side: Match Results -->
        <div>
          <div style="font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 18px; margin-bottom: 16px; text-transform: uppercase;">Match Results</div>
          <div id="results-container">
@@ -532,6 +544,7 @@
          </div>
        </div>
 
+       <!-- Right Side: Top Scorers -->
        <div>
          <div style="font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 18px; margin-bottom: 16px; text-transform: uppercase;">Top Scorers</div>
          <div id="top-scorers-container" style="background: var(--bg-input); border: 1px solid var(--border); border-radius: 16px; padding: 16px; transition: background 0.3s, border 0.3s;">
@@ -542,6 +555,7 @@
   </div>
 </div>
 
+<!-- STANDINGS (POINTS TABLE) PAGE -->
 <div id="page-standings" class="page">
   <div class="standings-wrap">
     <div class="section-header animate-on-scroll">
@@ -574,7 +588,8 @@
                </tr>
             </thead>
             <tbody id="standings-body">
-               </tbody>
+               <!-- Table Rows injected via JS -->
+            </tbody>
          </table>
        </div>
        
@@ -591,6 +606,7 @@
   </div>
 </div>
 
+<!-- SUPPORTERS / DONORS PAGE -->
 <div id="page-supporters" class="page">
   <div class="supporters-wrap">
     <div class="section-header animate-on-scroll">
@@ -611,6 +627,7 @@
   </div>
 </div>
 
+<!-- REGISTRATION -->
 <div id="page-register" class="page">
   <div class="reg-wrap">
     <div class="reg-header animate-on-scroll">
@@ -797,6 +814,7 @@
   </div>
 </div>
 
+<!-- ABOUT PAGE -->
 <div id="page-about" class="page">
   <div class="about-wrap">
     <div class="section-header animate-on-scroll">
@@ -825,12 +843,12 @@
     <div class="about-card animate-on-scroll" style="margin-bottom: 20px;">
         <div style="font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 20px; margin-bottom: 20px; text-transform: uppercase;">Tournament Rules</div>
         <div class="about-rules-grid">
-            <div class="rule-item"><div class="rule-num">01</div><div><span class="rule-title">Tournament Format:</span> <br><span class="rule-text">In the primary group stage, all teams will play against each other. The top 4 teams on the points table will advance. Semi-final 1: 1st vs 4th. Semi-final 2: 2nd vs 3rd. The winners will play the Final.</span></div></div>
-            <div class="rule-item"><div class="rule-num">02</div><div><span class="rule-title">Match Duration:</span> <br><span class="rule-text">Each match consists of 30 minutes (15 minutes per half) with a 10-minute half-time break.</span></div></div>
-            <div class="rule-item"><div class="rule-num">03</div><div><span class="rule-title">Walkover & Forfeit:</span> <br><span class="rule-text">Teams must be present at the Central Field at the scheduled time. If one team fails to appear, the opponent gets a 2-0 win. If both teams fail to appear, both will be considered to have lost by 1 goal.</span></div></div>
-            <div class="rule-item"><div class="rule-num">04</div><div><span class="rule-title">Knockout Ties:</span> <br><span class="rule-text">If a knockout match ends in a draw, the winner will be decided directly through a penalty shootout tiebreaker.</span></div></div>
-            <div class="rule-item"><div class="rule-num">05</div><div><span class="rule-title">Special Rule:</span> <br><span class="rule-text">To be added...</span></div></div>
-            <div class="rule-item"><div class="rule-num">06</div><div><span class="rule-title">Special Rule:</span> <br><span class="rule-text">To be added...</span></div></div>
+            <div class="rule-item"><div class="rule-num">01</div><div><span class="rule-title">Eligibility:</span> <br><span class="rule-text">All currently enrolled students of the Dept. of English, JU are eligible to participate.</span></div></div>
+            <div class="rule-item"><div class="rule-num">02</div><div><span class="rule-title">Squad Size:</span> <br><span class="rule-text">Each team must register a minimum of 7 and a maximum of 10 players.</span></div></div>
+            <div class="rule-item"><div class="rule-num">03</div><div><span class="rule-title">Format:</span> <br><span class="rule-text">League format followed by knockout semi-finals and a grand final.</span></div></div>
+            <div class="rule-item"><div class="rule-num">04</div><div><span class="rule-title">Match Duration:</span> <br><span class="rule-text">Each match consists of two halves as determined by the organizing committee.</span></div></div>
+            <div class="rule-item"><div class="rule-num">05</div><div><span class="rule-title">Fair Play:</span> <br><span class="rule-text">All players are expected to maintain sportsmanship and respect for opponents and officials.</span></div></div>
+            <div class="rule-item"><div class="rule-num">06</div><div><span class="rule-title">Disputes:</span> <br><span class="rule-text">All disputes shall be referred to the organizing committee whose decision is final.</span></div></div>
         </div>
     </div>
 
@@ -848,6 +866,7 @@
   </div>
 </div>
 
+<!-- SUPPORT MESSAGING BLOCK -->
 <div style="background: var(--brand); color: var(--bg-body); padding: 2.5rem 1rem; text-align: center; margin-top: 3rem; border-top: 4px solid var(--accent); transition: background-color 0.3s;">
     <div style="font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 20px; margin-bottom: 12px; letter-spacing: 1px;">Need to update your data?</div>
     <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 24px; max-width: 500px; margin-left: auto; margin-right: auto; line-height: 1.6; font-weight: 500;">
@@ -859,6 +878,7 @@
     </a>
 </div>
 
+<!-- GLOBAL FOOTER -->
 <footer style="text-align: center; padding: 2.5rem 1rem; border-top: 1px solid var(--border); background: transparent; font-family: 'Inter', sans-serif;">
   <div style="font-size: 13px; color: var(--text-muted); font-weight: 500; display: flex; align-items: center; justify-content: center; gap: 6px;">
     Organized & Hosted by <span style="color: var(--brand); font-weight: 800; font-family: 'Montserrat', sans-serif; letter-spacing: 0.5px;">BATCH 51</span>
@@ -868,6 +888,7 @@
   </div>
 </footer>
 
+<!-- AUCTION PRESENTATION MODAL OVERLAY -->
 <div class="modal-overlay" id="auctionModal" onclick="closeModal('auctionModal', event)">
   <div class="modal-content sm" onclick="event.stopPropagation()">
     <button class="modal-close" onclick="closeModal('auctionModal')">×</button>
@@ -876,9 +897,7 @@
        <img id="auc-photo" src="" style="width: 180px; height: 180px; border-radius: 16px; object-fit: cover; margin-bottom: 16px; border: 4px solid var(--bg-input);">
        <div id="auc-name" style="font-family: 'Montserrat', sans-serif; font-size: 28px; font-weight: 900; color: var(--text-main); margin-bottom: 4px;">PLAYER NAME</div>
        <div id="auc-pos" style="font-size: 16px; color: var(--brand); font-weight: 700; text-transform: uppercase; margin-bottom: 8px;">POSITION</div>
-       <div id="auc-batch" style="font-size: 14px; color: var(--text-muted); font-weight: 600; margin-bottom: 8px;">Batch: --</div>
-       
-       <div id="auc-availability" style="display: inline-block; font-size: 11px; font-weight: 800; padding: 4px 12px; border-radius: 20px; text-transform: uppercase; margin-bottom: 24px; letter-spacing: 1px;">AVAILABLE</div>
+       <div id="auc-batch" style="font-size: 14px; color: var(--text-muted); font-weight: 600; margin-bottom: 24px;">Batch: --</div>
        
        <div class="auction-controls">
           <button class="auction-nav-btn" id="auc-prev-btn" onclick="prevAuction()">◀ Prev</button>
@@ -889,6 +908,7 @@
   </div>
 </div>
 
+<!-- TEAM DETAILS MODAL OVERLAY -->
 <div class="modal-overlay" id="teamModal" onclick="closeModal('teamModal', event)">
   <div class="modal-content" onclick="event.stopPropagation()">
     <button class="modal-close" onclick="closeModal('teamModal')">×</button>
@@ -914,6 +934,7 @@
   </div>
 </div>
 
+<!-- PLAYER PROFILE MODAL OVERLAY -->
 <div class="modal-overlay" id="playerModal" onclick="closeModal('playerModal', event)">
   <div class="modal-content sm" onclick="event.stopPropagation()">
     <button class="modal-close" onclick="closeModal('playerModal')">×</button>
@@ -944,14 +965,17 @@
   </div>
 </div>
 
+<!-- VIDEO PLAYER MODAL FOR HLS LIVE & HIGHLIGHTS -->
 <div class="modal-overlay" id="videoModal" onclick="closeVideoModal(event)">
   <div class="modal-content" style="background: transparent; box-shadow: none; border: none; max-width: 900px;" onclick="event.stopPropagation()">
     <button class="modal-close" style="top: -40px; right: 0; background: var(--accent);" onclick="closeVideoModal()">×</button>
     <div class="video-container" id="video-container-box">
-       </div>
+       <!-- Video Tag and TV Overlay will be injected here by JS -->
+    </div>
   </div>
 </div>
 
+<!-- HIDDEN PLAYER CARD TEMPLATE FOR EXPORT -->
 <div style="position: absolute; top: -10000px; left: -10000px; width: 0; height: 0; overflow: hidden;">
   <div id="player-card" style="width: 400px; background: #0f172a; border-radius: 20px; padding: 32px; font-family: 'Inter', sans-serif; color: #fff; text-align: center; border: 2px solid rgba(255,255,255,0.1); box-sizing: border-box; position: relative;">
       <div style="position: relative; z-index: 1;">
@@ -977,6 +1001,7 @@
   </div>
 </div>
 
+<!-- HIDDEN MATCH RESULT CARD TEMPLATE FOR EXPORT -->
 <div style="position: absolute; top: -10000px; left: -10000px; width: 0; height: 0; overflow: hidden;">
   <div id="export-result-card" style="width: 800px; background: linear-gradient(135deg, #0f172a, #1e1b4b); border-radius: 24px; padding: 48px; font-family: 'Inter', sans-serif; color: #fff; position: relative; border: 4px solid rgba(255,255,255,0.05); box-sizing: border-box;">
       <div style="text-align: center; margin-bottom: 40px;">
@@ -985,11 +1010,13 @@
       </div>
 
       <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 40px;">
+          <!-- Team 1 -->
           <div style="display: flex; flex-direction: column; align-items: center; flex: 1;">
               <div id="erc-t1-crest" style="width: 120px; height: 120px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 32px; color: #fff; border: 4px solid rgba(255,255,255,0.2); box-shadow: 0 10px 30px rgba(0,0,0,0.5); margin-bottom: 16px; overflow: hidden;">T1</div>
               <div id="erc-t1-name" style="font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 24px; text-transform: uppercase; text-align: center;">TEAM 1</div>
           </div>
           
+          <!-- Score -->
           <div style="display: flex; flex-direction: column; align-items: center; padding: 0 40px;">
               <div style="background: rgba(0,0,0,0.3); padding: 16px 32px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; gap: 24px;">
                  <span id="erc-t1-score" style="font-family: 'Montserrat', sans-serif; font-size: 64px; font-weight: 900; color: #fff; line-height: 1;">0</span>
@@ -998,20 +1025,25 @@
               </div>
           </div>
 
+          <!-- Team 2 -->
           <div style="display: flex; flex-direction: column; align-items: center; flex: 1;">
               <div id="erc-t2-crest" style="width: 120px; height: 120px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 32px; color: #fff; border: 4px solid rgba(255,255,255,0.2); box-shadow: 0 10px 30px rgba(0,0,0,0.5); margin-bottom: 16px; overflow: hidden;">T2</div>
               <div id="erc-t2-name" style="font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 24px; text-transform: uppercase; text-align: center;">TEAM 2</div>
           </div>
       </div>
 
+      <!-- Scorers -->
       <div style="display: flex; justify-content: space-between; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 24px;">
           <div id="erc-t1-scorers" style="flex: 1; font-size: 16px; color: #cbd5e1; line-height: 1.8; padding-right: 20px;">
-              </div>
+              <!-- Scorers T1 -->
+          </div>
           <div style="width: 1px; background: rgba(255,255,255,0.1);"></div>
           <div id="erc-t2-scorers" style="flex: 1; font-size: 16px; color: #cbd5e1; line-height: 1.8; text-align: right; padding-left: 20px;">
-              </div>
+              <!-- Scorers T2 -->
+          </div>
       </div>
       
+      <!-- Player of the Match (Export Card) -->
       <div id="erc-motm-container" style="display: none; text-align: center; margin-top: 30px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px;">
           <div style="font-size: 12px; color: #f59e0b; text-transform: uppercase; font-weight: 800; letter-spacing: 2px; margin-bottom: 12px;">🏅 Player of the Match</div>
           <div style="display: inline-flex; align-items: center; gap: 12px; background: rgba(0,0,0,0.3); padding: 8px 24px; border-radius: 40px; border: 1px solid rgba(245,158,11,0.3);">
@@ -1027,7 +1059,6 @@
 </div>
 
 <script>
-
 // ==========================================
 // POCKETBASE CONFIGURATION
 // ==========================================
@@ -1046,6 +1077,9 @@ let searchQuery = '';
 let currentFilteredPlayers = [];
 let auctionIndex = 0;
 let currentHls = null; // Global variable to track HLS instance
+
+let liveScoreInterval = null; // Global variable to track Live Score Polling Interval
+let currentLiveFixtureId = null;
 
 // ==========================================
 // THEME (DARK/LIGHT MODE) LOGIC
@@ -1315,6 +1349,7 @@ function renderPlayersPage() {
 
     container.innerHTML += `
       <div class="player-card animate-on-scroll" style="position: relative;">
+        <!-- Instant Presentation Button -->
         <button onclick="presentSinglePlayer('${player.id}', event)" class="instant-present-btn" title="Present Player">🖥️</button>
         
         <div style="position:relative;" onclick="openPlayerModal('${player.id}')">
@@ -1333,9 +1368,6 @@ function renderPlayersPage() {
   setTimeout(observeElements, 100);
 }
 
-// ==========================================
-// FIXTURE UPDATE (12-Hour Format AM/PM)
-// ==========================================
 function renderFixturesPage() {
   const container = document.getElementById('fixtures-container');
   
@@ -1370,8 +1402,7 @@ function renderFixturesPage() {
       let dateStr = 'TBA';
       if (fix.match_date) {
           const d = new Date(fix.match_date);
-          // Changed to 12-hour US format with AM/PM
-          dateStr = d.toLocaleString('en-US', { weekday: 'short', day: 'numeric', month: 'short', hour: 'numeric', minute:'2-digit', hour12: true });
+          dateStr = d.toLocaleString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute:'2-digit' });
       }
 
       let isLiveHtml = '';
@@ -1570,7 +1601,9 @@ function renderResultsPage() {
               </div>
           </div>
           
-          ${motmHtml} <div style="display:flex; justify-content:center; gap:12px; flex-wrap:wrap; margin-top:8px;">
+          ${motmHtml} <!-- Player of the match UI -->
+          
+          <div style="display:flex; justify-content:center; gap:12px; flex-wrap:wrap; margin-top:8px;">
               ${highlightHtml}
               <button class="export-btn" onclick="downloadMatchCard('${res.id}')">
                  ⬇️ Download Result Card
@@ -1869,7 +1902,7 @@ function downloadMatchCard(resultId) {
 }
 
 // ==========================================
-// SUPPORTERS UPDATE (Hybrid Team Badge)
+// SUPPORTERS / DONORS LOGIC
 // ==========================================
 function renderSupportersPage() {
     const container = document.getElementById('supporters-container');
@@ -1893,38 +1926,21 @@ function renderSupportersPage() {
             msgHtml = `<div style="font-size: 12px; color: var(--text-muted); margin-top: 12px; font-style: italic; line-height: 1.5; padding: 10px; background: rgba(0,0,0,0.02); border-radius: 8px; border: 1px solid var(--border);">"${sMessage.trim()}"</div>`;
         }
 
-        // Dynamic Team Badge Logic
-        let badgeHtml = `<div class="supporter-badge">⭐ EFL Supporter</div>`;
-        let teamId = sup.supported_team;
-        
-        if (teamId && teamId !== 'decide_later' && !teamId.includes('TBD')) {
-            let team = db_teams.find(t => t.id === teamId);
-            if (team) {
-                let teamName = team.name || team.crest_text || team.short_name; // Using Full Name over Short Name
-                let crestHtml = team.banner ? `<img src="${getPbImageUrl(team, team.banner)}" style="width:14px; height:14px; border-radius:50%; object-fit:cover; display:inline-block; vertical-align:middle; margin-right:4px;" crossorigin="anonymous">` : `⭐ `;
-                
-                badgeHtml = `<div class="supporter-badge" style="background: rgba(15, 23, 42, 0.05); color: var(--brand); border: 1px solid rgba(15, 23, 42, 0.1);">
-                                ${crestHtml} Supporting ${teamName}
-                             </div>`;
-            }
-        }
-
         container.innerHTML += `
             <div class="supporter-card animate-on-scroll">
                 <img src="${photoUrl}" class="supporter-photo" alt="${sName}" crossorigin="anonymous">
                 <div class="supporter-name">${sName}</div>
                 <div class="supporter-batch">Batch: ${sBatch}</div>
                 ${msgHtml}
-                <div style="margin-top: 12px;">${badgeHtml}</div>
+                <div class="supporter-badge">⭐ EFL Supporter</div>
             </div>
         `;
     });
     setTimeout(observeElements, 100);
 }
 
-
 // ==========================================
-// AUCTION PRESENTATION UPDATE (Availability)
+// AUCTION PRESENTATION LOGIC
 // ==========================================
 function startAuctionMode() {
     if(currentFilteredPlayers.length === 0) {
@@ -1958,21 +1974,6 @@ function updateAuctionModal() {
     document.getElementById('auc-pos').textContent = p.position;
     document.getElementById('auc-batch').textContent = "Batch: " + p.batch;
     
-    // Availability Update Logic
-    let availRaw = (p.availability || '').toLowerCase();
-    let availEl = document.getElementById('auc-availability');
-    if (availRaw.includes('not')) {
-        availEl.innerHTML = '❌ UNAVAILABLE';
-        availEl.style.background = 'rgba(239, 68, 68, 0.1)';
-        availEl.style.color = '#ef4444';
-        availEl.style.border = '1px solid rgba(239, 68, 68, 0.3)';
-    } else {
-        availEl.innerHTML = '✅ AVAILABLE';
-        availEl.style.background = 'rgba(34, 197, 94, 0.1)';
-        availEl.style.color = '#22c55e';
-        availEl.style.border = '1px solid rgba(34, 197, 94, 0.3)';
-    }
-
     let rawCat = (p.Catagory || p.category || '').trim().toUpperCase();
     let displayCat = '';
     if (rawCat === 'ICON') displayCat = 'ICON';
@@ -2130,7 +2131,7 @@ function closeModal(modalId, event) {
 }
 
 // ==========================================
-// VIDEO PLAYER LOGIC (HLS LIVE & HIGHLIGHTS)
+// VIDEO PLAYER LOGIC (HLS LIVE, OVERLAY & HIGHLIGHTS)
 // ==========================================
 function renderScoreboardUI(fixture) {
     const sb = document.getElementById('tv-scoreboard');
@@ -2151,6 +2152,7 @@ function renderScoreboardUI(fixture) {
     let score1 = fixture.live_score_t1 || 0;
     let score2 = fixture.live_score_t2 || 0;
 
+    // Dynamic Team Colors
     let bg1 = t1.crest_bg || 'rgba(15, 23, 42, 0.85)';
     let bg2 = t2.crest_bg || 'rgba(15, 23, 42, 0.85)';
     let color1 = getSafeCrestTextColor(t1.crest_bg || '#0f172a');
@@ -2195,20 +2197,24 @@ async function fetchLiveScore(fixId) {
 function playLiveStream() {
     const container = document.getElementById('video-container-box');
     
+    // Inject Video Player and TV Overlay UI
     let overlayHtml = `
     <div class="tv-overlay" id="tv-overlay" style="display: block;">
         <img src="https://i.postimg.cc/1tbYp88M/EFLTV.png" class="tv-logo" alt="EFL TV" crossorigin="anonymous">
         <div class="tv-scoreboard" id="tv-scoreboard" style="display: none;">
-            </div>
+            <!-- Scoreboard injected dynamically -->
+        </div>
     </div>`;
 
     container.innerHTML = `<video id="main-video-player" controls class="video-player" autoplay playsinline></video>` + overlayHtml;
     const videoElement = document.getElementById('main-video-player');
     
+    // Dynamic PocketBase Connection for Live Scoreboard
     const liveFix = db_fixtures.find(f => f.is_live === true || f.is_live === 'true');
     if (liveFix) {
         currentLiveFixtureId = liveFix.id;
         renderScoreboardUI(liveFix);
+        // Start polling every 10 seconds for updated score
         liveScoreInterval = setInterval(() => fetchLiveScore(liveFix.id), 10000);
     }
     
@@ -2225,6 +2231,7 @@ function playLiveStream() {
             videoElement.play().catch(e => console.log("Autoplay prevented", e));
         });
     } else if (videoElement.canPlayType('application/vnd.apple.mpegurl')) {
+        // Native HLS support (Safari)
         videoElement.src = videoSrc;
         videoElement.addEventListener('loadedmetadata', function() {
             videoElement.play().catch(e => console.log("Autoplay prevented", e));
@@ -2236,18 +2243,22 @@ function playLiveStream() {
 
 function playHighlight(url) {
     const container = document.getElementById('video-container-box');
+    
+    // Regular HTML5 Video Player for stored highlights (No Overlay)
     container.innerHTML = `<video controls class="video-player" autoplay playsinline src="${url}"></video>`;
+    
     showModal('videoModal');
 }
 
 function closeVideoModal(event) {
     if (event && event.target !== document.getElementById('videoModal') && !event.target.classList.contains('modal-close')) return;
     
+    // Cleanup HLS and Score Polling
     if (typeof currentHls !== 'undefined' && currentHls) {
         currentHls.destroy();
         currentHls = null;
     }
-    if (typeof liveScoreInterval !== 'undefined' && liveScoreInterval) {
+    if (liveScoreInterval) {
         clearInterval(liveScoreInterval);
         liveScoreInterval = null;
     }
