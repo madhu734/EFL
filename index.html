@@ -9,8 +9,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@600;700;800;900&display=swap" rel="stylesheet">
 <!-- HTML2Canvas for Exporting Cards -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<!-- HLS.js for Live Streaming -->
-<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -195,17 +193,6 @@
   .fixture-score { font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 28px; color: var(--brand); letter-spacing: 2px; }
   .fixture-vs { font-size: 14px; font-weight: 800; color: var(--text-muted); background: var(--bg-input); padding: 6px 12px; border-radius: 20px; }
   
-  /* LIVE & HIGHLIGHTS BADGES */
-  .live-badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); padding: 6px 14px; border-radius: 20px; font-size: 11px; font-weight: 800; cursor: pointer; animation: pulse-live 2s infinite; text-transform: uppercase; margin-top: 12px; transition: all 0.2s;}
-  .live-badge:hover { background: #ef4444; color: white; transform: translateY(-1px); }
-  @keyframes pulse-live { 
-      0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); } 
-      70% { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); } 
-      100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } 
-  }
-  .highlight-btn { display: inline-flex; align-items: center; gap: 6px; background: rgba(99, 102, 241, 0.1); color: #6366f1; border: 1px solid rgba(99, 102, 241, 0.3); padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer; transition: all 0.2s; text-transform: uppercase; margin-top: 0; align-self: center; }
-  .highlight-btn:hover { background: #6366f1; color: white; }
-
   /* RESULTS & STATS ADDITIONS */
   .result-scorer-list { font-size: 12px; color: var(--text-muted); margin-top: 12px; display: flex; flex-direction: column; gap: 4px; font-weight: 500; }
   .result-scorer-list.right { text-align: right; }
@@ -311,25 +298,6 @@
   .auction-nav-btn { background: var(--bg-input); color: var(--text-main); border: 1px solid var(--border); padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 700; transition: 0.2s; font-family: 'Inter', sans-serif;}
   .auction-nav-btn:hover:not(:disabled) { background: var(--border); }
   .auction-nav-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-
-  /* VIDEO PLAYER & TV OVERLAY STYLES */
-  .video-container { width: 100%; max-width: 900px; background: #000; border-radius: 12px; overflow: hidden; aspect-ratio: 16/9; position: relative; margin: 0 auto; box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
-  .video-container video { width: 100%; height: 100%; object-fit: contain; border: none; }
-  
-  .tv-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 20; display: none; }
-  .tv-logo { position: absolute; top: 20px; right: 20px; height: 40px; width: auto; opacity: 0.9; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)); }
-  .tv-scoreboard { position: absolute; top: 25px; left: 30px; display: flex; flex-direction: column; align-items: center; font-family: 'Montserrat', sans-serif; color: #fff; }
-  .sb-wrapper { display: flex; align-items: stretch; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); }
-  .sb-team { display: flex; align-items: center; gap: 8px; padding: 6px 12px; transition: background 0.3s; }
-  .sb-team-name { font-weight: 800; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; min-width: 45px; text-align: center; }
-  .sb-crest { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 8px; font-weight: 800; border: 1px solid rgba(255,255,255,0.4); overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.2); background: rgba(0,0,0,0.15); color: inherit; }
-  .sb-score-box { display: flex; align-items: center; background: rgba(15, 23, 42, 0.95); padding: 0 16px; font-weight: 900; font-size: 18px; letter-spacing: 1px; color: #fff; }
-  .sb-live-badge { background: #ef4444; color: #fff; font-size: 10px; font-weight: 800; padding: 3px 12px; border-radius: 0 0 6px 6px; text-transform: uppercase; letter-spacing: 2px; animation: pulse-live 2s infinite; margin-top: -1px; box-shadow: 0 4px 8px rgba(0,0,0,0.3); }
-  
-  @media(max-width: 600px) {
-      .tv-logo { top: 10px; right: 10px; height: 25px; }
-      .tv-scoreboard { top: 15px; left: 15px; transform: scale(0.85); transform-origin: top left; }
-  }
 
   .fixtures-wrap, .about-wrap, .results-wrap, .standings-wrap, .supporters-wrap { max-width: 1000px; margin: 0 auto; padding: 2.5rem 2rem; }
   .coming-soon-box { background: var(--bg-card); border: 1px dashed var(--border); border-radius: 16px; padding: 4rem 2rem; text-align: center; }
@@ -983,16 +951,6 @@
   </div>
 </div>
 
-<!-- VIDEO PLAYER MODAL FOR HLS LIVE & HIGHLIGHTS -->
-<div class="modal-overlay" id="videoModal" onclick="closeVideoModal(event)">
-  <div class="modal-content" style="background: transparent; box-shadow: none; border: none; max-width: 900px;" onclick="event.stopPropagation()">
-    <button class="modal-close" style="top: -40px; right: 0; background: var(--accent);" onclick="closeVideoModal()">×</button>
-    <div class="video-container" id="video-container-box">
-       <!-- Video Tag and TV Overlay will be injected here by JS -->
-    </div>
-  </div>
-</div>
-
 <!-- HIDDEN PLAYER CARD TEMPLATE FOR EXPORT -->
 <div style="position: absolute; top: -10000px; left: -10000px; width: 0; height: 0; overflow: hidden;">
   <div id="player-card" style="width: 400px; background: #0f172a; border-radius: 20px; padding: 32px; font-family: 'Inter', sans-serif; color: #fff; text-align: center; border: 2px solid rgba(255,255,255,0.1); box-sizing: border-box; position: relative;">
@@ -1094,10 +1052,6 @@ let currentFilter = 'All';
 let searchQuery = '';
 let currentFilteredPlayers = [];
 let auctionIndex = 0;
-let currentHls = null; // Global variable to track HLS instance
-
-let liveScoreInterval = null; // Global variable to track Live Score Polling Interval
-let currentLiveFixtureId = null;
 
 // ==========================================
 // THEME (DARK/LIGHT MODE) LOGIC
@@ -1446,11 +1400,6 @@ function renderFixturesPage() {
           dateStr = d.toLocaleString('en-US', { weekday: 'short', day: 'numeric', month: 'short', hour: 'numeric', minute:'2-digit', hour12: true });
       }
 
-      let isLiveHtml = '';
-      if (fix.is_live === true || fix.is_live === 'true') {
-          isLiveHtml = `<div class="live-badge" onclick="playLiveStream()">🔴 Watch Live</div>`;
-      }
-
       html += `
       <div class="fixture-card animate-on-scroll">
           <div class="fixture-header">
@@ -1464,7 +1413,6 @@ function renderFixturesPage() {
               </div>
               <div class="fixture-center">
                   <div style="margin-top: 8px;">${scoreDisplay}</div>
-                  ${isLiveHtml}
               </div>
               <div class="fixture-team away">
                   <div class="fixture-crest" style="background:${t2.crest_bg}; color:${t2CrestTextCol}; ${t2.banner ? 'padding:0; border:2px solid transparent;' : ''}">${t2CrestHtml}</div>
@@ -1656,12 +1604,6 @@ function renderResultsPage() {
           });
       });
 
-      let highlightHtml = '';
-      if (res.highlight) {
-          let highlightUrl = getPbImageUrl(res, res.highlight);
-          highlightHtml = `<button class="highlight-btn" onclick="playHighlight('${highlightUrl}')">▶️ Watch Highlights</button>`;
-      }
-
       // 🏅 Player of the Match logic
       let motmId = res.motm || res.potm;
       let motmHtml = '';
@@ -1715,7 +1657,6 @@ function renderResultsPage() {
           ${motmHtml} <!-- Player of the match UI -->
           
           <div style="display:flex; justify-content:center; gap:12px; flex-wrap:wrap; margin-top:8px;">
-              ${highlightHtml}
               <button class="export-btn" onclick="downloadMatchCard('${res.id}')">
                  ⬇️ Download Result Card
               </button>
@@ -2327,143 +2268,6 @@ function closeModal(modalId, event) {
   modal.classList.remove('active');
   document.body.style.overflow = '';
   setTimeout(() => { modal.style.display = 'none'; }, 300);
-}
-
-// ==========================================
-// VIDEO PLAYER LOGIC (HLS LIVE, OVERLAY & HIGHLIGHTS)
-// ==========================================
-function renderScoreboardUI(fixture) {
-    const sb = document.getElementById('tv-scoreboard');
-    if(!sb) return;
-
-    const t1Id = Array.isArray(fixture.team1) ? fixture.team1[0] : fixture.team1;
-    const t2Id = Array.isArray(fixture.team2) ? fixture.team2[0] : fixture.team2;
-    
-    const t1 = db_teams.find(t => t.id === t1Id) || {};
-    const t2 = db_teams.find(t => t.id === t2Id) || {};
-
-    let t1Short = t1.short_name ? t1.short_name.substring(0,4) : (t1.name ? t1.name.substring(0,3) : 'T1');
-    let t2Short = t2.short_name ? t2.short_name.substring(0,4) : (t2.name ? t2.name.substring(0,3) : 'T2');
-
-    let t1Crest = t1.banner ? `<img src="${getPbImageUrl(t1, t1.banner)}" style="width:100%;height:100%;object-fit:cover;" crossorigin="anonymous">` : (t1.crest_text || 'T1');
-    let t2Crest = t2.banner ? `<img src="${getPbImageUrl(t2, t2.banner)}" style="width:100%;height:100%;object-fit:cover;" crossorigin="anonymous">` : (t2.crest_text || 'T2');
-
-    let score1 = fixture.live_score_t1 || 0;
-    let score2 = fixture.live_score_t2 || 0;
-
-    // Dynamic Team Colors
-    let bg1 = t1.crest_bg || 'rgba(15, 23, 42, 0.85)';
-    let bg2 = t2.crest_bg || 'rgba(15, 23, 42, 0.85)';
-    let color1 = getSafeCrestTextColor(t1.crest_bg || '#0f172a');
-    let color2 = getSafeCrestTextColor(t2.crest_bg || '#0f172a');
-
-    sb.innerHTML = `
-        <div class="sb-wrapper">
-            <div class="sb-team" style="background: ${bg1}; color: ${color1};">
-                <div class="sb-crest">${t1Crest}</div>
-                <div class="sb-team-name">${t1Short}</div>
-            </div>
-            <div class="sb-score-box">
-                <span id="live-s1">${score1}</span> <span style="margin:0 6px;opacity:0.5">-</span> <span id="live-s2">${score2}</span>
-            </div>
-            <div class="sb-team" style="background: ${bg2}; color: ${color2};">
-                <div class="sb-team-name">${t2Short}</div>
-                <div class="sb-crest">${t2Crest}</div>
-            </div>
-        </div>
-        <div class="sb-live-badge">LIVE</div>
-    `;
-    sb.style.display = 'flex';
-}
-
-async function fetchLiveScore(fixId) {
-    try {
-        const res = await fetch(`${PB_CONFIG.baseURL}/api/collections/fixtures/records/${fixId}?fields=live_score_t1,live_score_t2`, { cache: 'no-store' });
-        if(res.ok) {
-            const data = await res.json();
-            const s1El = document.getElementById('live-s1');
-            const s2El = document.getElementById('live-s2');
-            if(s1El && s2El) {
-                s1El.textContent = data.live_score_t1 || 0;
-                s2El.textContent = data.live_score_t2 || 0;
-            }
-        }
-    } catch(e) {
-        console.error("Failed to fetch live score", e);
-    }
-}
-
-function playLiveStream() {
-    const container = document.getElementById('video-container-box');
-    
-    // Inject Video Player and TV Overlay UI
-    let overlayHtml = `
-    <div class="tv-overlay" id="tv-overlay" style="display: block;">
-        <img src="https://i.postimg.cc/1tbYp88M/EFLTV.png" class="tv-logo" alt="EFL TV" crossorigin="anonymous">
-        <div class="tv-scoreboard" id="tv-scoreboard" style="display: none;">
-            <!-- Scoreboard injected dynamically -->
-        </div>
-    </div>`;
-
-    container.innerHTML = `<video id="main-video-player" controls class="video-player" autoplay playsinline></video>` + overlayHtml;
-    const videoElement = document.getElementById('main-video-player');
-    
-    // Dynamic PocketBase Connection for Live Scoreboard
-    const liveFix = db_fixtures.find(f => f.is_live === true || f.is_live === 'true');
-    if (liveFix) {
-        currentLiveFixtureId = liveFix.id;
-        renderScoreboardUI(liveFix);
-        // Start polling every 10 seconds for updated score
-        liveScoreInterval = setInterval(() => fetchLiveScore(liveFix.id), 10000);
-    }
-    
-    showModal('videoModal');
-    
-    const videoSrc = 'https://live.tmadhu.me/live/efls4/index.m3u8';
-    
-    if (typeof Hls !== 'undefined' && Hls.isSupported()) {
-        if(currentHls) { currentHls.destroy(); }
-        currentHls = new Hls();
-        currentHls.loadSource(videoSrc);
-        currentHls.attachMedia(videoElement);
-        currentHls.on(Hls.Events.MANIFEST_PARSED, function() {
-            videoElement.play().catch(e => console.log("Autoplay prevented", e));
-        });
-    } else if (videoElement.canPlayType('application/vnd.apple.mpegurl')) {
-        // Native HLS support (Safari)
-        videoElement.src = videoSrc;
-        videoElement.addEventListener('loadedmetadata', function() {
-            videoElement.play().catch(e => console.log("Autoplay prevented", e));
-        });
-    } else {
-        alert("দুঃখিত, আপনার ব্রাউজার HLS লাইভ স্ট্রিম সাপোর্ট করছে না।");
-    }
-}
-
-function playHighlight(url) {
-    const container = document.getElementById('video-container-box');
-    
-    // Regular HTML5 Video Player for stored highlights (No Overlay)
-    container.innerHTML = `<video controls class="video-player" autoplay playsinline src="${url}"></video>`;
-    
-    showModal('videoModal');
-}
-
-function closeVideoModal(event) {
-    if (event && event.target !== document.getElementById('videoModal') && !event.target.classList.contains('modal-close')) return;
-    
-    // Cleanup HLS and Score Polling
-    if (typeof currentHls !== 'undefined' && currentHls) {
-        currentHls.destroy();
-        currentHls = null;
-    }
-    if (liveScoreInterval) {
-        clearInterval(liveScoreInterval);
-        liveScoreInterval = null;
-    }
-    
-    document.getElementById('video-container-box').innerHTML = ''; 
-    closeModal('videoModal');
 }
 
 // ==========================================
