@@ -216,7 +216,7 @@
   .ts-info { flex: 1; }
   .ts-name { font-weight: 700; font-size: 14px; color: var(--text-main); margin-bottom: 2px; }
   .ts-team { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; }
-  .ts-goals { font-family: 'Montserrat', sans-serif; font-size: 20px; font-weight: 900; color: var(--brand); }
+  .ts-goals { font-family: 'Montserrat', sans-serif; font-size: 20px; font-weight: 900; color: var(--brand); display: flex; gap: 8px; align-items: center;}
   
   .export-btn { background: var(--bg-body); border: 1px solid var(--border); padding: 8px 14px; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: 0.2s; color: var(--text-main); margin-top: 0; align-self: center; }
   .export-btn:hover { background: var(--brand); color: var(--bg-card); border-color: var(--brand); }
@@ -544,11 +544,28 @@
          </div>
        </div>
 
-       <!-- Right Side: Top Scorers -->
-       <div>
-         <div style="font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 18px; margin-bottom: 16px; text-transform: uppercase;">Top Scorers</div>
-         <div id="top-scorers-container" style="background: var(--bg-input); border: 1px solid var(--border); border-radius: 16px; padding: 16px; transition: background 0.3s, border 0.3s;">
-            <div style="text-align: center; color: var(--text-muted); font-size: 13px; padding: 2rem 0;">Stats will update once matches are played.</div>
+       <!-- Right Side: Stats (Scorers, Assists, Cards) -->
+       <div style="display: flex; flex-direction: column; gap: 24px;">
+         <div>
+             <div style="font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 18px; margin-bottom: 16px; text-transform: uppercase;">Top Scorers</div>
+             <div id="top-scorers-container" style="background: var(--bg-input); border: 1px solid var(--border); border-radius: 16px; padding: 16px; transition: background 0.3s, border 0.3s;">
+                <div style="text-align: center; color: var(--text-muted); font-size: 13px; padding: 2rem 0;">Stats will update once matches are played.</div>
+             </div>
+         </div>
+         
+         <div>
+             <div style="font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 18px; margin-bottom: 16px; text-transform: uppercase;">Top Assists</div>
+             <div id="top-assists-container" style="background: var(--bg-input); border: 1px solid var(--border); border-radius: 16px; padding: 16px; transition: background 0.3s, border 0.3s;">
+                <div style="text-align: center; color: var(--text-muted); font-size: 13px; padding: 2rem 0;">Stats will update once matches are played.</div>
+             </div>
+         </div>
+
+         <!-- Top Kung-fu Player (Cards) -->
+         <div>
+             <div style="font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 18px; margin-bottom: 16px; text-transform: uppercase;">Top Kung-fu Player</div>
+             <div id="top-cards-container" style="background: var(--bg-input); border: 1px solid var(--border); border-radius: 16px; padding: 16px; transition: background 0.3s, border 0.3s;">
+                <div style="text-align: center; color: var(--text-muted); font-size: 13px; padding: 2rem 0;">Stats will update once matches are played.</div>
+             </div>
          </div>
        </div>
     </div>
@@ -627,7 +644,7 @@
   </div>
 </div>
 
-<!-- REGISTRATION -->
+<!-- REGISTRATION (CLOSED) -->
 <div id="page-register" class="page">
   <div class="reg-wrap">
     <div class="reg-header animate-on-scroll">
@@ -840,15 +857,16 @@
       </div>
     </div>
 
+    <!-- UPDATED RULES SECTION -->
     <div class="about-card animate-on-scroll" style="margin-bottom: 20px;">
         <div style="font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 20px; margin-bottom: 20px; text-transform: uppercase;">Tournament Rules</div>
         <div class="about-rules-grid">
-            <div class="rule-item"><div class="rule-num">01</div><div><span class="rule-title">Eligibility:</span> <br><span class="rule-text">All currently enrolled students of the Dept. of English, JU are eligible to participate.</span></div></div>
-            <div class="rule-item"><div class="rule-num">02</div><div><span class="rule-title">Squad Size:</span> <br><span class="rule-text">Each team must register a minimum of 7 and a maximum of 10 players.</span></div></div>
-            <div class="rule-item"><div class="rule-num">03</div><div><span class="rule-title">Format:</span> <br><span class="rule-text">League format followed by knockout semi-finals and a grand final.</span></div></div>
-            <div class="rule-item"><div class="rule-num">04</div><div><span class="rule-title">Match Duration:</span> <br><span class="rule-text">Each match consists of two halves as determined by the organizing committee.</span></div></div>
-            <div class="rule-item"><div class="rule-num">05</div><div><span class="rule-title">Fair Play:</span> <br><span class="rule-text">All players are expected to maintain sportsmanship and respect for opponents and officials.</span></div></div>
-            <div class="rule-item"><div class="rule-num">06</div><div><span class="rule-title">Disputes:</span> <br><span class="rule-text">All disputes shall be referred to the organizing committee whose decision is final.</span></div></div>
+            <div class="rule-item"><div class="rule-num">01</div><div><span class="rule-title">Tournament Format:</span> <br><span class="rule-text">In the primary group stage, all teams will play against each other. The top 4 teams on the points table will advance. Semi-final 1: 1st vs 4th. Semi-final 2: 2nd vs 3rd. The winners will play the Final.</span></div></div>
+            <div class="rule-item"><div class="rule-num">02</div><div><span class="rule-title">Match Duration:</span> <br><span class="rule-text">Each match consists of 30 minutes (15 minutes per half) with a 10-minute half-time break.</span></div></div>
+            <div class="rule-item"><div class="rule-num">03</div><div><span class="rule-title">Walkover & Forfeit:</span> <br><span class="rule-text">Teams must be present at the Central Field at the scheduled time. If one team fails to appear, the opponent gets a 2-0 win. If both teams fail to appear, both will be considered to have lost by 1 goal.</span></div></div>
+            <div class="rule-item"><div class="rule-num">04</div><div><span class="rule-title">Knockout Ties:</span> <br><span class="rule-text">If a knockout match ends in a draw, the winner will be decided directly through a penalty shootout tiebreaker.</span></div></div>
+            <div class="rule-item"><div class="rule-num">05</div><div><span class="rule-title">Special Rule:</span> <br><span class="rule-text">To be added...</span></div></div>
+            <div class="rule-item"><div class="rule-num">06</div><div><span class="rule-title">Special Rule:</span> <br><span class="rule-text">To be added...</span></div></div>
         </div>
     </div>
 
@@ -1140,9 +1158,32 @@ function observeElements() {
 // ==========================================
 function extractScorers(res, teamPrefix) {
     let ids = [];
-    // Iterate exactly through the 1-6 fields
     for (let i = 1; i <= 6; i++) {
         let val = res[`${teamPrefix}_goal_${i}`];
+        if (val) {
+            if (Array.isArray(val)) ids.push(...val);
+            else ids.push(val);
+        }
+    }
+    return ids;
+}
+
+function extractAssists(res, teamPrefix) {
+    let ids = [];
+    for (let i = 1; i <= 6; i++) {
+        let val = res[`${teamPrefix}_assist_${i}`];
+        if (val) {
+            if (Array.isArray(val)) ids.push(...val);
+            else ids.push(val);
+        }
+    }
+    return ids;
+}
+
+function extractFields(res, prefix, maxCount) {
+    let ids = [];
+    for (let i = 1; i <= maxCount; i++) {
+        let val = res[`${prefix}_${i}`];
         if (val) {
             if (Array.isArray(val)) ids.push(...val);
             else ids.push(val);
@@ -1402,7 +1443,7 @@ function renderFixturesPage() {
       let dateStr = 'TBA';
       if (fix.match_date) {
           const d = new Date(fix.match_date);
-          dateStr = d.toLocaleString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute:'2-digit' });
+          dateStr = d.toLocaleString('en-US', { weekday: 'short', day: 'numeric', month: 'short', hour: 'numeric', minute:'2-digit', hour12: true });
       }
 
       let isLiveHtml = '';
@@ -1444,6 +1485,8 @@ function renderFixturesPage() {
 function renderResultsPage() {
   const resultsContainer = document.getElementById('results-container');
   const topScorersContainer = document.getElementById('top-scorers-container');
+  const topAssistsContainer = document.getElementById('top-assists-container');
+  const topCardsContainer = document.getElementById('top-cards-container'); // Kung-fu player
   
   if (db_results.length === 0) {
       resultsContainer.innerHTML = `
@@ -1452,11 +1495,15 @@ function renderResultsPage() {
           <div class="cs-title" style="font-size: 16px; margin-top: 8px;">No results published yet.</div>
         </div>`;
       topScorersContainer.innerHTML = '<div style="text-align: center; color: var(--text-muted); font-size: 13px; padding: 2rem 0;">Stats will update once matches are played.</div>';
+      topAssistsContainer.innerHTML = '<div style="text-align: center; color: var(--text-muted); font-size: 13px; padding: 2rem 0;">Stats will update once matches are played.</div>';
+      topCardsContainer.innerHTML = '<div style="text-align: center; color: var(--text-muted); font-size: 13px; padding: 2rem 0;">Stats will update once matches are played.</div>';
       return;
   }
 
   let resultsHtml = '<div class="fixture-list">';
   let playerGoalsMap = {}; 
+  let playerAssistsMap = {};
+  let playerCardsMap = {}; // Maps { yellow: 0, red: 0, pts: 0 }
 
   db_results.forEach(res => {
       const fixtureId = Array.isArray(res.fixture) ? res.fixture[0] : res.fixture;
@@ -1485,6 +1532,9 @@ function renderResultsPage() {
       const score1 = parseInt(res.team1_score !== undefined ? res.team1_score : res.t1_score) || 0;
       const score2 = parseInt(res.team2_score !== undefined ? res.team2_score : res.t2_score) || 0;
 
+      // ----------------------------------------------------
+      // GOALS PROCESSING
+      // ----------------------------------------------------
       let t1ScorersRaw = extractScorers(res, 't1');
       let t1Counts = {};
       t1ScorersRaw.forEach(val => { 
@@ -1543,6 +1593,67 @@ function renderResultsPage() {
           } else {
               t2ScorersUI.push(`<span>${playerRef}${suffix} ⚽</span>`);
           }
+      });
+
+      // ----------------------------------------------------
+      // ASSISTS PROCESSING (Only for Stats, not Match UI)
+      // ----------------------------------------------------
+      let t1AssistsRaw = extractAssists(res, 't1');
+      t1AssistsRaw.forEach(val => {
+          if(val) {
+              let strVal = String(val).trim();
+              if (strVal !== '' && strVal.toLowerCase() !== 'n/a') {
+                  const player = db_players.find(p => p.id === strVal || (p.name && p.name.toLowerCase() === strVal.toLowerCase()));
+                  if (player) {
+                      playerAssistsMap[player.id] = (playerAssistsMap[player.id] || 0) + 1;
+                  }
+              }
+          }
+      });
+
+      let t2AssistsRaw = extractAssists(res, 't2');
+      t2AssistsRaw.forEach(val => {
+          if(val) {
+              let strVal = String(val).trim();
+              if (strVal !== '' && strVal.toLowerCase() !== 'n/a') {
+                  const player = db_players.find(p => p.id === strVal || (p.name && p.name.toLowerCase() === strVal.toLowerCase()));
+                  if (player) {
+                      playerAssistsMap[player.id] = (playerAssistsMap[player.id] || 0) + 1;
+                  }
+              }
+          }
+      });
+
+      // ----------------------------------------------------
+      // CARDS (KUNG-FU PLAYER) PROCESSING
+      // ----------------------------------------------------
+      ['t1', 't2'].forEach(teamPrefix => {
+          let yellows = extractFields(res, `${teamPrefix}_yellow`, 4);
+          let reds = extractFields(res, `${teamPrefix}_red`, 2);
+
+          yellows.forEach(val => {
+              let strVal = String(val).trim();
+              if (strVal && strVal.toLowerCase() !== 'n/a') {
+                  const p = db_players.find(p => p.id === strVal || (p.name && p.name.toLowerCase() === strVal.toLowerCase()));
+                  if (p) {
+                      if(!playerCardsMap[p.id]) playerCardsMap[p.id] = { yellow: 0, red: 0, pts: 0 };
+                      playerCardsMap[p.id].yellow += 1;
+                      playerCardsMap[p.id].pts += 1; // 1 point for yellow
+                  }
+              }
+          });
+
+          reds.forEach(val => {
+              let strVal = String(val).trim();
+              if (strVal && strVal.toLowerCase() !== 'n/a') {
+                  const p = db_players.find(p => p.id === strVal || (p.name && p.name.toLowerCase() === strVal.toLowerCase()));
+                  if (p) {
+                      if(!playerCardsMap[p.id]) playerCardsMap[p.id] = { yellow: 0, red: 0, pts: 0 };
+                      playerCardsMap[p.id].red += 1;
+                      playerCardsMap[p.id].pts += 2; // 2 points for red
+                  }
+              }
+          });
       });
 
       let highlightHtml = '';
@@ -1615,10 +1726,13 @@ function renderResultsPage() {
   resultsHtml += '</div>';
   resultsContainer.innerHTML = resultsHtml;
 
+  // ----------------------------------------------------
+  // RENDER TOP SCORERS
+  // ----------------------------------------------------
   const topScorersArr = Object.entries(playerGoalsMap)
-      .map(([id, count]) => ({ player: db_players.find(p => p.id === id), goals: count }))
+      .map(([id, count]) => ({ player: db_players.find(p => p.id === id), count: count }))
       .filter(item => item.player) 
-      .sort((a, b) => b.goals - a.goals)
+      .sort((a, b) => b.count - a.count)
       .slice(0, 5); 
 
   if (topScorersArr.length === 0) {
@@ -1639,12 +1753,81 @@ function renderResultsPage() {
                 <div class="ts-name">${p.name}</div>
                 <div class="ts-team">${pTeamName}</div>
              </div>
-             <div class="ts-goals">${item.goals} <span style="font-size: 10px; color:var(--text-muted);">Goals</span></div>
+             <div class="ts-goals">${item.count} <span style="font-size: 10px; color:var(--text-muted);">Goals</span></div>
           </div>`;
       });
       topScorersContainer.innerHTML = topScorersHtml;
   }
-  
+
+  // ----------------------------------------------------
+  // RENDER TOP ASSISTS
+  // ----------------------------------------------------
+  const topAssistsArr = Object.entries(playerAssistsMap)
+      .map(([id, count]) => ({ player: db_players.find(p => p.id === id), count: count }))
+      .filter(item => item.player) 
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 5); 
+
+  if (topAssistsArr.length === 0) {
+      topAssistsContainer.innerHTML = '<div style="text-align: center; color: var(--text-muted); font-size: 13px; padding: 2rem 0;">No assists recorded yet.</div>';
+  } else {
+      let topAssistsHtml = '';
+      topAssistsArr.forEach((item, index) => {
+          const p = item.player;
+          const team = db_teams.find(t => t.id === getPBLinkedTeamId(p));
+          const pTeamName = team ? (team.name || team.crest_text || 'Unnamed') : 'Undrafted';
+          let photoUrl = getPbImageUrl(p, p.photo);
+
+          topAssistsHtml += `
+          <div class="top-scorer-card animate-on-scroll">
+             <div class="ts-rank">#${index + 1}</div>
+             <img src="${photoUrl}" class="ts-photo" crossorigin="anonymous">
+             <div class="ts-info">
+                <div class="ts-name">${p.name}</div>
+                <div class="ts-team">${pTeamName}</div>
+             </div>
+             <div class="ts-goals">${item.count} <span style="font-size: 10px; color:var(--text-muted);">Assists</span></div>
+          </div>`;
+      });
+      topAssistsContainer.innerHTML = topAssistsHtml;
+  }
+
+  // ----------------------------------------------------
+  // RENDER TOP CARDS (KUNG-FU PLAYER)
+  // ----------------------------------------------------
+  const topCardsArr = Object.entries(playerCardsMap)
+      .map(([id, stats]) => ({ player: db_players.find(p => p.id === id), ...stats }))
+      .filter(item => item.player) 
+      .sort((a, b) => b.pts - a.pts) // Sort by total card points
+      .slice(0, 5); 
+
+  if (topCardsArr.length === 0) {
+      topCardsContainer.innerHTML = '<div style="text-align: center; color: var(--text-muted); font-size: 13px; padding: 2rem 0;">No cards issued yet. Peaceful tournament!</div>';
+  } else {
+      let topCardsHtml = '';
+      topCardsArr.forEach((item, index) => {
+          const p = item.player;
+          const team = db_teams.find(t => t.id === getPBLinkedTeamId(p));
+          const pTeamName = team ? (team.name || team.crest_text || 'Unnamed') : 'Undrafted';
+          let photoUrl = getPbImageUrl(p, p.photo);
+
+          topCardsHtml += `
+          <div class="top-scorer-card animate-on-scroll">
+             <div class="ts-rank">#${index + 1}</div>
+             <img src="${photoUrl}" class="ts-photo" crossorigin="anonymous">
+             <div class="ts-info">
+                <div class="ts-name">${p.name}</div>
+                <div class="ts-team">${pTeamName}</div>
+             </div>
+             <div class="ts-goals" style="display: flex; gap: 12px; font-family: 'Inter', sans-serif;">
+                 ${item.red > 0 ? `<span style="font-size: 16px; font-weight: 700;">🟥 ${item.red}</span>` : ''}
+                 ${item.yellow > 0 ? `<span style="font-size: 16px; font-weight: 700;">🟨 ${item.yellow}</span>` : ''}
+             </div>
+          </div>`;
+      });
+      topCardsContainer.innerHTML = topCardsHtml;
+  }
+
   setTimeout(observeElements, 100);
 }
 
@@ -1926,13 +2109,29 @@ function renderSupportersPage() {
             msgHtml = `<div style="font-size: 12px; color: var(--text-muted); margin-top: 12px; font-style: italic; line-height: 1.5; padding: 10px; background: rgba(0,0,0,0.02); border-radius: 8px; border: 1px solid var(--border);">"${sMessage.trim()}"</div>`;
         }
 
+        // Dynamic Team Badge Logic
+        let badgeHtml = `<div class="supporter-badge">⭐ EFL Supporter</div>`;
+        let teamId = sup.supported_team;
+        
+        if (teamId && teamId !== 'decide_later' && !teamId.includes('TBD')) {
+            let team = db_teams.find(t => t.id === teamId);
+            if (team) {
+                let teamName = team.name || team.crest_text || team.short_name; // Using Full Name over Short Name
+                let crestHtml = team.banner ? `<img src="${getPbImageUrl(team, team.banner)}" style="width:14px; height:14px; border-radius:50%; object-fit:cover; display:inline-block; vertical-align:middle; margin-right:4px;" crossorigin="anonymous">` : `⭐ `;
+                
+                badgeHtml = `<div class="supporter-badge" style="background: rgba(15, 23, 42, 0.05); color: var(--brand); border: 1px solid rgba(15, 23, 42, 0.1);">
+                                ${crestHtml} Supporting ${teamName}
+                             </div>`;
+            }
+        }
+
         container.innerHTML += `
             <div class="supporter-card animate-on-scroll">
                 <img src="${photoUrl}" class="supporter-photo" alt="${sName}" crossorigin="anonymous">
                 <div class="supporter-name">${sName}</div>
                 <div class="supporter-batch">Batch: ${sBatch}</div>
                 ${msgHtml}
-                <div class="supporter-badge">⭐ EFL Supporter</div>
+                <div style="margin-top: 12px;">${badgeHtml}</div>
             </div>
         `;
     });
