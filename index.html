@@ -184,7 +184,7 @@
   .fixture-card { background: linear-gradient(135deg, #050815 0%, #0d1630 55%, #0a1227 100%); border: 1px solid rgba(88, 152, 255, 0.35); border-radius: 24px; padding: 24px; display: flex; flex-direction: column; gap: 18px; transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease; box-shadow: 0 20px 50px rgba(0,0,0,0.3), inset 0 0 0 1px rgba(255,255,255,0.04); position: relative; overflow: hidden; }
   .fixture-card::before { content: ''; position: absolute; inset: 0; border-radius: 24px; padding: 1px; background: linear-gradient(180deg, rgba(64, 154, 255, 0.55), rgba(255, 205, 60, 0.45)); -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); -webkit-mask-composite: xor; mask-composite: exclude; pointer-events:none; }
   .fixture-card:hover { border-color: rgba(59, 130, 246, 0.8); box-shadow: 0 28px 60px rgba(0,0,0,0.4), inset 0 0 36px rgba(59, 130, 246, 0.08); transform: translateY(-4px); }
-  .fixture-body { display: grid; grid-template-columns: 1.5fr 1fr 1.5fr; align-items: center; gap: 20px; position: relative; }
+  .fixture-card:not(.result-card) .fixture-body { display: grid; grid-template-columns: 1.5fr 1fr 1.5fr; align-items: center; gap: 20px; position: relative; }
   .fixture-team { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; min-width: 0; }
   .fixture-team.away { text-align: center; }
   .fixture-crest { width: 100px; height: 100px; border-radius: 20px; display: flex; align-items: center; justify-content: center; font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 28px; color: #fff; flex-shrink: 0; box-shadow: 0 0 30px rgba(59,130,246,0.18); overflow: hidden; background: rgba(255,255,255,0.04); border: 2px solid rgba(255,255,255,0.08); }
@@ -196,7 +196,48 @@
   .fixture-vs { font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 48px; letter-spacing: 0.3em; color: #dbeafe; text-shadow: 0 0 22px rgba(96,165,250,0.55), 0 0 10px rgba(255,255,255,0.18); z-index: 1; }
   .fixture-date-badge { display: inline-flex; align-items: center; gap: 10px; padding: 12px 18px; border-radius: 999px; background: rgba(15, 23, 42, 0.88); border: 1px solid rgba(96, 165, 250, 0.22); color: #e2e8f0; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 700; z-index: 1; }
   .fixture-clock-icon { font-size: 14px; }
+  
+  /* Mobile responsive for fixtures */
+  @media (max-width: 768px) {
+    .fixture-card { padding: 16px; gap: 12px; }
+    .fixture-body { grid-template-columns: 1fr; gap: 16px; }
+    .fixture-crest { width: 80px; height: 80px; font-size: 24px; }
+    .fixture-tname { font-size: 16px; max-width: none; }
+    .fixture-center { padding: 0; gap: 12px; }
+    .fixture-center::before { display: none; }
+    .fixture-vs { font-size: 36px; }
+    .fixture-type-badge { font-size: 10px; padding: 6px 12px; }
+    .fixture-date-badge { font-size: 12px; padding: 8px 12px; }
+  }
+  
+  @media (max-width: 480px) {
+    .fixture-card { padding: 12px; }
+    .fixture-crest { width: 60px; height: 60px; font-size: 20px; }
+    .fixture-tname { font-size: 14px; }
+    .fixture-vs { font-size: 28px; }
+  }
+  
   /* REMOVED: Live Streaming & Highlights Badges */
+
+  /* RESULTS STYLES - Restored old layout */
+  .fixture-header { display: flex; justify-content: space-between; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid var(--border); padding-bottom: 12px; }
+  .fixture-score { font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 28px; color: var(--brand); letter-spacing: 2px; }
+  .result-body { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+  
+  /* Mobile responsive for results */
+  @media (max-width: 768px) {
+    .fixture-header { font-size: 10px; padding-bottom: 8px; }
+    .fixture-score { font-size: 24px; }
+    .fixture-crest { width: 48px; height: 48px; font-size: 12px; }
+    .fixture-tname { font-size: 14px; }
+    .result-body { flex-direction: column; align-items: center; gap: 12px; }
+  }
+  
+  @media (max-width: 480px) {
+    .fixture-score { font-size: 20px; }
+    .fixture-crest { width: 40px; height: 40px; font-size: 10px; }
+    .fixture-tname { font-size: 12px; }
+  }
 
   /* RESULTS & STATS ADDITIONS */
   .result-scorer-list { font-size: 12px; color: var(--text-muted); margin-top: 12px; display: flex; flex-direction: column; gap: 4px; font-weight: 500; }
@@ -1651,12 +1692,12 @@ function renderResultsPage() {
       }
 
       resultsHtml += `
-      <div class="fixture-card animate-on-scroll">
+      <div class="fixture-card animate-on-scroll result-card">
           <div class="fixture-header">
               <span>${fixture.match_type || 'Match Result'}</span>
               <span style="color:var(--brand);">Full Time</span>
           </div>
-          <div class="fixture-body" style="align-items: flex-start;">
+          <div class="result-body">
               <div class="fixture-team" style="flex-direction: column; align-items: flex-start;">
                   <div style="display: flex; align-items: center; gap: 12px;">
                       <div class="fixture-crest" style="background:${t1.crest_bg}; color:${t1CrestTextCol}; ${t1.banner ? 'padding:0; border:2px solid transparent;' : ''}">${t1CrestHtml}</div>
