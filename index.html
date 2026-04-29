@@ -238,15 +238,19 @@
     .fixture-header { font-size: 10px; padding-bottom: 8px; }
     .fixture-score { font-size: 24px; }
     .fixture-crest { width: 48px; height: 48px; font-size: 12px; }
-    .fixture-tname { font-size: 14px; }
+    .fixture-tname { font-size: 14px; font-weight: 800; color: var(--text-main); }
     .result-body { flex-direction: column; align-items: center; gap: 12px; }
+    .fixture-team { flex-direction: row !important; align-items: center !important; gap: 12px !important; }
+    .fixture-team.away { flex-direction: row-reverse !important; }
+    .result-scorer-list { margin-top: 8px; }
   }
   
   @media (max-width: 480px) {
     .result-card { padding: 12px; }
     .fixture-score { font-size: 20px; }
     .fixture-crest { width: 40px; height: 40px; font-size: 10px; }
-    .fixture-tname { font-size: 12px; }
+    .fixture-tname { font-size: 12px; font-weight: 800; }
+    .fixture-team { gap: 8px !important; }
   }
 
   /* RESULTS & STATS ADDITIONS */
@@ -1967,25 +1971,73 @@ function renderStandingsPage() {
 }
 
 function downloadStandings() {
-    const tableArea = document.getElementById('standings-export-area');
-    const header = document.getElementById('standings-export-header');
-    const footer = document.getElementById('standings-export-footer');
+    const tableContainer = document.querySelector('.standings-table-container');
+    const table = document.querySelector('.standings-table');
     
-    header.style.display = 'block';
-    footer.style.display = 'block';
-    tableArea.style.border = 'none';
-    tableArea.style.boxShadow = 'none';
-
-    html2canvas(tableArea, { scale: 2, useCORS: true, backgroundColor: '#FFFFFF' }).then(canvas => {
+    // Temporarily adjust styles for full capture
+    const originalMaxHeight = tableContainer.style.maxHeight;
+    const originalOverflow = tableContainer.style.overflow;
+    const originalWidth = table.style.width;
+    
+    tableContainer.style.maxHeight = 'none';
+    tableContainer.style.overflow = 'visible';
+    table.style.width = '100%';
+    
+    // Create a temporary wrapper to ensure full table capture
+    const tempWrapper = document.createElement('div');
+    tempWrapper.style.position = 'absolute';
+    tempWrapper.style.top = '-10000px';
+    tempWrapper.style.left = '-10000px';
+    tempWrapper.style.background = 'white';
+    tempWrapper.style.padding = '20px';
+    tempWrapper.style.borderRadius = '16px';
+    tempWrapper.style.boxShadow = '0 4px 16px rgba(0,0,0,0.02)';
+    
+    // Clone the table container
+    const clonedContainer = tableContainer.cloneNode(true);
+    tempWrapper.appendChild(clonedContainer);
+    document.body.appendChild(tempWrapper);
+    
+    // Ensure the cloned table is fully expanded
+    const clonedTable = clonedContainer.querySelector('.standings-table');
+    clonedTable.style.width = '100%';
+    clonedTable.style.minWidth = '800px'; // Ensure minimum width for readability
+    
+    html2canvas(clonedContainer, { 
+        scale: 3, // Higher resolution for crisp text
+        useCORS: true, 
+        backgroundColor: '#FFFFFF',
+        width: clonedContainer.offsetWidth,
+        height: clonedContainer.offsetHeight,
+        scrollX: 0,
+        scrollY: 0,
+        allowTaint: false
+    }).then(canvas => {
         const link = document.createElement('a');
         link.download = `EFL_S4_Points_Table.png`;
-        link.href = canvas.toDataURL('image/png');
+        link.href = canvas.toDataURL('image/png', 1.0);
         link.click();
         
-        header.style.display = 'none';
-        footer.style.display = 'none';
-        tableArea.style.border = '';
-        tableArea.style.boxShadow = '';
+        // Clean up
+        document.body.removeChild(tempWrapper);
+        
+        // Restore original styles
+        tableContainer.style.maxHeight = originalMaxHeight;
+        tableContainer.style.overflow = originalOverflow;
+        table.style.width = originalWidth;
+    }).catch(error => {
+        console.error('Error capturing standings table:', error);
+        alert('Failed to download points table. Please try again.');
+        
+        // Clean up on error
+        if (document.body.contains(tempWrapper)) {
+            document.body.removeChild(tempWrapper);
+        }
+        
+        // Restore original styles
+        tableContainer.style.maxHeight = originalMaxHeight;
+        tableContainer.style.overflow = originalOverflow;
+        table.style.width = originalWidth;
     });
 }
 
