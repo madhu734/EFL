@@ -2497,6 +2497,145 @@ function resetForm() {
   selectPay(document.querySelector('.pay-opt[data-type="digital"]'), 'digital');
 }
 
+// ==========================================
+// RESULT CARD DOWNLOAD FUNCTION
+// ==========================================
+async function downloadMatchCard(resultId) {
+    try {
+        // Find the result
+        const result = db_results.find(r => r.id === resultId);
+        if (!result) {
+            alert('Result not found!');
+            return;
+        }
+
+        // Get team data
+        const team1Id = Array.isArray(result.team1) ? result.team1[0] : result.team1;
+        const team2Id = Array.isArray(result.team2) ? result.team2[0] : result.team2;
+        const t1 = db_teams.find(t => t.id === team1Id) || { name: 'TBD', crest_text: '?', crest_bg: '#94a3b8' };
+        const t2 = db_teams.find(t => t.id === team2Id) || { name: 'TBD', crest_text: '?', crest_bg: '#94a3b8' };
+
+        // Populate the hidden template
+        const cardEl = document.getElementById('export-result-card');
+        
+        // Team names
+        document.getElementById('erc-t1-name').textContent = t1.name || t1.crest_text || 'TBD';
+        document.getElementById('erc-t2-name').textContent = t2.name || t2.crest_text || 'TBD';
+        
+        // Team crests
+        const t1CrestEl = document.getElementById('erc-t1-crest');
+        const t2CrestEl = document.getElementById('erc-t2-crest');
+        
+        if (t1.banner) {
+            t1CrestEl.innerHTML = `<img src="${getPbImageUrl(t1, t1.banner)}" style="width:100%;height:100%;object-fit:cover;" crossorigin="anonymous">`;
+        } else {
+            t1CrestEl.innerHTML = t1.crest_text || '?';
+            t1CrestEl.style.background = t1.crest_bg || '#94a3b8';
+        }
+        
+        if (t2.banner) {
+            t2CrestEl.innerHTML = `<img src="${getPbImageUrl(t2, t2.banner)}" style="width:100%;height:100%;object-fit:cover;" crossorigin="anonymous">`;
+        } else {
+            t2CrestEl.innerHTML = t2.crest_text || '?';
+            t2CrestEl.style.background = t2.crest_bg || '#94a3b8';
+        }
+        
+        // Scores
+        document.getElementById('erc-t1-score').textContent = result.score_t1 || 0;
+        document.getElementById('erc-t2-score').textContent = result.score_t2 || 0;
+        
+        // Scorers
+        const t1ScorersEl = document.getElementById('erc-t1-scorers');
+        const t2ScorersEl = document.getElementById('erc-t2-scorers');
+        
+        // Parse scorers from result data
+        let t1Scorers = [];
+        let t2Scorers = [];
+        
+        if (result.scorers) {
+            const scorerEntries = result.scorers.split(',').map(s => s.trim());
+            scorerEntries.forEach(entry => {
+                const parts = entry.split('(');
+                if (parts.length >= 2) {
+                    const playerName = parts[0].trim();
+                    const teamIndicator = parts[1].replace(')', '').trim().toLowerCase();
+                    
+                    if (teamIndicator === 't1' || teamIndicator === 'home') {
+                        t1Scorers.push(playerName);
+                    } else if (teamIndicator === 't2' || teamIndicator === 'away') {
+                        t2Scorers.push(playerName);
+                    }
+                }
+            });
+        }
+        
+        t1ScorersEl.innerHTML = t1Scorers.length > 0 ? 
+            t1Scorers.map(name => `<div>⚽ ${name}</div>`).join('') : 
+            '<div style="color:#64748b;">No goals</div>';
+            
+        t2ScorersEl.innerHTML = t2Scorers.length > 0 ? 
+            t2Scorers.map(name => `<div>${name} ⚽</div>`).join('') : 
+            '<div style="color:#64748b;">No goals</div>';
+        
+        // Player of the Match
+        const motmContainer = document.getElementById('erc-motm-container');
+        const motmId = result.motm || result.potm;
+        
+        if (motmId) {
+            let id = Array.isArray(motmId) ? motmId[0] : motmId;
+            let motmPlayer = db_players.find(p => p.id === id || (p.name && p.name.toLowerCase() === String(id).toLowerCase()));
+            
+            if (motmPlayer) {
+                document.getElementById('erc-motm-photo').src = getPbImageUrl(motmPlayer, motmPlayer.photo);
+                document.getElementById('erc-motm-name').textContent = motmPlayer.name;
+                motmContainer.style.display = 'block';
+            } else {
+                motmContainer.style.display = 'none';
+            }
+        } else {
+            motmContainer.style.display = 'none';
+        }
+        
+        // Make the card visible temporarily for capture
+        cardEl.parentElement.style.top = "0";
+        cardEl.parentElement.style.left = "0";
+        cardEl.parentElement.style.width = "auto";
+        cardEl.parentElement.style.height = "auto";
+        cardEl.parentElement.style.overflow = "visible";
+        
+        // Use html2canvas with high quality settings
+        const canvas = await html2canvas(cardEl, {
+            backgroundColor: null,
+            scale: 2, // High resolution (2x)
+            useCORS: true,
+            allowTaint: false,
+            width: 800,
+            height: cardEl.offsetHeight,
+            scrollX: 0,
+            scrollY: 0,
+            windowWidth: 800,
+            windowHeight: cardEl.offsetHeight
+        });
+        
+        // Download the image
+        const link = document.createElement('a');
+        link.download = `EFL_Result_${t1.name || 'Team1'}_vs_${t2.name || 'Team2'}.png`;
+        link.href = canvas.toDataURL('image/png', 1.0); // Maximum quality
+        link.click();
+        
+        // Hide the card again
+        cardEl.parentElement.style.top = "-10000px";
+        cardEl.parentElement.style.left = "-10000px";
+        cardEl.parentElement.style.width = "0";
+        cardEl.parentElement.style.height = "0";
+        cardEl.parentElement.style.overflow = "hidden";
+        
+    } catch (error) {
+        console.error('Error generating result card:', error);
+        alert('Failed to download result card. Please try again.');
+    }
+}
+
 </script>
 </body>
 </html>
