@@ -199,33 +199,42 @@
   
   /* Mobile responsive for fixtures */
   @media (max-width: 768px) {
-    .fixture-card { padding: 16px; gap: 12px; }
-    .fixture-body { grid-template-columns: 1fr; gap: 16px; }
-    .fixture-crest { width: 80px; height: 80px; font-size: 24px; }
-    .fixture-tname { font-size: 16px; max-width: none; }
-    .fixture-center { padding: 0; gap: 12px; }
+    .fixture-card { padding: 16px; gap: 12px; border-radius: 20px; }
+    .fixture-card:not(.result-card) .fixture-body { grid-template-columns: 1fr; gap: 16px; }
+    .fixture-crest { width: 70px; height: 70px; font-size: 20px; border-radius: 16px; }
+    .fixture-tname { font-size: 14px; max-width: 120px; letter-spacing: 0.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .fixture-center { padding: 0; gap: 10px; }
     .fixture-center::before { display: none; }
-    .fixture-vs { font-size: 36px; }
-    .fixture-type-badge { font-size: 10px; padding: 6px 12px; }
-    .fixture-date-badge { font-size: 12px; padding: 8px 12px; }
+    .fixture-vs { font-size: 32px; letter-spacing: 0.2em; }
+    .fixture-type-badge { font-size: 9px; padding: 5px 10px; border-radius: 20px; }
+    .fixture-date-badge { font-size: 11px; padding: 6px 10px; border-radius: 20px; }
+    .fixture-clock-icon { font-size: 12px; }
   }
   
   @media (max-width: 480px) {
-    .fixture-card { padding: 12px; }
-    .fixture-crest { width: 60px; height: 60px; font-size: 20px; }
-    .fixture-tname { font-size: 14px; }
-    .fixture-vs { font-size: 28px; }
+    .fixture-card { padding: 12px; gap: 8px; border-radius: 16px; }
+    .fixture-card:not(.result-card) .fixture-body { gap: 12px; }
+    .fixture-crest { width: 50px; height: 50px; font-size: 16px; border-radius: 12px; }
+    .fixture-tname { font-size: 12px; max-width: 90px; font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .fixture-center { gap: 8px; }
+    .fixture-vs { font-size: 24px; letter-spacing: 0.1em; }
+    .fixture-type-badge { font-size: 8px; padding: 4px 8px; }
+    .fixture-date-badge { font-size: 10px; padding: 5px 8px; }
+    .fixture-clock-icon { font-size: 10px; }
   }
   
   /* REMOVED: Live Streaming & Highlights Badges */
 
   /* RESULTS STYLES - Restored old layout */
+  .result-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 16px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 4px 10px rgba(0,0,0,0.02); position: relative; }
+  .result-card:hover { border-color: var(--brand); box-shadow: 0 12px 24px rgba(0,0,0,0.08); transform: translateY(-4px); }
   .fixture-header { display: flex; justify-content: space-between; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid var(--border); padding-bottom: 12px; }
-  .fixture-score { font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 28px; color: var(--brand); letter-spacing: 2px; }
+  .fixture-score { font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 28px; color: var(--brand); letter-spacing: 2px; white-space: nowrap; display: inline-block; }
   .result-body { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
   
   /* Mobile responsive for results */
   @media (max-width: 768px) {
+    .result-card { padding: 16px; }
     .fixture-header { font-size: 10px; padding-bottom: 8px; }
     .fixture-score { font-size: 24px; }
     .fixture-crest { width: 48px; height: 48px; font-size: 12px; }
@@ -234,6 +243,7 @@
   }
   
   @media (max-width: 480px) {
+    .result-card { padding: 12px; }
     .fixture-score { font-size: 20px; }
     .fixture-crest { width: 40px; height: 40px; font-size: 10px; }
     .fixture-tname { font-size: 12px; }
@@ -1692,7 +1702,7 @@ function renderResultsPage() {
       }
 
       resultsHtml += `
-      <div class="fixture-card animate-on-scroll result-card">
+      <div class="result-card animate-on-scroll">
           <div class="fixture-header">
               <span>${fixture.match_type || 'Match Result'}</span>
               <span style="color:var(--brand);">Full Time</span>
