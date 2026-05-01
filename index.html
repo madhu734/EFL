@@ -1717,6 +1717,51 @@ function renderResultsPage() {
           });
       });
 
+          // ----------------------------------------------------
+          // PER-MATCH CARDS UI (Shown on each result card)
+          // ----------------------------------------------------
+          // Team 1: icons first (🟨 / 🟥) — left-aligned
+          const t1_yellow = extractFields(res, 't1_yellow', 4);
+          const t1_red = extractFields(res, 't1_red', 2);
+          let t1CardsUI = [];
+          t1_yellow.forEach(val => {
+            let strVal = String(val).trim();
+            if (strVal && strVal.toLowerCase() !== 'n/a') {
+              const p = db_players.find(p => p.id === strVal || (p.name && p.name.toLowerCase() === strVal.toLowerCase()));
+              const name = p ? p.name : strVal;
+              t1CardsUI.push(`<span style="display: flex; align-items: center; gap: 4px;">🟨 ${name}</span>`);
+            }
+          });
+          t1_red.forEach(val => {
+            let strVal = String(val).trim();
+            if (strVal && strVal.toLowerCase() !== 'n/a') {
+              const p = db_players.find(p => p.id === strVal || (p.name && p.name.toLowerCase() === strVal.toLowerCase()));
+              const name = p ? p.name : strVal;
+              t1CardsUI.push(`<span style="display: flex; align-items: center; gap: 4px;">🟥 ${name}</span>`);
+            }
+          });
+
+          // Team 2: name first, icon last — right-aligned
+          const t2_yellow = extractFields(res, 't2_yellow', 4);
+          const t2_red = extractFields(res, 't2_red', 2);
+          let t2CardsUI = [];
+          t2_yellow.forEach(val => {
+            let strVal = String(val).trim();
+            if (strVal && strVal.toLowerCase() !== 'n/a') {
+              const p = db_players.find(p => p.id === strVal || (p.name && p.name.toLowerCase() === strVal.toLowerCase()));
+              const name = p ? p.name : strVal;
+              t2CardsUI.push(`<span style="display: flex; align-items: center; gap: 4px; justify-content: flex-end;">${name} 🟨</span>`);
+            }
+          });
+          t2_red.forEach(val => {
+            let strVal = String(val).trim();
+            if (strVal && strVal.toLowerCase() !== 'n/a') {
+              const p = db_players.find(p => p.id === strVal || (p.name && p.name.toLowerCase() === strVal.toLowerCase()));
+              const name = p ? p.name : strVal;
+              t2CardsUI.push(`<span style="display: flex; align-items: center; gap: 4px; justify-content: flex-end;">${name} 🟥</span>`);
+            }
+          });
+
 
 
       // 🏅 Player of the Match logic
@@ -1754,6 +1799,9 @@ function renderResultsPage() {
                   <div class="result-scorer-list">
                       ${t1ScorersUI.join('')}
                   </div>
+                    <div class="result-card-list" style="font-size: 11px; color: var(--text-muted); margin-top: 6px; display: flex; flex-direction: column; gap: 3px;">
+                      ${t1CardsUI.join('')}
+                    </div>
               </div>
               <div class="fixture-center">
                   <div class="fixture-score">${score1} - ${score2}</div>
@@ -1766,6 +1814,9 @@ function renderResultsPage() {
                   <div class="result-scorer-list right">
                       ${t2ScorersUI.join('')}
                   </div>
+                    <div class="result-card-list" style="font-size: 11px; color: var(--text-muted); margin-top: 6px; display: flex; flex-direction: column; gap: 3px;">
+                      ${t2CardsUI.join('')}
+                    </div>
               </div>
           </div>
           
