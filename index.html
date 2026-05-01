@@ -2182,7 +2182,32 @@ function downloadMatchCard(resultId) {
             t1ScorersHtml += `<div>⚽ ${playerRef}${suffix}</div>`;
         }
     });
-    document.getElementById('erc-t1-scorers').innerHTML = t1ScorersHtml;
+
+    // -----------------------------
+    // Cards for Team 1 (Left) — Emoji first
+    // -----------------------------
+    const t1_yellow = extractFields(res, 't1_yellow', 4);
+    const t1_red = extractFields(res, 't1_red', 2);
+    let t1CardsArr = [];
+    t1_yellow.forEach(val => {
+      let strVal = String(val).trim();
+      if (strVal && strVal.toLowerCase() !== 'n/a') {
+        const p = db_players.find(p => p.id === strVal || (p.name && p.name.toLowerCase() === strVal.toLowerCase()));
+        const name = p ? p.name : strVal;
+        t1CardsArr.push(`<div style="color: #94a3b8; font-size: 14px;">🟨 ${name}</div>`);
+      }
+    });
+    t1_red.forEach(val => {
+      let strVal = String(val).trim();
+      if (strVal && strVal.toLowerCase() !== 'n/a') {
+        const p = db_players.find(p => p.id === strVal || (p.name && p.name.toLowerCase() === strVal.toLowerCase()));
+        const name = p ? p.name : strVal;
+        t1CardsArr.push(`<div style="color: #94a3b8; font-size: 14px;">🟥 ${name}</div>`);
+      }
+    });
+
+    const t1CardsHtml = t1CardsArr.length ? `<div style="margin-top:12px;">${t1CardsArr.join('')}</div>` : '';
+    document.getElementById('erc-t1-scorers').innerHTML = t1ScorersHtml + t1CardsHtml;
 
     let t2ScorersRaw = extractScorers(res, 't2');
     let t2Counts = {};
@@ -2207,7 +2232,32 @@ function downloadMatchCard(resultId) {
             t2ScorersHtml += `<div>${playerRef}${suffix} ⚽</div>`;
         }
     });
-    document.getElementById('erc-t2-scorers').innerHTML = t2ScorersHtml;
+
+    // -----------------------------
+    // Cards for Team 2 (Right) — Name first, Emoji last
+    // -----------------------------
+    const t2_yellow = extractFields(res, 't2_yellow', 4);
+    const t2_red = extractFields(res, 't2_red', 2);
+    let t2CardsArr = [];
+    t2_yellow.forEach(val => {
+      let strVal = String(val).trim();
+      if (strVal && strVal.toLowerCase() !== 'n/a') {
+        const p = db_players.find(p => p.id === strVal || (p.name && p.name.toLowerCase() === strVal.toLowerCase()));
+        const name = p ? p.name : strVal;
+        t2CardsArr.push(`<div style="color: #94a3b8; font-size: 14px;">${name} 🟨</div>`);
+      }
+    });
+    t2_red.forEach(val => {
+      let strVal = String(val).trim();
+      if (strVal && strVal.toLowerCase() !== 'n/a') {
+        const p = db_players.find(p => p.id === strVal || (p.name && p.name.toLowerCase() === strVal.toLowerCase()));
+        const name = p ? p.name : strVal;
+        t2CardsArr.push(`<div style="color: #94a3b8; font-size: 14px;">${name} 🟥</div>`);
+      }
+    });
+
+    const t2CardsHtml = t2CardsArr.length ? `<div style="margin-top:12px;">${t2CardsArr.join('')}</div>` : '';
+    document.getElementById('erc-t2-scorers').innerHTML = t2ScorersHtml + t2CardsHtml;
 
     // Export Card MOTM Update
     let motmId = res.motm || res.potm;
@@ -2735,7 +2785,31 @@ function downloadMatchCard(resultId) {
             t1ScorersHtml += `<div>⚽ ${playerRef}${suffix}</div>`;
         }
     });
-    document.getElementById('erc-t1-scorers').innerHTML = t1ScorersHtml;
+    // -----------------------------
+    // Cards for Team 1 (Left) — Emoji first
+    // -----------------------------
+    const t1_yellow = extractFields(res, 't1_yellow', 4);
+    const t1_red = extractFields(res, 't1_red', 2);
+    let t1CardsArr = [];
+    t1_yellow.forEach(val => {
+      let strVal = String(val).trim();
+      if (strVal && strVal.toLowerCase() !== 'n/a') {
+        const p = db_players.find(p => p.id === strVal || (p.name && p.name.toLowerCase() === strVal.toLowerCase()));
+        const name = p ? p.name : strVal;
+        t1CardsArr.push(`<div style="color: #94a3b8; font-size: 14px;">🟨 ${name}</div>`);
+      }
+    });
+    t1_red.forEach(val => {
+      let strVal = String(val).trim();
+      if (strVal && strVal.toLowerCase() !== 'n/a') {
+        const p = db_players.find(p => p.id === strVal || (p.name && p.name.toLowerCase() === strVal.toLowerCase()));
+        const name = p ? p.name : strVal;
+        t1CardsArr.push(`<div style="color: #94a3b8; font-size: 14px;">🟥 ${name}</div>`);
+      }
+    });
+
+    const t1CardsHtml = t1CardsArr.length ? `<div style="margin-top:12px;">${t1CardsArr.join('')}</div>` : '';
+    document.getElementById('erc-t1-scorers').innerHTML = t1ScorersHtml + t1CardsHtml;
 
     let t2ScorersRaw = extractScorers(res, 't2');
     let t2Counts = {};
@@ -2760,7 +2834,31 @@ function downloadMatchCard(resultId) {
             t2ScorersHtml += `<div>${playerRef}${suffix} ⚽</div>`;
         }
     });
-    document.getElementById('erc-t2-scorers').innerHTML = t2ScorersHtml;
+    // -----------------------------
+    // Cards for Team 2 (Right) — Name first, Emoji last
+    // -----------------------------
+    const t2_yellow = extractFields(res, 't2_yellow', 4);
+    const t2_red = extractFields(res, 't2_red', 2);
+    let t2CardsArr = [];
+    t2_yellow.forEach(val => {
+      let strVal = String(val).trim();
+      if (strVal && strVal.toLowerCase() !== 'n/a') {
+        const p = db_players.find(p => p.id === strVal || (p.name && p.name.toLowerCase() === strVal.toLowerCase()));
+        const name = p ? p.name : strVal;
+        t2CardsArr.push(`<div style="color: #94a3b8; font-size: 14px;">${name} 🟨</div>`);
+      }
+    });
+    t2_red.forEach(val => {
+      let strVal = String(val).trim();
+      if (strVal && strVal.toLowerCase() !== 'n/a') {
+        const p = db_players.find(p => p.id === strVal || (p.name && p.name.toLowerCase() === strVal.toLowerCase()));
+        const name = p ? p.name : strVal;
+        t2CardsArr.push(`<div style="color: #94a3b8; font-size: 14px;">${name} 🟥</div>`);
+      }
+    });
+
+    const t2CardsHtml = t2CardsArr.length ? `<div style="margin-top:12px;">${t2CardsArr.join('')}</div>` : '';
+    document.getElementById('erc-t2-scorers').innerHTML = t2ScorersHtml + t2CardsHtml;
 
     // Export Card MOTM Update
     let motmId = res.motm || res.potm;
