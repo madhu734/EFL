@@ -119,9 +119,9 @@
   .teams-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
   .team-card { background: var(--bg-card); border: 1.5px solid var(--text-muted); border-radius: 12px; overflow: hidden; transition: all .3s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.04); }
   .team-card:hover { transform: translateY(-6px); box-shadow: 0 16px 32px rgba(0,0,0,0.12); border-color: var(--brand); }
-  .team-banner { height: 80px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; background-size: cover !important; background-position: center !important;}
-  .team-crest { width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 14px; color: #fff; border: 2px solid rgba(255,255,255,0.3); text-transform: uppercase; overflow: hidden; text-align: center; line-height: 1.1; }
-  .team-info { padding: 1rem 1.25rem; }
+  .team-banner { height: 160px; display: flex; align-items: center; justify-content: center; position: relative; overflow: visible; background-size: cover !important; background-position: center !important;}
+  .team-crest { width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 14px; color: #fff; border: 2px solid rgba(255,255,255,0.3); text-transform: uppercase; overflow: hidden; text-align: center; line-height: 1.1; position: absolute; bottom: -28px; z-index: 5; }
+  .team-info { padding: 2rem 1.25rem 1rem 1.25rem; }
   .team-name { font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 18px; letter-spacing: 0.5px; margin-bottom: 4px; text-transform: uppercase; color: var(--text-main); }
   .team-meta { font-size: 12px; color: var(--text-muted); display: flex; gap: 12px; font-weight: 500; }
   .team-badge { font-size: 11px; padding: 4px 10px; border-radius: 20px; font-weight: 600; letter-spacing: 0.5px; display: inline-block; margin-top: 8px; }
@@ -189,7 +189,7 @@
   .fixture-team.away { text-align: center; }
   .fixture-crest { width: 100px; height: 100px; border-radius: 20px; display: flex; align-items: center; justify-content: center; font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 28px; color: #fff; flex-shrink: 0; box-shadow: 0 0 30px rgba(59,130,246,0.18); overflow: hidden; background: rgba(255,255,255,0.04); border: 2px solid rgba(255,255,255,0.08); }
   .fixture-crest img.crest-img { width: 100%; height: 100%; object-fit: contain; }
-  .fixture-tname { font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 18px; color: #f8fafc; text-transform: uppercase; letter-spacing: 1px; white-space: normal; word-wrap: break-word; line-height: 1.2; }
+  .fixture-tname { font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 18px; color: var(--text-main); text-transform: uppercase; letter-spacing: 1px; white-space: normal; word-wrap: break-word; line-height: 1.2; }
   .fixture-center { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; padding: 0 12px; position: relative; }
   .fixture-center::before { content: ''; position: absolute; left: 50%; top: 10%; bottom: 10%; width: 2px; background: linear-gradient(to bottom, rgba(59,130,246,0.18), rgba(255,255,255,0.08), rgba(59,130,246,0.18)); transform: translateX(-50%); }
   .fixture-type-badge { font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 11px; letter-spacing: 1px; color: #e2e8f0; text-transform: uppercase; background: linear-gradient(135deg, rgba(59,130,246,0.18), rgba(59,130,246,0.35)); border: 1px solid rgba(59,130,246,0.4); border-radius: 999px; padding: 8px 18px; backdrop-filter: blur(12px); z-index: 1; }
@@ -320,13 +320,28 @@
   .modal-close { position: absolute; top: 16px; right: 16px; background: rgba(0,0,0,0.5); color: #fff; border: none; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px; z-index: 30; transition: background 0.2s; }
   .modal-close:hover { background: var(--accent); }
   
-  .team-modal-header { height: 160px; background: linear-gradient(135deg, #1e3a8a, #1e40af); padding: 2rem; position: relative; border-radius: 16px 16px 0 0; }
-  .team-modal-crest { width: 80px; height: 80px; background: #1d4ed8; border-radius: 50%; border: 4px solid var(--bg-card); display: flex; align-items: center; justify-content: center; color: #fff; font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 24px; position: absolute; bottom: -40px; left: 2rem; box-shadow: 0 4px 12px rgba(0,0,0,0.1); overflow: hidden; text-align: center; line-height: 1.1;}
-  .team-modal-body { padding: 3.5rem 2rem 2rem; }
+  .team-modal-header { height: 220px; background: linear-gradient(135deg, #1e3a8a, #1e40af); padding: 0; position: relative; border-radius: 16px 16px 0 0; overflow: visible; display: flex; align-items: center; justify-content: center; }
+  .team-modal-crest { width: 80px; height: 80px; background: #1d4ed8; border-radius: 50%; border: 4px solid var(--bg-card); display: flex; align-items: center; justify-content: center; color: #fff; font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 24px; position: absolute; bottom: -40px; left: 50%; transform: translateX(-50%); z-index: 10; box-shadow: 0 4px 12px rgba(0,0,0,0.1); overflow: hidden; text-align: center; line-height: 1.1;}
+  .team-modal-body { padding: 5.5rem 2rem 2rem; }
   .team-modal-name { font-family: 'Montserrat', sans-serif; font-size: 28px; font-weight: 900; color: var(--text-main); text-transform: uppercase; margin-bottom: 4px; line-height: 1.1; }
   .team-modal-meta { display: flex; gap: 16px; font-size: 13px; color: var(--text-muted); font-weight: 500; margin-bottom: 24px; }
   
   /* POCKETBASE UI ADDITIONS */
+  /* COVER PICTURE STYLES */
+  .team-cover-pic { width: 100%; height: 100%; object-fit: cover; cursor: pointer; background: var(--bg-input); transition: transform 0.2s, filter 0.2s; position: absolute; inset: 0; }
+  .team-cover-pic:hover { transform: scale(1.02); filter: brightness(1.1); }
+  .team-card .team-banner { position: relative; }
+  .team-card .team-banner::before { content: ''; position: absolute; inset: 0; background: rgba(0,0,0,0.15); opacity: 0; transition: opacity 0.2s; z-index: 2; pointer-events: none; }
+  .team-card:hover .team-banner::before { opacity: 1; }
+  
+  /* LIGHTBOX MODAL FOR IMAGES */
+  .lightbox-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.92); backdrop-filter: blur(8px); z-index: 2000; display: none; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s; }
+  .lightbox-modal.active { display: flex; opacity: 1; }
+  .lightbox-container { position: relative; max-width: 90vw; max-height: 90vh; display: flex; align-items: center; justify-content: center; }
+  .lightbox-image { max-width: 100%; max-height: 90vh; object-fit: contain; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
+  .lightbox-close { position: absolute; top: 20px; right: 20px; background: rgba(255,255,255,0.2); color: #fff; border: 1px solid rgba(255,255,255,0.3); width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 24px; z-index: 30; transition: all 0.2s; backdrop-filter: blur(4px); }
+  .lightbox-close:hover { background: rgba(255,255,255,0.3); transform: rotate(90deg); }
+  
   .player-filter-bar { display: flex; gap: 12px; margin-bottom: 20px; align-items: center; background: var(--bg-card); padding: 12px 16px; border-radius: 12px; border: 1px solid var(--border); }
   .cat-badge { font-size: 10px; padding: 4px 8px; border-radius: 6px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
   .cat-Icon { background: linear-gradient(135deg, #FFD700, #F59E0B); color: #fff; }
@@ -978,6 +993,9 @@
   <div class="modal-content" onclick="event.stopPropagation()">
     <button class="modal-close" onclick="closeModal('teamModal')">×</button>
     <div class="team-modal-header" id="tm-banner">
+      <div id="tm-cover-container" style="display:none; position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; overflow: hidden;">
+        <img id="tm-cover-pic" src="" style="width:100%; height:100%; object-fit:cover; cursor:pointer;" onclick="viewCoverImage(event, this.src)" alt="Team Cover">
+      </div>
       <div class="team-modal-crest" id="tm-crest">FC</div>
     </div>
     <div class="team-modal-body">
@@ -1027,6 +1045,14 @@
         <div id="pm-exp" style="font-size: 13px; line-height: 1.6; color: var(--text-main);">No experience provided.</div>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- IMAGE LIGHTBOX MODAL -->
+<div class="lightbox-modal" id="lightboxModal" onclick="closeLightbox(event)">
+  <div class="lightbox-container" onclick="event.stopPropagation()">
+    <button class="lightbox-close" onclick="closeLightbox()">×</button>
+    <img id="lightboxImage" class="lightbox-image" src="" alt="Full Size Image">
   </div>
 </div>
 
@@ -1242,10 +1268,13 @@ function isLightColor(color) {
 }
 
 function getSafeTextColor(bgColor) {
-    return isLightColor(bgColor) ? '#1e293b' : bgColor; 
+    // Returns contrasting text color based on background brightness
+    // Light background = dark text, Dark background = light text
+    return isLightColor(bgColor) ? '#1e293b' : '#f8fafc'; 
 }
 
 function getSafeCrestTextColor(bgColor) {
+    // Returns contrasting text color for crest icons
     return isLightColor(bgColor) ? '#1e293b' : '#ffffff'; 
 }
 
@@ -1353,6 +1382,7 @@ function renderTeamsPage() {
     container.innerHTML += `
       <div class="team-card animate-on-scroll" onclick="openTeamModal('${team.id}')">
         <div class="team-banner" style="background:${bannerStyle}">
+          ${team.cover_pic ? `<img src="${getPbImageUrl(team, team.cover_pic)}" class="team-cover-pic" alt="Team Cover" onclick="viewCoverImage(event, '${getPbImageUrl(team, team.cover_pic)}')">` : ''}
           <div class="team-crest" style="background:${crestBg}; color:${crestTextCol}; border: 4px solid var(--bg-card); ${team.banner ? 'padding:0;' : ''}">
              ${crestHtml}
           </div>
@@ -2285,6 +2315,16 @@ function openTeamModal(teamId) {
   let bannerStyle = `linear-gradient(135deg, ${crestBg}CC, ${crestBg})`;
 
   document.getElementById('tm-banner').style.background = bannerStyle;
+  
+  // Handle cover picture display
+  const coverContainer = document.getElementById('tm-cover-container');
+  if (team.cover_pic) {
+      document.getElementById('tm-cover-pic').src = getPbImageUrl(team, team.cover_pic);
+      coverContainer.style.display = 'block';
+  } else {
+      coverContainer.style.display = 'none';
+  }
+  
   document.getElementById('tm-crest').style.background = crestBg;
   document.getElementById('tm-crest').style.color = crestTextCol;
   
@@ -2398,6 +2438,38 @@ function closeModal(modalId, event) {
   document.body.style.overflow = '';
   setTimeout(() => { modal.style.display = 'none'; }, 300);
 }
+
+// ==========================================
+// LIGHTBOX MODAL LOGIC FOR IMAGE VIEWING
+// ==========================================
+function viewCoverImage(event, imageUrl) {
+  event.stopPropagation();
+  const lightbox = document.getElementById('lightboxModal');
+  document.getElementById('lightboxImage').src = imageUrl;
+  lightbox.style.display = 'flex';
+  setTimeout(() => {
+    lightbox.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }, 10);
+}
+
+function closeLightbox(event) {
+  if (event && event.target !== document.getElementById('lightboxModal')) return;
+  const lightbox = document.getElementById('lightboxModal');
+  lightbox.classList.remove('active');
+  document.body.style.overflow = '';
+  setTimeout(() => { lightbox.style.display = 'none'; }, 300);
+}
+
+// Close lightbox with Escape key
+document.addEventListener('keydown', function(event) {
+  if (event.key === 'Escape') {
+    const lightbox = document.getElementById('lightboxModal');
+    if (lightbox && lightbox.classList.contains('active')) {
+      closeLightbox();
+    }
+  }
+});
 
 // ==========================================
 // VIDEO PLAYER LOGIC - REMOVED (No more live streaming/highlights)
