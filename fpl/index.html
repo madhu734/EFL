@@ -1098,7 +1098,7 @@
   }
 
   /* =========================================================
-     [5] EVENTS & MODALS
+     [5] EVENTS, LEADERBOARD & MODALS
      ========================================================= */
   document.querySelectorAll('.formation-btn').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -1113,15 +1113,117 @@
     });
   });
 
-  document.getElementById('resetBtn').onclick = () => {
-    if(isDeadlinePassed()) return;
-    Object.keys(state.slots).forEach(k => state.slots[k] = null);
-    state.captain = null;
-    state.viceCaptain = null;
-    renderPitch();
-    showToast('Squad cleared!', 'warn');
-  };
+  async function openLeaderboard() {
+    document.getElementById('leaderboardModal').classList.add('open');
+    switchLBTab('overall');
+  }
 
+  function switchLBTab(tab) {
+    // If event is defined, use it to set active class. Otherwise just default to first child.
+    if(window.event && window.event.target) {
+        document.querySelectorAll('#leaderboardModal .auth-tab').forEach(t => t.classList.remove('active'));
+        window.event.target.classList.add('active');
+    }
+    
+    const listEl = document.getElementById('lb-list');
+    listEl.innerHTML = `<div style="text-align:center; padding: 40px; color: var(--text-muted);">Loading ${tab} ranking...</div>`;
+    
+    pb.collection('fpl_users').getFullList().then(users => {
+       allUsersList = users;
+       users.sort((a, b) => (b.total_points || 0) - (a.total_points || 0));
+
+       let html = '';
+       users.forEach((u, i) => {
+          let avatarUrl = u.avatar ? pb.files.getUrl(u, u.avatar) : 'https://via.placeholder.com/40';
+          let pts = u.total_points || 0;
+          html += `
+             <div class="lb-user-item" onclick="viewUserSquad('${u.id}')">
+                <div class="lb-rank">#${i+1}</div>
+                <div class="lb-user-info">
+                   <img src="${avatarUrl}" class="lb-avatar">
+                   <div style="font-weight: 700;">${u.name}</div>
+                </div>
+                <div class="lb-pts">${pts}</div>
+             </div>
+          `;
+       });
+       if(users.length === 0) html = `<div style="text-align:center; padding: 40px; color: var(--text-muted);">No managers registered yet.</div>`;
+       listEl.innerHTML = html;
+    }).catch(err => {
+       listEl.innerHTML = `<div style="text-align:center; padding: 40px; color: var(--red-accent);">Error loading leaderboard.</div>`;
+    });
+  }
+
+  function viewUserSquad(userId) {
+     if(!isDeadlinePassed()) {
+         showToast("Squads are hidden until the deadline passes!", "error");
+         return;
+     }
+
+     const user = allUsersList.find(u => u.id === userId);
+     if(!user) return;
+
+     document.getElementById('vs-title').textContent = `${user.name}'s Squad`;
+
+     let vsFormation = '4-4-2';
+     let vsSlots = {};
+     let vsCap = null;
+     let vsVC = null;
+
+     if(user.squad) {
+         try {
+             let sq = typeof user.squad === 'string' ? JSON.parse(user.squad) : user.squad;
+             vsFormation = sq.formation || '4-4-2';
+             vsCap = sq.captain || null;
+             vsVC = sq.viceCaptain || null;
+             
+             if(sq.players) {
+                 for(let key in sq.players) {
+                     const pId = sq.players[key];
+                     vsSlots[key] = pId ? allPlayers.find(p => p.id === pId) : null;
+                 }
+             }
+         } catch(e) {}
+     }
+
+     const vsPitch = document.getElementById('vs-pitch');
+     vsPitch.innerHTML = '<div class="pitch-bottom-lines"></div>';
+     const config = FORMATIONS[vsFormation];
+
+     const backupState = { ...state };
+     state.formation = vsFormation;
+     state.captain = null;
+     state.viceCaptain = null;
+     
+     for(let key in vsSlots) {
+         if(vsSlots[key] && vsSlots[key].id === vsCap) state.captain = key;
+         if(vsSlots[key] && vsSlots[key].id === vsVC) state.viceCaptain = key;
+     }
+
+     ROW_ORDER.forEach(pos => {
+      const row = document.createElement('div');
+      row.className = 'pitch-row';
+      const slotsWrap = document.createElement('div');
+      slotsWrap.className = 'row-slots';
+
+      for (let i = 0; i < config[pos]; i++) {
+        const key = `${pos}-${i}`;
+        slotsWrap.appendChild(buildSlotEl(key, pos, vsSlots[key], true, true));
+      }
+      row.appendChild(slotsWrap);
+      vsPitch.appendChild(row);
+    });
+
+    state.formation = backupState.formation;
+    state.captain = backupState.captain;
+    state.viceCaptain = backupState.viceCaptain;
+
+    document.getElementById('viewSquadModal').classList.add('open');
+  }
+
+  /* =========================================================
+     [6] PLAYER SELECTION
+     ========================================================= */
   let activeModalSlot = null;
   const playerModal = document.getElementById('playerModal');
   const searchInput = document.getElementById('playerSearch');
