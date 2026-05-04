@@ -135,7 +135,7 @@
       gap: 10px; 
       width: 100%; 
       padding: 16px; 
-      background: linear-gradient(135deg, #10b981, #059669); /* Beautiful Emerald Green */
+      background: linear-gradient(135deg, #10b981, #059669); 
       border: 1px solid #34d399;
       border-radius: 12px; 
       font-family: var(--font-display); 
@@ -143,7 +143,7 @@
       font-weight: 800; 
       letter-spacing: 0.08em; 
       text-transform: uppercase; 
-      color: #ffffff; /* White text for contrast */
+      color: #ffffff; 
       cursor: pointer; 
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
       box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4); 
@@ -166,7 +166,7 @@
     .save-btn:hover { 
       transform: translateY(-3px); 
       box-shadow: 0 8px 25px rgba(16, 185, 129, 0.6); 
-      background: linear-gradient(135deg, #34d399, #10b981); /* Lighter on hover */
+      background: linear-gradient(135deg, #34d399, #10b981); 
       border-color: #6ee7b7;
     }
     
@@ -352,12 +352,8 @@
           <h3>Squad Budget & Restrictions</h3>
           <div class="rules-grid">
             <div class="rule-item" style="border-color: var(--gold);"><span class="rule-desc" style="font-weight: 700;">Total Team Budget Maximum</span><span class="pts-badge" style="background: rgba(245,158,11,0.1); color: var(--gold);">100M</span></div>
-            <div class="rule-item" style="border-color: var(--red-accent);"><span class="rule-desc" style="font-weight: 700;">Max players from the same team</span><span class="pts-badge" style="background: rgba(229,62,62,0.1); color: var(--red-accent);">3</span></div>
-            <div class="rule-item"><span class="rule-desc">Category A Price</span><span class="pts-badge">15M</span></div>
-            <div class="rule-item"><span class="rule-desc">Category B Price</span><span class="pts-badge">12M</span></div>
-            <div class="rule-item"><span class="rule-desc">Icon Player Price</span><span class="pts-badge">10M</span></div>
-            <div class="rule-item"><span class="rule-desc">Category C / Enthusiast Price</span><span class="pts-badge">7M</span></div>
-            <div class="rule-item"><span class="rule-desc">Category GK Price</span><span class="pts-badge">6M</span></div>
+            <div class="rule-item" style="border-color: var(--red-accent);"><span class="rule-desc" style="font-weight: 700;">Max players from the same team</span><span class="pts-badge" style="background: rgba(229,62,62,0.1); color: var(--red-accent);">5</span></div>
+            <div class="rule-item"><span class="rule-desc">Player Prices</span><span class="pts-badge">Custom (Check Player List)</span></div>
           </div>
         </div>
         
@@ -369,6 +365,7 @@
             <div class="rule-item"><span class="rule-desc">For each Assist</span><span class="pts-badge positive">+3</span></div>
             <div class="rule-item"><span class="rule-desc">Penalty earned</span><span class="pts-badge positive">+3</span></div>
             <div class="rule-item"><span class="rule-desc">Man of the Match</span><span class="pts-badge positive">+3</span></div>
+            <div class="rule-item"><span class="rule-desc">Match Top 3 Players (Bonus)</span><span class="pts-badge positive">+3, +2, +1</span></div>
             <div class="rule-item"><span class="rule-desc">Yellow Card</span><span class="pts-badge negative">-1</span></div>
             <div class="rule-item"><span class="rule-desc">Own Goal</span><span class="pts-badge negative">-2</span></div>
             <div class="rule-item"><span class="rule-desc">Missing a penalty</span><span class="pts-badge negative">-2</span></div>
@@ -573,19 +570,17 @@
         const badgeUrl = p.expand?.team?.banner ? pb.files.getUrl(p.expand.team, p.expand.team.banner) : null;
         const photoUrl = p.photo ? pb.files.getUrl(p, p.photo) : null;
 
-        // Player Budget Logic
-        let rawCat = (p.Catagory || p.category || '').trim().toUpperCase();
-        let price = 7; // Default for Category C / Enthusiast / Unassigned
-        if (rawCat === 'A') price = 15;
-        else if (rawCat === 'B') price = 12;
-        else if (rawCat === 'ICON') price = 10;
-        else if (rawCat === 'GK') price = 6;
-        else price = 7; // All remaining (C, None, etc) are 7M
+        // Player Custom Budget Logic (efl_price)
+        let price = parseFloat(p.efl_price || p.eflPrice || p['efl price'] || p.price);
+        if (isNaN(price)) {
+            price = 7; // Default fallback if no custom price is found
+        }
 
         return {
           id: p.id,
           name: p.name,
           position: mapPosition(p.position),
+          rawPosition: p.position || '', // Store raw position to check for Wingers later
           price: price, 
           team: tName,
           teamBadgeHtml: badgeUrl ? `<img src="${badgeUrl}">` : `<span style="font-size:10px; color:black;">${tName.substring(0,3)}</span>`,
@@ -979,8 +974,11 @@
     document.getElementById('modalTitle').textContent = `Select ${position}`;
     searchInput.value = '';
     
-    // Strict Position Filtering Logic for ALL positions
+    // Strict Position Filtering Logic with exception for Wingers
     const playersInPos = allPlayers.filter(p => {
+      const isWinger = p.rawPosition.toLowerCase().includes('wing');
+      if (position === 'MID') return p.position === 'MID' || isWinger;
+      if (position === 'FWD') return p.position === 'FWD' || isWinger;
       return p.position === position; 
     });
 
@@ -1019,11 +1017,11 @@
       
       if(!isSelected) {
         item.onclick = () => {
-          // RULE: MAX 3 PLAYERS FROM THE SAME TEAM
+          // RULE: MAX 5 PLAYERS FROM THE SAME TEAM
           if (p.team && p.team !== 'Undrafted') {
              const sameTeamCount = currentSquad.filter(sp => sp.team === p.team).length;
-             if (sameTeamCount >= 3) {
-                 showToast(`Maximum 3 players allowed from ${p.team}!`, 'error');
+             if (sameTeamCount >= 5) {
+                 showToast(`Maximum 5 players allowed from ${p.team}!`, 'error');
                  return; // Prevent addition
              }
           }
@@ -1042,8 +1040,15 @@
     const pos = activeModalSlot.split('-')[0];
     
     const filtered = allPlayers.filter(p => {
+      const isWinger = p.rawPosition.toLowerCase().includes('wing');
+      let matchPos = false;
+      
+      if (pos === 'MID') matchPos = (p.position === 'MID' || isWinger);
+      else if (pos === 'FWD') matchPos = (p.position === 'FWD' || isWinger);
+      else matchPos = (p.position === pos);
+      
       const matchesSearch = p.name.toLowerCase().includes(term) || p.team.toLowerCase().includes(term);
-      return p.position === pos && matchesSearch; // Strict match
+      return matchPos && matchesSearch; 
     });
     
     renderPlayerList(filtered);
