@@ -1,1 +1,921 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fantasy Premier League — Local Tournament</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,300;0,400;0,600;0,700;0,800;0,900;1,700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <!-- PocketBase SDK -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pocketbase/0.21.1/pocketbase.umd.min.js"></script>
 
+  <style>
+    /* ═══════════════════════════════════════════════════
+       CSS CUSTOM PROPERTIES — THEME TOKENS
+    ═══════════════════════════════════════════════════ */
+    :root {
+      --navy-950: #050a14;
+      --navy-900: #080f1e;
+      --navy-800: #0d1829;
+      --navy-700: #122033;
+      --navy-600: #1a2d47;
+      --navy-500: #243b5e;
+      --navy-400: #2e4d7a;
+      --pitch-dark:    #1a5c2e;
+      --pitch-mid:     #1e6b34;
+      --pitch-light:   #22783b;
+      --pitch-lines:   rgba(255,255,255,0.18);
+      --gold:          #f0b429;
+      --green-neon:    #39d353;
+      --red-accent:    #e53e3e;
+      --text-primary:   #f0f4ff;
+      --text-secondary: #8fa3c0;
+      --text-muted:     #4d6480;
+      --surface-glass:  rgba(255,255,255,0.04);
+      --surface-hover:  rgba(255,255,255,0.08);
+      --border-subtle:  rgba(255,255,255,0.08);
+      --font-display: 'Barlow Condensed', sans-serif;
+      --font-body:    'DM Sans', sans-serif;
+      --radius-pill: 50px;
+      --radius-card: 14px;
+      --shadow-card: 0 8px 32px rgba(0,0,0,0.5);
+      --shadow-glow-gold: 0 0 20px rgba(240,180,41,0.35);
+      --shadow-glow-green: 0 0 20px rgba(57,211,83,0.35);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; scroll-behavior: smooth; }
+    body { font-family: var(--font-body); background: var(--navy-950); color: var(--text-primary); min-height: 100vh; overflow-x: hidden; }
+
+    /* Animated background grid */
+    body::before {
+      content: ''; position: fixed; inset: 0;
+      background-image: linear-gradient(rgba(57,211,83,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(57,211,83,0.03) 1px, transparent 1px);
+      background-size: 48px 48px; pointer-events: none; z-index: 0;
+    }
+
+    .app-container { position: relative; z-index: 1; max-width: 1280px; margin: 0 auto; padding: 0 24px 60px; }
+
+    /* ═══════════════════════════════════════════════════
+       HEADER & AUTH BTN
+    ═══════════════════════════════════════════════════ */
+    .app-header { display: flex; align-items: center; justify-content: space-between; padding: 22px 0 18px; border-bottom: 1px solid var(--border-subtle); gap: 16px; flex-wrap: wrap; }
+    .brand { display: flex; align-items: center; gap: 12px; text-decoration: none; cursor: pointer; }
+    .brand-icon { width: 44px; height: 44px; background: linear-gradient(135deg, var(--gold), #c8830a); border-radius: 12px; display: grid; place-items: center; font-size: 22px; box-shadow: var(--shadow-glow-gold); flex-shrink: 0; }
+    .brand-text h1 { font-family: var(--font-display); font-size: 1.55rem; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; line-height: 1; color: var(--text-primary); }
+    .brand-text span { font-size: 0.7rem; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gold); }
+    .header-controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+    /* Nav/Auth Buttons */
+    .auth-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2); color: var(--text-primary); padding: 8px 16px; border-radius: 8px; font-family: var(--font-body); font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 8px; }
+    .auth-btn:hover { background: rgba(255,255,255,0.1); border-color: var(--gold); }
+    .auth-avatar { width: 24px; height: 24px; border-radius: 50%; object-fit: cover; background: var(--navy-600); }
+
+    /* ═══════════════════════════════════════════════════
+       MAIN GRID & FORMATION
+    ═══════════════════════════════════════════════════ */
+    .main-grid { display: grid; grid-template-columns: 1fr 340px; gap: 24px; margin-top: 28px; }
+    .formation-bar { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; flex-wrap: wrap; }
+    .formation-label { font-family: var(--font-display); font-size: 0.8rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-secondary); white-space: nowrap; }
+    .formation-buttons { display: flex; gap: 8px; flex-wrap: wrap; }
+    .formation-btn { font-family: var(--font-display); font-size: 1rem; font-weight: 700; letter-spacing: 0.06em; padding: 8px 18px; background: var(--surface-glass); border: 1px solid var(--border-subtle); border-radius: var(--radius-pill); color: var(--text-secondary); cursor: pointer; transition: all 0.22s ease; user-select: none; }
+    .formation-btn:hover { background: var(--surface-hover); color: var(--text-primary); border-color: rgba(255,255,255,0.2); }
+    .formation-btn.active { background: linear-gradient(135deg, var(--gold), #c8830a); border-color: var(--gold); color: var(--navy-950); box-shadow: var(--shadow-glow-gold); transform: translateY(-1px); }
+
+    /* ═══════════════════════════════════════════════════
+       PITCH DESIGN
+    ═══════════════════════════════════════════════════ */
+    .pitch-wrapper { position: relative; border-radius: 18px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.7); }
+    .pitch { position: relative; min-height: 650px; padding: 30px 16px; display: flex; flex-direction: column; justify-content: space-evenly; gap: 12px; background-color: var(--pitch-mid); background-image: repeating-linear-gradient( 180deg, transparent, transparent 70px, rgba(0,0,0,0.06) 70px, rgba(0,0,0,0.06) 140px ); }
+    .pitch::before { content: ''; position: absolute; inset: 0; background: linear-gradient(var(--pitch-lines) 0, var(--pitch-lines) 0) 5% 4% / 90% 2px no-repeat, linear-gradient(var(--pitch-lines) 0, var(--pitch-lines) 0) 5% 96% / 90% 2px no-repeat, linear-gradient(var(--pitch-lines) 0, var(--pitch-lines) 0) 5% 4% / 2px 92% no-repeat, linear-gradient(var(--pitch-lines) 0, var(--pitch-lines) 0) 95% 4% / 2px 92% no-repeat, linear-gradient(var(--pitch-lines) 0, var(--pitch-lines) 0) 5% 50% / 90% 1px no-repeat, radial-gradient(circle, transparent 58px, var(--pitch-lines) 58px, var(--pitch-lines) 60px, transparent 60px) 50% 50% / 124px 124px no-repeat, radial-gradient(circle, var(--pitch-lines) 4px, transparent 4px) 50% 50% / 100% 100% no-repeat; pointer-events: none; z-index: 0; }
+    .pitch::after { content: ''; position: absolute; top: 4%; left: calc(50% - 120px); width: 240px; height: 80px; border: 2px solid var(--pitch-lines); border-top: none; pointer-events: none; z-index: 0; }
+    .pitch-bottom-lines { position: absolute; bottom: 4%; left: calc(50% - 120px); width: 240px; height: 80px; border: 2px solid var(--pitch-lines); border-bottom: none; pointer-events: none; z-index: 0; }
+    .pitch-row { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+    .row-slots { display: flex; justify-content: center; align-items: center; gap: 15px; width: 100%; flex-wrap: wrap; }
+
+    /* ═══════════════════════════════════════════════════
+       PLAYER PILL
+    ═══════════════════════════════════════════════════ */
+    .player-slot { display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; transition: transform 0.2s, filter 0.2s; }
+    .player-slot:hover { transform: translateY(-4px); }
+    .slot-card { position: relative; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 2px dashed rgba(255,255,255,0.4); border-radius: var(--radius-pill); width: 85px; height: 85px; transition: all 0.25s ease; overflow: visible; }
+    .slot-card:hover { border-color: var(--green-neon); background: rgba(57,211,83,0.15); box-shadow: var(--shadow-glow-green); }
+    .slot-empty-icon { width: 32px; height: 32px; border: 2px dashed rgba(255,255,255,0.5); border-radius: 50%; display: grid; place-items: center; color: rgba(255,255,255,0.6); font-size: 1.2rem; font-weight: bold; transition: all 0.2s; }
+    .player-slot:hover .slot-empty-icon { border-color: var(--green-neon); color: var(--green-neon); }
+    .slot-card.filled { background: var(--navy-900); border: 3px solid var(--gold); backdrop-filter: none; padding: 2px; }
+    .slot-card.filled:hover { box-shadow: var(--shadow-glow-gold); }
+    .player-photo-wrap { position: relative; width: 100%; height: 100%; border-radius: 50%; overflow: hidden; background: var(--navy-700); }
+    .player-photo { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .player-photo-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 2rem; background: linear-gradient(135deg, var(--navy-600), var(--navy-400)); color: white;}
+    .team-badge { position: absolute; bottom: -5px; right: -5px; width: 28px; height: 28px; background: #fff; border: 2px solid var(--navy-900); border-radius: 50%; display: grid; place-items: center; font-size: 0.6rem; z-index: 2; overflow: hidden; color: black; font-weight: bold;}
+    .team-badge img { width: 100%; height: 100%; object-fit: cover; }
+    .slot-remove-btn { position: absolute; top: -8px; left: -8px; width: 24px; height: 24px; background: var(--red-accent); border: 2px solid var(--navy-900); border-radius: 50%; color: white; font-size: 0.8rem; font-weight: bold; cursor: pointer; display: none; place-items: center; z-index: 10; line-height: 1; }
+    .player-slot:hover .slot-remove-btn.show { display: grid; }
+    .slot-name { font-family: var(--font-display); font-size: 0.85rem; font-weight: 700; letter-spacing: 0.04em; text-align: center; color: var(--text-primary); max-width: 90px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); border-radius: 6px; padding: 3px 8px; }
+
+    /* ═══════════════════════════════════════════════════
+       SIDEBAR
+    ═══════════════════════════════════════════════════ */
+    .sidebar { display: flex; flex-direction: column; gap: 20px; }
+    .panel { background: var(--navy-800); border: 1px solid var(--border-subtle); border-radius: var(--radius-card); padding: 24px; box-shadow: var(--shadow-card); }
+    .panel-title { font-family: var(--font-display); font-size: 1rem; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+    .panel-title::before { content: ''; display: block; width: 4px; height: 16px; background: var(--gold); border-radius: 2px; }
+    .squad-progress-wrap { margin-top: 15px; }
+    .squad-progress-text { display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 8px; font-weight: 600; }
+    .squad-progress-text span b { color: var(--text-primary); font-size: 1rem; }
+    .squad-progress-bar { width: 100%; height: 8px; background: var(--navy-900); border-radius: 10px; overflow: hidden; }
+    .squad-progress-fill { height: 100%; background: var(--green-neon); width: 0%; transition: width 0.4s ease; box-shadow: var(--shadow-glow-green); }
+
+    /* Buttons */
+    .save-btn { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 16px; background: linear-gradient(135deg, var(--gold), #c8830a); border: none; border-radius: 12px; font-family: var(--font-display); font-size: 1.2rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--navy-950); cursor: pointer; transition: all 0.25s; box-shadow: var(--shadow-glow-gold); margin-bottom: 12px; }
+    .save-btn:hover { transform: translateY(-2px); box-shadow: 0 0 30px rgba(240,180,41,0.6); }
+    .reset-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 12px; background: transparent; border: 1px solid var(--border-subtle); border-radius: 12px; font-family: var(--font-display); font-size: 0.95rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-secondary); cursor: pointer; transition: all 0.2s; }
+    .reset-btn:hover { border-color: var(--red-accent); color: var(--red-accent); background: rgba(229,62,62,0.07); }
+
+    /* ═══════════════════════════════════════════════════
+       MODALS (Player Selection, Auth, Rules)
+    ═══════════════════════════════════════════════════ */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(5,10,20,0.85); backdrop-filter: blur(6px); z-index: 1000; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+    .modal-overlay.open { opacity: 1; pointer-events: all; }
+    .modal { background: var(--navy-800); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; width: min(500px, 94vw); max-height: 85vh; display: flex; flex-direction: column; box-shadow: 0 32px 80px rgba(0,0,0,0.8); transform: scale(0.95) translateY(20px); transition: transform 0.3s; overflow: hidden; }
+    .modal-overlay.open .modal { transform: scale(1) translateY(0); }
+    .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 22px 24px 16px; border-bottom: 1px solid var(--border-subtle); flex-shrink: 0; }
+    .modal-title { font-family: var(--font-display); font-size: 1.5rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; }
+    .modal-close-btn { width: 36px; height: 36px; background: var(--surface-glass); border: 1px solid var(--border-subtle); border-radius: 10px; color: var(--text-secondary); font-size: 1.2rem; cursor: pointer; display: grid; place-items: center; transition: all 0.2s; }
+    .modal-close-btn:hover { background: rgba(229,62,62,0.15); border-color: var(--red-accent); color: var(--red-accent); }
+    .modal-body { padding: 24px; overflow-y: auto; }
+    
+    .modal-search-wrap { padding: 16px 24px 0; flex-shrink: 0; position: relative;}
+    .modal-search { width: 100%; background: var(--surface-glass); border: 1px solid var(--border-subtle); border-radius: 10px; padding: 12px 16px 12px 42px; color: var(--text-primary); font-family: var(--font-body); font-size: 0.95rem; outline: none; transition: border-color 0.25s; }
+    .modal-search:focus { border-color: var(--gold); }
+    .modal-search-wrap::before { content: '🔍'; position: absolute; left: 40px; top: 55%; transform: translateY(-50%); font-size: 1rem; pointer-events: none; }
+    
+    .player-list { overflow-y: auto; padding: 16px 24px 24px; flex: 1; }
+    .player-list::-webkit-scrollbar { width: 8px; }
+    .player-list::-webkit-scrollbar-track { background: transparent; }
+    .player-list::-webkit-scrollbar-thumb { background: var(--navy-600); border-radius: 8px; }
+    .player-item { display: flex; align-items: center; gap: 16px; padding: 14px; border-radius: 14px; cursor: pointer; border: 1px solid transparent; background: var(--surface-glass); transition: all 0.2s ease; margin-bottom: 10px; }
+    .player-item:hover { background: var(--surface-hover); border-color: var(--border-subtle); transform: translateX(4px); }
+    .player-item.already-selected { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
+    .player-avatar { width: 50px; height: 50px; border-radius: 50%; overflow: hidden; background: var(--navy-600); flex-shrink: 0; border: 2px solid var(--border-subtle); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: white;}
+    .player-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    
+    .player-info { flex: 1; min-width: 0; }
+    .player-item-name { font-weight: 700; font-size: 1rem; color: var(--text-primary); }
+    .player-item-meta { font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px; display: flex; align-items: center; gap: 5px; }
+    .player-item-meta img { width: 18px; height: 18px; border-radius: 50%; object-fit: cover; }
+    
+    /* Auth Modal Tabs & Forms */
+    .auth-tabs { display: flex; border-bottom: 1px solid var(--border-subtle); margin-bottom: 20px; }
+    .auth-tab { flex: 1; padding: 12px; text-align: center; cursor: pointer; font-weight: 600; color: var(--text-secondary); border-bottom: 2px solid transparent; transition: 0.3s; }
+    .auth-tab.active { color: var(--gold); border-color: var(--gold); }
+    .auth-form { display: none; flex-direction: column; gap: 15px; }
+    .auth-form.active { display: flex; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group label { font-size: 0.85rem; color: var(--text-secondary); }
+    .form-group input { background: var(--navy-900); border: 1px solid var(--border-subtle); padding: 12px; border-radius: 8px; color: white; outline: none; }
+    .form-group input:focus { border-color: var(--gold); }
+    .form-btn { background: var(--gold); color: black; padding: 12px; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; margin-top: 10px; transition: 0.2s; }
+    .form-btn:hover { opacity: 0.9; }
+
+    /* Rules Styles */
+    .rules-section { margin-bottom: 24px; }
+    .rules-section h3 { font-family: var(--font-display); font-size: 1.2rem; color: var(--gold); text-transform: uppercase; margin-bottom: 12px; letter-spacing: 0.05em; border-bottom: 1px solid var(--border-subtle); padding-bottom: 6px; }
+    .rules-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
+    .rule-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: var(--surface-glass); border-radius: 8px; border: 1px solid var(--border-subtle); }
+    .rule-desc { font-size: 0.9rem; color: var(--text-primary); font-weight: 500; }
+    .pts-badge { font-family: var(--font-display); font-weight: 800; font-size: 1rem; padding: 4px 10px; border-radius: 6px; min-width: 45px; text-align: center; }
+    .pts-badge.positive { background: rgba(57,211,83,0.15); color: var(--green-neon); border: 1px solid rgba(57,211,83,0.3); }
+    .pts-badge.negative { background: rgba(229,62,62,0.15); color: var(--red-accent); border: 1px solid rgba(229,62,62,0.3); }
+    
+    /* ═══════════════════════════════════════════════════
+       TOAST / NOTIFICATION
+    ═══════════════════════════════════════════════════ */
+    .toast-container { position: fixed; bottom: 30px; right: 30px; z-index: 2000; display: flex; flex-direction: column; gap: 10px; align-items: flex-end; }
+    .toast { background: var(--navy-700); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 14px 20px; font-size: 0.95rem; font-weight: 600; color: var(--text-primary); box-shadow: var(--shadow-card); transform: translateX(120%); transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1), opacity 0.35s; display: flex; align-items: center; gap: 10px; }
+    .toast.show { transform: translateX(0); }
+    .toast.toast-success { border-left: 4px solid var(--green-neon); }
+    .toast.toast-warn    { border-left: 4px solid var(--gold); }
+    .toast.toast-error   { border-left: 4px solid var(--red-accent); }
+
+    @media (max-width: 900px) { .main-grid { grid-template-columns: 1fr; } .app-header { flex-direction: column; align-items: flex-start; } .header-controls { width: 100%; justify-content: space-between; } }
+    @media (max-width: 600px) { .slot-card { width: 65px; height: 65px; } .row-slots { gap: 8px; } .formation-btn { font-size: 0.9rem; padding: 6px 14px; } .pitch { min-height: 550px; padding: 15px 10px; } }
+  </style>
+</head>
+
+<body>
+  <div class="app-container">
+    
+    <!-- ── Header ── -->
+    <header class="app-header">
+      <a href="/" class="brand" title="Back to Main Site">
+        <div class="brand-icon">⚽</div>
+        <div class="brand-text">
+          <h1>EFL Fantasy</h1>
+          <span>Local Tournament</span>
+        </div>
+      </a>
+
+      <div class="header-controls">
+        <button class="auth-btn" onclick="document.getElementById('rulesModal').classList.add('open')">
+          📜 Rules
+        </button>
+        <button id="authHeaderBtn" class="auth-btn" onclick="openAuthModal()">
+          Login / Register
+        </button>
+      </div>
+    </header>
+
+    <!-- ── Main Grid ── -->
+    <div class="main-grid">
+
+      <!-- Left: Pitch Area -->
+      <div>
+        <div class="formation-bar">
+          <span class="formation-label">Select Formation:</span>
+          <div class="formation-buttons" id="formationButtons">
+            <button class="formation-btn" data-formation="5-4-1">5-4-1</button>
+            <button class="formation-btn" data-formation="4-5-1">4-5-1</button>
+            <button class="formation-btn" data-formation="5-3-2">5-3-2</button>
+            <button class="formation-btn" data-formation="4-3-3">4-3-3</button>
+            <button class="formation-btn active" data-formation="4-4-2">4-4-2</button>
+            <button class="formation-btn" data-formation="3-5-2">3-5-2</button>
+            <button class="formation-btn" data-formation="3-4-3">3-4-3</button>
+          </div>
+        </div>
+
+        <div class="pitch-wrapper">
+          <div class="pitch" id="pitch">
+            <!-- ⚽ Rows injected dynamically by JavaScript -->
+            <div class="pitch-bottom-lines"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Sidebar -->
+      <aside class="sidebar">
+        <!-- Status -->
+        <div class="panel">
+          <p class="panel-title">Squad Status</p>
+          <div class="squad-progress-wrap">
+            <div class="squad-progress-text">
+              <span>Players Selected:</span>
+              <span><b id="squadCount">0</b> / 11</span>
+            </div>
+            <div class="squad-progress-bar">
+              <div class="squad-progress-fill" id="squadProgressFill"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="panel" style="gap:12px; display:flex; flex-direction:column;">
+          <p class="panel-title">Manage Team</p>
+          <button class="save-btn" onclick="saveSquad()">💾 Save Squad</button>
+          <button class="reset-btn" id="resetBtn">↺ Clear Squad</button>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <!-- ── Modal: Rules ── -->
+  <div class="modal-overlay" id="rulesModal">
+    <div class="modal" style="width: min(700px, 94vw);">
+      <div class="modal-header">
+        <div>
+          <span class="modal-title">FPL Point Rules</span>
+        </div>
+        <button class="modal-close-btn" onclick="document.getElementById('rulesModal').classList.remove('open')">✕</button>
+      </div>
+      <div class="modal-body">
+        
+        <div class="rules-section">
+          <h3>General Rules (All Players)</h3>
+          <div class="rules-grid">
+            <div class="rule-item"><span class="rule-desc">Playing for at least 1 min</span><span class="pts-badge positive">+1</span></div>
+            <div class="rule-item"><span class="rule-desc">Playing the full match</span><span class="pts-badge positive">+2</span></div>
+            <div class="rule-item"><span class="rule-desc">For each Assist</span><span class="pts-badge positive">+3</span></div>
+            <div class="rule-item"><span class="rule-desc">Penalty earned</span><span class="pts-badge positive">+3</span></div>
+            <div class="rule-item"><span class="rule-desc">Man of the Match</span><span class="pts-badge positive">+3</span></div>
+            <div class="rule-item"><span class="rule-desc">Yellow Card</span><span class="pts-badge negative">-1</span></div>
+            <div class="rule-item"><span class="rule-desc">Own Goal</span><span class="pts-badge negative">-2</span></div>
+            <div class="rule-item"><span class="rule-desc">Missing a penalty</span><span class="pts-badge negative">-2</span></div>
+            <div class="rule-item"><span class="rule-desc">Red Card</span><span class="pts-badge negative">-3</span></div>
+          </div>
+        </div>
+
+        <div class="rules-section">
+          <h3>Goalkeeper (GK)</h3>
+          <div class="rules-grid">
+            <div class="rule-item"><span class="rule-desc">Goal Scored</span><span class="pts-badge positive">+6</span></div>
+            <div class="rule-item"><span class="rule-desc">Penalty Save</span><span class="pts-badge positive">+5</span></div>
+            <div class="rule-item"><span class="rule-desc">Clean Sheet</span><span class="pts-badge positive">+4</span></div>
+            <div class="rule-item"><span class="rule-desc">For every 3 saves</span><span class="pts-badge positive">+1</span></div>
+            <div class="rule-item"><span class="rule-desc">For every 2 goals conceded</span><span class="pts-badge negative">-1</span></div>
+          </div>
+        </div>
+
+        <div class="rules-section">
+          <h3>Defender (DEF)</h3>
+          <div class="rules-grid">
+            <div class="rule-item"><span class="rule-desc">Goal Scored</span><span class="pts-badge positive">+6</span></div>
+            <div class="rule-item"><span class="rule-desc">Clean Sheet</span><span class="pts-badge positive">+3</span></div>
+            <div class="rule-item"><span class="rule-desc">For every 2 goals conceded</span><span class="pts-badge negative">-1</span></div>
+          </div>
+        </div>
+
+        <div class="rules-section">
+          <h3>Midfielder (MID)</h3>
+          <div class="rules-grid">
+            <div class="rule-item"><span class="rule-desc">Goal Scored</span><span class="pts-badge positive">+5</span></div>
+            <div class="rule-item"><span class="rule-desc">Clean Sheet</span><span class="pts-badge positive">+1</span></div>
+          </div>
+        </div>
+
+        <div class="rules-section">
+          <h3>Forward (FWD)</h3>
+          <div class="rules-grid">
+            <div class="rule-item"><span class="rule-desc">Goal Scored</span><span class="pts-badge positive">+4</span></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Modal: Player Selection ── -->
+  <div class="modal-overlay" id="playerModal">
+    <div class="modal" style="width: min(620px, 94vw);">
+      <div class="modal-header">
+        <div>
+          <span class="modal-title" id="modalTitle">Select Player</span>
+        </div>
+        <button class="modal-close-btn" onclick="document.getElementById('playerModal').classList.remove('open')">✕</button>
+      </div>
+      <div class="modal-search-wrap">
+        <input class="modal-search" type="text" id="playerSearch" placeholder="Search by player name or team…" autocomplete="off" />
+      </div>
+      <div class="player-list" id="playerList">
+        <div style="text-align:center; padding: 20px; color: var(--text-muted);">Loading...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Modal: Auth (Login/Register) ── -->
+  <div class="modal-overlay" id="authModal">
+    <div class="modal">
+      <div class="modal-header">
+        <span class="modal-title" id="authModalTitle">Account</span>
+        <button class="modal-close-btn" onclick="document.getElementById('authModal').classList.remove('open')">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="auth-tabs">
+          <div class="auth-tab active" onclick="switchAuthTab('login')">Login</div>
+          <div class="auth-tab" onclick="switchAuthTab('register')">Register</div>
+        </div>
+
+        <!-- Login Form -->
+        <form id="loginForm" class="auth-form active" onsubmit="handleLogin(event)">
+          <div class="form-group">
+            <label>Batch (e.g. 51)</label>
+            <input type="text" id="loginBatch" required>
+          </div>
+          <div class="form-group">
+            <label>Roll Number</label>
+            <input type="text" id="loginRoll" required>
+          </div>
+          <button type="submit" class="form-btn">Login</button>
+        </form>
+
+        <!-- Register Form -->
+        <form id="registerForm" class="auth-form" onsubmit="handleRegister(event)">
+          <div class="form-group">
+            <label>Your Name</label>
+            <input type="text" id="regName" required>
+          </div>
+          <div class="form-group">
+            <label>Batch (e.g. 51)</label>
+            <input type="text" id="regBatch" required>
+          </div>
+          <div class="form-group">
+            <label>Roll Number</label>
+            <input type="text" id="regRoll" required>
+          </div>
+          <div class="form-group">
+            <label>Profile Picture (Optional)</label>
+            <input type="file" id="regAvatar" accept="image/*">
+          </div>
+          <button type="submit" class="form-btn">Create Account</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Modal: Profile Edit ── -->
+  <div class="modal-overlay" id="profileModal">
+    <div class="modal">
+      <div class="modal-header">
+        <span class="modal-title">Your Profile</span>
+        <button class="modal-close-btn" onclick="document.getElementById('profileModal').classList.remove('open')">✕</button>
+      </div>
+      <div class="modal-body">
+        <form id="profileForm" class="auth-form active" onsubmit="handleProfileUpdate(event)">
+          
+          <div style="display:flex; justify-content:center; margin-bottom: 15px;">
+            <label for="profAvatar" style="cursor: pointer; position: relative;" title="Click to change profile picture">
+              <img id="profAvatarPreview" src="" style="width:80px; height:80px; border-radius:50%; object-fit:cover; border:2px solid var(--gold); background: var(--navy-600);">
+              <div style="position: absolute; bottom: 0; right: -5px; background: var(--gold); color: black; border-radius: 50%; width: 28px; height: 28px; display: grid; place-items: center; font-size: 14px; border: 2px solid var(--navy-800);">📷</div>
+            </label>
+            <input type="file" id="profAvatar" accept="image/*" style="display:none;">
+          </div>
+          
+          <div class="form-group">
+            <label>Name</label>
+            <input type="text" id="profName" required>
+          </div>
+          
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <div class="form-group">
+              <label>Batch</label>
+              <input type="text" id="profBatch" readonly style="opacity: 0.6; cursor: not-allowed;" title="Batch cannot be changed">
+            </div>
+            <div class="form-group">
+              <label>Roll Number</label>
+              <input type="text" id="profRoll" readonly style="opacity: 0.6; cursor: not-allowed;" title="Roll cannot be changed">
+            </div>
+          </div>
+          
+          <div style="display:flex; gap: 10px; margin-top: 15px;">
+            <button type="submit" class="form-btn" style="flex:1;">Update Profile</button>
+            <button type="button" class="form-btn" style="flex:1; background: var(--red-accent); color: white;" onclick="handleLogout()">Logout</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+
+  <!-- ══════════════════════════════════════════════════════════════
+       JAVASCRIPT LOGIC
+  ══════════════════════════════════════════════════════════════ -->
+  <script>
+  'use strict';
+
+  /* =========================================================
+     [1] POCKETBASE DATABASE INTEGRATION
+     ========================================================= */
+  const pb = new PocketBase('https://efljudb.duckdns.org');
+  let allPlayers = [];
+  let currentUser = null;
+
+  function mapPosition(rawPos) {
+    if(!rawPos) return 'FWD';
+    let p = rawPos.toLowerCase();
+    if(p.includes('goal') || p === 'gk') return 'GK';
+    if(p.includes('def')) return 'DEF';
+    if(p.includes('mid')) return 'MID';
+    return 'FWD';
+  }
+
+  async function fetchPlayersFromDB() {
+    try {
+      const records = await pb.collection('players').getFullList({
+        expand: 'team', 
+        sort: 'name'
+      });
+
+      allPlayers = records.map(p => {
+        const tName = p.expand?.team?.name || p.expand?.team?.crest_text || 'Undrafted';
+        const badgeUrl = p.expand?.team?.banner ? pb.files.getUrl(p.expand.team, p.expand.team.banner) : null;
+        const photoUrl = p.photo ? pb.files.getUrl(p, p.photo) : null;
+
+        return {
+          id: p.id,
+          name: p.name,
+          position: mapPosition(p.position),
+          team: tName,
+          teamBadgeHtml: badgeUrl ? `<img src="${badgeUrl}">` : `<span style="font-size:10px; color:black;">${tName.substring(0,3)}</span>`,
+          photoHtml: photoUrl ? `<img src="${photoUrl}" class="player-photo">` : `<div class="player-photo-placeholder">${p.name.charAt(0)}</div>`
+        };
+      });
+    } catch (err) {
+      console.error("Error fetching players:", err);
+      showToast("Error loading player list", "error");
+    }
+  }
+
+  /* =========================================================
+     [2] AUTH & PROFILING SYSTEM
+     ========================================================= */
+  function openAuthModal() {
+    if(currentUser) {
+      document.getElementById('profName').value = currentUser.name || '';
+      document.getElementById('profBatch').value = currentUser.batch || '';
+      document.getElementById('profRoll').value = currentUser.roll || '';
+      document.getElementById('profAvatarPreview').src = currentUser.avatar 
+        ? pb.files.getUrl(currentUser, currentUser.avatar) 
+        : 'https://via.placeholder.com/80?text=User';
+      document.getElementById('profileModal').classList.add('open');
+    } else {
+      document.getElementById('authModal').classList.add('open');
+    }
+  }
+
+  // Handle immediate preview when selecting a new avatar
+  document.getElementById('profAvatar').addEventListener('change', function(e) {
+    if (e.target.files && e.target.files[0]) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        document.getElementById('profAvatarPreview').src = e.target.result;
+      }
+      reader.readAsDataURL(e.target.files[0]);
+    }
+  });
+
+  function switchAuthTab(tab) {
+    document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
+    
+    if(tab === 'login') {
+      document.querySelectorAll('.auth-tab')[0].classList.add('active');
+      document.getElementById('loginForm').classList.add('active');
+    } else {
+      document.querySelectorAll('.auth-tab')[1].classList.add('active');
+      document.getElementById('registerForm').classList.add('active');
+    }
+  }
+
+  async function handleLogin(e) {
+    e.preventDefault();
+    const batch = document.getElementById('loginBatch').value.trim();
+    const roll = document.getElementById('loginRoll').value.trim();
+    
+    try {
+      const record = await pb.collection('fpl_users').getFirstListItem(`batch="${batch}" && roll="${roll}"`);
+      setCurrentUser(record);
+      document.getElementById('authModal').classList.remove('open');
+      showToast('Login successful!', 'success');
+      loadSquadFromUser();
+    } catch (err) {
+      showToast('Account not found. Check batch and roll.', 'error');
+    }
+  }
+
+  async function handleRegister(e) {
+    e.preventDefault();
+    const btn = e.target.querySelector('button[type="submit"]');
+    btn.disabled = true; btn.textContent = "Please wait...";
+
+    try {
+      const formData = new FormData();
+      formData.append('name', document.getElementById('regName').value.trim());
+      formData.append('batch', document.getElementById('regBatch').value.trim());
+      formData.append('roll', document.getElementById('regRoll').value.trim());
+      
+      const fileInput = document.getElementById('regAvatar');
+      if(fileInput.files.length > 0) {
+        formData.append('avatar', fileInput.files[0]);
+      }
+      formData.append('squad', '{}');
+
+      const record = await pb.collection('fpl_users').create(formData);
+      setCurrentUser(record);
+      document.getElementById('authModal').classList.remove('open');
+      showToast('Account created successfully!', 'success');
+    } catch (err) {
+      showToast('Error creating account. Batch/Roll might exist.', 'error');
+    } finally {
+      btn.disabled = false; btn.textContent = "Create Account";
+    }
+  }
+
+  async function handleProfileUpdate(e) {
+    e.preventDefault();
+    const btn = e.target.querySelector('button[type="submit"]');
+    btn.disabled = true; btn.textContent = "Updating...";
+
+    try {
+      const formData = new FormData();
+      formData.append('name', document.getElementById('profName').value.trim());
+      const fileInput = document.getElementById('profAvatar');
+      if(fileInput.files.length > 0) {
+        formData.append('avatar', fileInput.files[0]);
+      }
+
+      const record = await pb.collection('fpl_users').update(currentUser.id, formData);
+      setCurrentUser(record);
+      document.getElementById('profileModal').classList.remove('open');
+      showToast('Profile updated!', 'success');
+    } catch (err) {
+      showToast('Profile update failed', 'error');
+    } finally {
+      btn.disabled = false; btn.textContent = "Update Profile";
+    }
+  }
+
+  function handleLogout() {
+    localStorage.removeItem('fpl_user_data');
+    currentUser = null;
+    document.getElementById('profileModal').classList.remove('open');
+    updateAuthUI();
+    Object.keys(state.slots).forEach(k => state.slots[k] = null);
+    renderPitch();
+    showToast('Logged out', 'warn');
+  }
+
+  function setCurrentUser(record) {
+    currentUser = record;
+    localStorage.setItem('fpl_user_data', JSON.stringify(record));
+    updateAuthUI();
+  }
+
+  function updateAuthUI() {
+    const btn = document.getElementById('authHeaderBtn');
+    if(currentUser) {
+      const avatarUrl = currentUser.avatar ? pb.files.getUrl(currentUser, currentUser.avatar) : 'https://via.placeholder.com/24';
+      btn.innerHTML = `<img src="${avatarUrl}" class="auth-avatar"> ${currentUser.name}`;
+    } else {
+      btn.innerHTML = `Login / Register`;
+    }
+  }
+
+  function checkSession() {
+    const saved = localStorage.getItem('fpl_user_data');
+    if(saved) {
+      currentUser = JSON.parse(saved);
+      updateAuthUI();
+      pb.collection('fpl_users').getOne(currentUser.id).then(rec => {
+        setCurrentUser(rec);
+        loadSquadFromUser();
+      }).catch(e => console.log('Session fetch error', e));
+    }
+  }
+
+  /* =========================================================
+     [3] SQUAD SAVING LOGIC
+     ========================================================= */
+  async function saveSquad() {
+    if(!currentUser) {
+      showToast('Please login to save your squad!', 'error');
+      openAuthModal();
+      return;
+    }
+
+    const saveBtn = document.querySelector('.save-btn');
+    saveBtn.innerHTML = "Saving...";
+
+    try {
+      const squadData = { formation: state.formation, players: {} };
+      for(let key in state.slots) {
+        squadData.players[key] = state.slots[key] ? state.slots[key].id : null;
+      }
+
+      const updatedRecord = await pb.collection('fpl_users').update(currentUser.id, {
+        squad: JSON.stringify(squadData)
+      });
+      setCurrentUser(updatedRecord);
+      showToast('Squad saved successfully!', 'success');
+    } catch (err) {
+      showToast('Error saving squad!', 'error');
+    } finally {
+      saveBtn.innerHTML = "💾 Save Squad";
+    }
+  }
+
+  function loadSquadFromUser() {
+    if(currentUser && currentUser.squad) {
+      try {
+        const squadData = typeof currentUser.squad === 'string' ? JSON.parse(currentUser.squad) : currentUser.squad;
+        if(squadData.formation) {
+          state.formation = squadData.formation;
+          document.querySelectorAll('.formation-btn').forEach(b => {
+            b.classList.toggle('active', b.dataset.formation === state.formation);
+          });
+          initSlots(state.formation);
+        }
+        
+        if(squadData.players && allPlayers.length > 0) {
+          for(let key in squadData.players) {
+            const pId = squadData.players[key];
+            if(pId && state.slots[key] !== undefined) {
+              const pObj = allPlayers.find(p => p.id === pId);
+              state.slots[key] = pObj || null;
+            }
+          }
+          renderPitch();
+        }
+      } catch(e) { console.log('Error parsing squad data', e); }
+    }
+  }
+
+  /* =========================================================
+     [4] STATE MANAGEMENT & DOM RENDERING
+     ========================================================= */
+  const FORMATIONS = {
+    '5-4-1': { FWD: 1, MID: 4, DEF: 5, GK: 1 },
+    '4-5-1': { FWD: 1, MID: 5, DEF: 4, GK: 1 },
+    '5-3-2': { FWD: 2, MID: 3, DEF: 5, GK: 1 },
+    '4-3-3': { FWD: 3, MID: 3, DEF: 4, GK: 1 },
+    '4-4-2': { FWD: 2, MID: 4, DEF: 4, GK: 1 },
+    '3-5-2': { FWD: 2, MID: 5, DEF: 3, GK: 1 },
+    '3-4-3': { FWD: 3, MID: 4, DEF: 3, GK: 1 },
+  };
+
+  const state = { formation: '4-4-2', slots: {} };
+
+  function initSlots(formation) {
+    const config = FORMATIONS[formation];
+    const newSlots = {};
+    ['FWD','MID','DEF','GK'].forEach(pos => {
+      for (let i = 0; i < config[pos]; i++) {
+        const key = `${pos}-${i}`;
+        newSlots[key] = state.slots[key] || null;
+      }
+    });
+    state.slots = newSlots;
+  }
+
+  const pitch = document.getElementById('pitch');
+  const ROW_ORDER = ['FWD', 'MID', 'DEF', 'GK'];
+
+  function renderPitch() {
+    pitch.innerHTML = '<div class="pitch-bottom-lines"></div>';
+    const config = FORMATIONS[state.formation];
+
+    ROW_ORDER.forEach(pos => {
+      const row = document.createElement('div');
+      row.className = 'pitch-row';
+      const slotsWrap = document.createElement('div');
+      slotsWrap.className = 'row-slots';
+
+      for (let i = 0; i < config[pos]; i++) {
+        const key = `${pos}-${i}`;
+        slotsWrap.appendChild(buildSlotEl(key, pos, state.slots[key]));
+      }
+      row.appendChild(slotsWrap);
+      pitch.appendChild(row);
+    });
+
+    updateDashboard();
+  }
+
+  function buildSlotEl(slotKey, position, player) {
+    const wrap = document.createElement('div');
+    wrap.className = 'player-slot';
+
+    if (player) {
+      wrap.innerHTML = `
+        <div class="slot-card filled">
+          <div class="player-photo-wrap">
+            ${player.photoHtml}
+            <div class="team-badge">${player.teamBadgeHtml}</div>
+          </div>
+          <button class="slot-remove-btn show">✕</button>
+        </div>
+        <span class="slot-name">${player.name.split(' ').pop()}</span>
+      `;
+      wrap.querySelector('.slot-remove-btn').onclick = (e) => {
+        e.stopPropagation();
+        state.slots[slotKey] = null;
+        renderPitch();
+      };
+    } else {
+      wrap.innerHTML = `
+        <div class="slot-card">
+          <div class="slot-empty-icon">＋</div>
+        </div>
+        <span class="slot-name" style="color:var(--text-muted); background:transparent;">Add Player</span>
+      `;
+      wrap.onclick = () => openPlayerModal(slotKey, position);
+    }
+    return wrap;
+  }
+
+  function updateDashboard() {
+    const filled = Object.values(state.slots).filter(Boolean);
+    const squadCountEl = document.getElementById('squadCount');
+    if (squadCountEl) squadCountEl.textContent = filled.length;
+    
+    const squadProgressFillEl = document.getElementById('squadProgressFill');
+    if (squadProgressFillEl) squadProgressFillEl.style.width = `${(filled.length / 11) * 100}%`;
+  }
+
+  /* =========================================================
+     [5] EVENTS & MODALS
+     ========================================================= */
+  document.getElementById('formationButtons').addEventListener('click', (e) => {
+    if(e.target.tagName !== 'BUTTON') return;
+    document.querySelectorAll('.formation-btn').forEach(btn => btn.classList.remove('active'));
+    e.target.classList.add('active');
+    state.formation = e.target.dataset.formation;
+    initSlots(state.formation);
+    renderPitch();
+  });
+
+  document.getElementById('resetBtn').onclick = () => {
+    Object.keys(state.slots).forEach(k => state.slots[k] = null);
+    renderPitch();
+    showToast('Squad cleared!', 'warn');
+  };
+
+  let activeModalSlot = null;
+  const playerModal = document.getElementById('playerModal');
+  const searchInput = document.getElementById('playerSearch');
+
+  function openPlayerModal(slotKey, position) {
+    activeModalSlot = slotKey;
+    document.getElementById('modalTitle').textContent = position === 'GK' ? `Select GK` : `Select Player`;
+    searchInput.value = '';
+    
+    // Position Filtering Logic
+    const playersInPos = allPlayers.filter(p => {
+      // GK slot only gets GK players
+      if (position === 'GK') return p.position === 'GK';
+      // Outfield slots (DEF, MID, FWD) can get ANY outfield player (not GK)
+      return p.position !== 'GK';
+    });
+
+    renderPlayerList(playersInPos);
+    playerModal.classList.add('open');
+  }
+
+  function renderPlayerList(players) {
+    const listEl = document.getElementById('playerList');
+    listEl.innerHTML = '';
+    
+    if(players.length === 0) {
+      listEl.innerHTML = '<div style="text-align:center; padding: 20px; color: var(--text-muted);">No players found</div>';
+      return;
+    }
+    
+    const selectedIds = Object.values(state.slots).filter(Boolean).map(p => p.id);
+
+    players.forEach(p => {
+      const isSelected = selectedIds.includes(p.id);
+      
+      const item = document.createElement('div');
+      item.className = `player-item ${isSelected ? 'already-selected' : ''}`;
+      item.innerHTML = `
+        <div class="player-avatar">${p.photoHtml || p.teamBadgeHtml}</div>
+        <div class="player-info">
+          <div class="player-item-name">${p.name} <span style="color:var(--gold); font-size:12px; margin-left:6px;">${p.position}</span></div>
+          <div class="player-item-meta">${p.teamBadgeHtml} <span style="margin-left:5px;">${p.team}</span></div>
+        </div>
+      `;
+      
+      if(!isSelected) {
+        item.onclick = () => {
+          state.slots[activeModalSlot] = p;
+          playerModal.classList.remove('open');
+          renderPitch();
+        };
+      }
+      listEl.appendChild(item);
+    });
+  }
+
+  searchInput.addEventListener('input', (e) => {
+    const term = e.target.value.toLowerCase();
+    const pos = activeModalSlot.split('-')[0];
+    
+    const filtered = allPlayers.filter(p => {
+      const matchesSearch = p.name.toLowerCase().includes(term) || p.team.toLowerCase().includes(term);
+      if (pos === 'GK') return p.position === 'GK' && matchesSearch;
+      return p.position !== 'GK' && matchesSearch;
+    });
+    
+    renderPlayerList(filtered);
+  });
+
+  function showToast(msg, type) {
+    const container = document.getElementById('toastContainer');
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.innerHTML = `<span>${type === 'success' ? '✅' : '⚠️'}</span> ${msg}`;
+    container.appendChild(toast);
+    setTimeout(() => toast.classList.add('show'), 10);
+    setTimeout(() => {
+      toast.classList.remove('show');
+      setTimeout(() => toast.remove(), 400);
+    }, 3000);
+  }
+
+  /* =========================================================
+     [6] INITIALIZATION
+     ========================================================= */
+  async function initApp() {
+    checkSession();
+    initSlots(state.formation);
+    renderPitch();
+    await fetchPlayersFromDB();
+    loadSquadFromUser(); // If user session loaded fast enough
+  }
+
+  initApp();
+
+  </script>
+</body>
+</html>
