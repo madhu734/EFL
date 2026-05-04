@@ -558,6 +558,11 @@
             </div>
           </div>
           
+          <div class="form-group" style="margin-top: 15px;">
+            <label>Change PIN / Password (Optional)</label>
+            <input type="password" id="profPassword" placeholder="Leave blank to keep current password" minlength="4">
+          </div>
+          
           <div style="display:flex; gap: 10px; margin-top: 15px;">
             <button type="submit" class="form-btn" style="flex:1;">Update Profile</button>
             <button type="button" class="form-btn" style="flex:1; background: var(--red-accent); color: white;" onclick="handleLogout()">Logout</button>
@@ -580,7 +585,8 @@
   /* =========================================================
      [0] CONSTANTS & DEADLINE LOGIC
      ========================================================= */
-  const DEADLINE_DATE = new Date('2026-05-15T12:00:00').getTime(); 
+  // Deadline set to upcoming Friday (May 8, 2026, 12:00 PM Noon)
+  const DEADLINE_DATE = new Date('2026-05-08T12:00:00').getTime(); 
   
   function isDeadlinePassed() {
     return new Date().getTime() >= DEADLINE_DATE;
@@ -668,6 +674,7 @@
       document.getElementById('profName').value = currentUser.name || '';
       document.getElementById('profBatch').value = currentUser.batch || '';
       document.getElementById('profRoll').value = currentUser.roll || '';
+      document.getElementById('profPassword').value = ''; 
       document.getElementById('profAvatarPreview').src = currentUser.avatar 
         ? pb.files.getUrl(currentUser, currentUser.avatar) 
         : 'https://via.placeholder.com/80?text=User';
@@ -710,7 +717,7 @@
       showToast('Login successful!', 'success');
       loadSquadFromUser();
     } catch (err) {
-      showToast('Invalid credentials. Check your batch, roll, and PIN.', 'error');
+      showToast('Invalid credentials. Check your batch, roll, and PIN/Password.', 'error');
     }
   }
 
@@ -725,7 +732,7 @@
     const pin = document.getElementById('regPin').value.trim();
 
     if(pin.length < 4) {
-       showToast('PIN must be at least 4 digits/characters.', 'error');
+       showToast('PIN / Password must be at least 4 characters.', 'error');
        btn.disabled = false; btn.textContent = "Create Account";
        return;
     }
@@ -766,15 +773,28 @@
     const btn = e.target.querySelector('button[type="submit"]');
     btn.disabled = true; btn.textContent = "Updating...";
 
+    const newPass = document.getElementById('profPassword').value.trim();
+    if(newPass && newPass.length < 4) {
+       showToast('New PIN / Password must be at least 4 characters.', 'error');
+       btn.disabled = false; btn.textContent = "Update Profile";
+       return;
+    }
+
     try {
       const formData = new FormData();
       formData.append('name', document.getElementById('profName').value.trim());
+      
+      if(newPass) {
+          formData.append('password', newPass);
+      }
+
       const fileInput = document.getElementById('profAvatar');
       if(fileInput.files.length > 0) { formData.append('avatar', fileInput.files[0]); }
 
       const record = await pb.collection('fpl_users').update(currentUser.id, formData);
       setCurrentUser(record);
       document.getElementById('profileModal').classList.remove('open');
+      document.getElementById('profPassword').value = ''; 
       showToast('Profile updated!', 'success');
     } catch (err) {
       showToast('Profile update failed', 'error');
