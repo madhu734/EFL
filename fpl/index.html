@@ -58,7 +58,7 @@
     .app-container { position: relative; z-index: 1; max-width: 1280px; margin: 0 auto; padding: 0 24px 60px; }
 
     /* ═══════════════════════════════════════════════════
-       HEADER & AUTH BTN
+       HEADER & DEADLINE BANNER
     ═══════════════════════════════════════════════════ */
     .app-header { display: flex; align-items: center; justify-content: space-between; padding: 22px 0 18px; border-bottom: 1px solid var(--border-subtle); gap: 16px; flex-wrap: wrap; }
     .brand { display: flex; align-items: center; gap: 12px; text-decoration: none; }
@@ -66,6 +66,9 @@
     .brand-text h1 { font-family: var(--font-display); font-size: 1.55rem; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; line-height: 1; color: var(--text-primary); }
     .brand-text span { font-size: 0.7rem; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gold); }
     .header-controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+    .deadline-banner { background: var(--navy-800); border-bottom: 2px solid var(--gold); color: var(--text-primary); text-align: center; padding: 10px; font-size: 14px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; box-shadow: 0 4px 12px rgba(0,0,0,0.2); position: relative; z-index: 10; }
+    .deadline-banner span { color: var(--gold); font-family: var(--font-display); font-size: 18px; margin-left: 8px; }
 
     /* Nav/Auth Buttons */
     .auth-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2); color: var(--text-primary); padding: 8px 16px; border-radius: 8px; font-family: var(--font-body); font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 8px; }
@@ -80,8 +83,9 @@
     .formation-label { font-family: var(--font-display); font-size: 0.8rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-secondary); white-space: nowrap; }
     .formation-buttons { display: flex; gap: 8px; flex-wrap: wrap; }
     .formation-btn { font-family: var(--font-display); font-size: 1rem; font-weight: 700; letter-spacing: 0.06em; padding: 8px 18px; background: var(--surface-glass); border: 1px solid var(--border-subtle); border-radius: var(--radius-pill); color: var(--text-secondary); cursor: pointer; transition: all 0.22s ease; user-select: none; }
-    .formation-btn:hover { background: var(--surface-hover); color: var(--text-primary); border-color: rgba(255,255,255,0.2); }
+    .formation-btn:hover:not(:disabled) { background: var(--surface-hover); color: var(--text-primary); border-color: rgba(255,255,255,0.2); }
     .formation-btn.active { background: linear-gradient(135deg, var(--gold), #c8830a); border-color: var(--gold); color: var(--navy-950); box-shadow: var(--shadow-glow-gold); transform: translateY(-1px); }
+    .formation-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
     /* ═══════════════════════════════════════════════════
        PITCH DESIGN
@@ -95,9 +99,9 @@
     .row-slots { display: flex; justify-content: center; align-items: center; gap: 15px; width: 100%; flex-wrap: wrap; }
 
     /* ═══════════════════════════════════════════════════
-       PLAYER PILL
+       PLAYER PILL & CAPTAINCY
     ═══════════════════════════════════════════════════ */
-    .player-slot { display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; transition: transform 0.2s, filter 0.2s; }
+    .player-slot { display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; transition: transform 0.2s, filter 0.2s; position: relative; }
     .player-slot:hover { transform: translateY(-4px); }
     .slot-card { position: relative; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 2px dashed rgba(255,255,255,0.4); border-radius: var(--radius-pill); width: 85px; height: 85px; transition: all 0.25s ease; overflow: visible; }
     .slot-card:hover { border-color: var(--green-neon); background: rgba(57,211,83,0.15); box-shadow: var(--shadow-glow-green); }
@@ -110,9 +114,17 @@
     .player-photo-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 2rem; background: linear-gradient(135deg, var(--navy-600), var(--navy-400)); color: white;}
     .team-badge { position: absolute; bottom: -5px; right: -5px; width: 28px; height: 28px; background: #fff; border: 2px solid var(--navy-900); border-radius: 50%; display: grid; place-items: center; font-size: 0.6rem; z-index: 2; overflow: hidden; color: black; font-weight: bold;}
     .team-badge img { width: 100%; height: 100%; object-fit: cover; }
-    .slot-remove-btn { position: absolute; top: -8px; left: -8px; width: 24px; height: 24px; background: var(--red-accent); border: 2px solid var(--navy-900); border-radius: 50%; color: white; font-size: 0.8rem; font-weight: bold; cursor: pointer; display: none; place-items: center; z-index: 10; line-height: 1; }
+    .slot-remove-btn { position: absolute; top: -8px; right: -8px; width: 24px; height: 24px; background: var(--red-accent); border: 2px solid var(--navy-900); border-radius: 50%; color: white; font-size: 0.8rem; font-weight: bold; cursor: pointer; display: none; place-items: center; z-index: 20; line-height: 1; }
     .player-slot:hover .slot-remove-btn.show { display: grid; }
-    .slot-name { font-family: var(--font-display); font-size: 0.85rem; font-weight: 700; letter-spacing: 0.04em; text-align: center; color: var(--text-primary); max-width: 90px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); border-radius: 6px; padding: 3px 8px; }
+    .slot-name { font-family: var(--font-display); font-size: 0.85rem; font-weight: 700; letter-spacing: 0.04em; text-align: center; color: var(--text-primary); max-width: 90px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); border-radius: 6px; padding: 3px 8px; z-index: 10;}
+
+    /* Captain & VC Buttons */
+    .cvc-btn { position: absolute; top: -8px; width: 24px; height: 24px; border-radius: 50%; font-size: 10px; font-weight: 900; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 2px solid var(--navy-900); background: var(--navy-600); color: var(--text-muted); z-index: 15; transition: all 0.2s; }
+    .cvc-btn.btn-c { left: -8px; }
+    .cvc-btn.btn-vc { left: 18px; }
+    .cvc-btn:hover { background: var(--navy-500); color: white; }
+    .cvc-btn.active { background: var(--gold); color: black; border-color: white; transform: scale(1.1); box-shadow: 0 2px 8px rgba(240, 180, 41, 0.5); }
+    .read-only-cvc { position: absolute; top: -8px; left: -8px; width: 24px; height: 24px; border-radius: 50%; font-size: 10px; font-weight: 900; display: flex; align-items: center; justify-content: center; border: 2px solid white; background: var(--gold); color: black; z-index: 15; box-shadow: 0 2px 8px rgba(240, 180, 41, 0.5); }
 
     /* ═══════════════════════════════════════════════════
        SIDEBAR
@@ -129,61 +141,23 @@
 
     /* Buttons */
     .save-btn { 
-      display: flex; 
-      align-items: center; 
-      justify-content: center; 
-      gap: 10px; 
-      width: 100%; 
-      padding: 16px; 
-      background: linear-gradient(135deg, #10b981, #059669); 
-      border: 1px solid #34d399;
-      border-radius: 12px; 
-      font-family: var(--font-display); 
-      font-size: 1.25rem; 
-      font-weight: 800; 
-      letter-spacing: 0.08em; 
-      text-transform: uppercase; 
-      color: #ffffff; 
-      cursor: pointer; 
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
-      box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4); 
-      margin-bottom: 12px; 
-      position: relative;
-      overflow: hidden;
+      display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 16px; 
+      background: linear-gradient(135deg, #10b981, #059669); border: 1px solid #34d399; border-radius: 12px; 
+      font-family: var(--font-display); font-size: 1.25rem; font-weight: 800; letter-spacing: 0.08em; 
+      text-transform: uppercase; color: #ffffff; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+      box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4); margin-bottom: 12px; position: relative; overflow: hidden;
     }
-    
-    .save-btn::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-      transition: left 0.5s;
-    }
-
-    .save-btn:hover { 
-      transform: translateY(-3px); 
-      box-shadow: 0 8px 25px rgba(16, 185, 129, 0.6); 
-      background: linear-gradient(135deg, #34d399, #10b981); 
-      border-color: #6ee7b7;
-    }
-    
-    .save-btn:hover::before {
-      left: 100%;
-    }
-
-    .save-btn:active {
-      transform: translateY(1px);
-      box-shadow: 0 2px 10px rgba(16, 185, 129, 0.4);
-    }
+    .save-btn::before { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent); transition: left 0.5s; }
+    .save-btn:hover:not(:disabled) { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(16, 185, 129, 0.6); background: linear-gradient(135deg, #34d399, #10b981); border-color: #6ee7b7; }
+    .save-btn:hover:not(:disabled)::before { left: 100%; }
+    .save-btn:disabled { opacity: 0.5; cursor: not-allowed; filter: grayscale(1); box-shadow: none; }
     
     .reset-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 12px; background: transparent; border: 1px solid var(--border-subtle); border-radius: 12px; font-family: var(--font-display); font-size: 0.95rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-secondary); cursor: pointer; transition: all 0.2s; }
-    .reset-btn:hover { border-color: var(--red-accent); color: var(--red-accent); background: rgba(229,62,62,0.07); }
+    .reset-btn:hover:not(:disabled) { border-color: var(--red-accent); color: var(--red-accent); background: rgba(229,62,62,0.07); }
+    .reset-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
     /* ═══════════════════════════════════════════════════
-       MODALS (Player Selection, Auth, Rules)
+       MODALS
     ═══════════════════════════════════════════════════ */
     .modal-overlay { position: fixed; inset: 0; background: rgba(5,10,20,0.85); backdrop-filter: blur(6px); z-index: 1000; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
     .modal-overlay.open { opacity: 1; pointer-events: all; }
@@ -191,7 +165,7 @@
     .modal-overlay.open .modal { transform: scale(1) translateY(0); }
     .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 22px 24px 16px; border-bottom: 1px solid var(--border-subtle); flex-shrink: 0; }
     .modal-title { font-family: var(--font-display); font-size: 1.5rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; }
-    .modal-close-btn { width: 36px; height: 36px; background: var(--surface-glass); border: 1px solid var(--border-subtle); border-radius: 10px; color: var(--text-secondary); font-size: 1.2rem; cursor: pointer; display: grid; place-items: center; transition: all 0.2s; }
+    .modal-close-btn { width: 36px; height: 36px; background: var(--surface-glass); border: 1px solid var(--border-subtle); border-radius: 10px; color: var(--text-secondary); font-size: 1.2rem; cursor: pointer; display: grid; place-items: center; transition: all 0.2s; z-index: 10; }
     .modal-close-btn:hover { background: rgba(229,62,62,0.15); border-color: var(--red-accent); color: var(--red-accent); }
     .modal-body { padding: 24px; overflow-y: auto; }
     
@@ -228,6 +202,14 @@
     .form-btn { background: var(--gold); color: black; padding: 12px; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; margin-top: 10px; transition: 0.2s; }
     .form-btn:hover { opacity: 0.9; }
 
+    /* Leaderboard Styles */
+    .lb-user-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid var(--border-subtle); transition: background 0.2s; cursor: pointer; }
+    .lb-user-item:hover { background: var(--surface-hover); }
+    .lb-rank { font-family: var(--font-display); font-size: 18px; font-weight: 800; color: var(--text-muted); width: 30px; }
+    .lb-user-info { flex: 1; display: flex; align-items: center; gap: 12px; }
+    .lb-avatar { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 2px solid var(--navy-600); }
+    .lb-pts { font-family: var(--font-display); font-size: 20px; font-weight: 900; color: var(--green-neon); }
+
     /* Rules Styles */
     .rules-section { margin-bottom: 24px; }
     .rules-section h3 { font-family: var(--font-display); font-size: 1.2rem; color: var(--gold); text-transform: uppercase; margin-bottom: 12px; letter-spacing: 0.05em; border-bottom: 1px solid var(--border-subtle); padding-bottom: 6px; }
@@ -254,6 +236,11 @@
 </head>
 
 <body>
+  <!-- ── Deadline Banner ── -->
+  <div class="deadline-banner" id="deadlineBanner">
+    ⏳ Matchday Deadline: <span id="countdownTimer">Loading...</span>
+  </div>
+
   <div class="app-container">
     
     <!-- ── Header ── -->
@@ -267,6 +254,9 @@
       </div>
 
       <div class="header-controls">
+        <button class="auth-btn" onclick="openLeaderboard()">
+          🏆 Leaderboard
+        </button>
         <button class="auth-btn" onclick="document.getElementById('rulesModal').classList.add('open')">
           📜 Rules
         </button>
@@ -284,6 +274,8 @@
         <div class="formation-bar">
           <span class="formation-label">Select Formation:</span>
           <div class="formation-buttons" id="formationButtons">
+            <button class="formation-btn" data-formation="5-4-1">5-4-1</button>
+            <button class="formation-btn" data-formation="4-5-1">4-5-1</button>
             <button class="formation-btn" data-formation="5-3-2">5-3-2</button>
             <button class="formation-btn" data-formation="4-3-3">4-3-3</button>
             <button class="formation-btn active" data-formation="4-4-2">4-4-2</button>
@@ -319,7 +311,7 @@
           <div class="squad-progress-wrap" style="margin-top: 24px;">
             <div class="squad-progress-text">
               <span>Budget Spent:</span>
-              <span><b id="budgetSpent" style="color: var(--green-neon);">0M</b> / 100M</span>
+              <span><b id="budgetSpent" style="color: var(--green-neon);">0.0M</b> / 100M</span>
             </div>
             <div class="squad-progress-bar">
               <div class="squad-progress-fill" id="budgetProgressFill" style="background: var(--gold);"></div>
@@ -330,8 +322,8 @@
         <!-- Actions -->
         <div class="panel" style="gap:12px; display:flex; flex-direction:column;">
           <p class="panel-title">Manage Team</p>
-          <button class="save-btn" onclick="saveSquad()">💾 Save Squad</button>
-          <button class="reset-btn" id="resetBtn">↺ Clear Squad</button>
+          <button class="save-btn" id="saveBtn" onclick="saveSquad()">💾 Save Squad</button>
+          <button class="reset-btn" id="resetBtn" onclick="resetSquad()">↺ Clear Squad</button>
         </div>
       </aside>
     </div>
@@ -360,6 +352,8 @@
         <div class="rules-section">
           <h3>General Rules (All Players)</h3>
           <div class="rules-grid">
+            <div class="rule-item" style="border-color: var(--gold);"><span class="rule-desc" style="font-weight: 700;">Captain (C) Points</span><span class="pts-badge positive">x2</span></div>
+            <div class="rule-item"><span class="rule-desc" style="font-size: 12px; color: var(--text-muted);">A Captain and Vice-Captain must be selected. If Captain doesn't play, Vice-Captain's points are doubled.</span></div>
             <div class="rule-item"><span class="rule-desc">Playing for at least 1 min</span><span class="pts-badge positive">+1</span></div>
             <div class="rule-item"><span class="rule-desc">Playing the full match</span><span class="pts-badge positive">+2</span></div>
             <div class="rule-item"><span class="rule-desc">For each Assist</span><span class="pts-badge positive">+3</span></div>
@@ -412,6 +406,48 @@
     </div>
   </div>
 
+  <!-- ── Modal: Leaderboard ── -->
+  <div class="modal-overlay" id="leaderboardModal">
+    <div class="modal" style="width: min(600px, 94vw); max-height: 90vh;">
+      <div class="modal-header">
+        <span class="modal-title">Leaderboard</span>
+        <button class="modal-close-btn" onclick="document.getElementById('leaderboardModal').classList.remove('open')">✕</button>
+      </div>
+      <div class="modal-body" style="padding: 0;">
+        <div class="auth-tabs" style="margin-bottom: 0; position: sticky; top: 0; background: var(--navy-800); z-index: 10;">
+          <div class="auth-tab active" onclick="switchLBTab('overall')">Overall</div>
+          <div class="auth-tab" onclick="switchLBTab('md1')">MD 1</div>
+          <div class="auth-tab" onclick="switchLBTab('md2')">MD 2</div>
+          <div class="auth-tab" onclick="switchLBTab('md3')">MD 3</div>
+        </div>
+        <div style="padding: 16px; background: var(--bg-input); font-size: 12px; color: var(--text-muted); text-align: center; border-bottom: 1px solid var(--border-subtle);">
+          Click on a manager to view their squad <br>(Squads are hidden until the deadline passes)
+        </div>
+        <div id="lb-list" style="padding-bottom: 20px;">
+           <div style="text-align:center; padding: 40px; color: var(--text-muted);">Loading Leaderboard...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Modal: View Squad (Read Only) ── -->
+  <div class="modal-overlay" id="viewSquadModal">
+    <div class="modal" style="width: min(800px, 94vw); max-height: 95vh;">
+      <div class="modal-header">
+        <span class="modal-title" id="vs-title">Manager's Squad</span>
+        <button class="modal-close-btn" onclick="document.getElementById('viewSquadModal').classList.remove('open')">✕</button>
+      </div>
+      <div class="modal-body" style="background: var(--bg-main); padding: 16px;">
+         <div class="pitch-wrapper" style="transform: scale(0.9); transform-origin: top center; margin-bottom: -60px;">
+          <div class="pitch" id="vs-pitch">
+            <!-- Read Only Pitch Injected via JS -->
+            <div class="pitch-bottom-lines"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- ── Modal: Player Selection ── -->
   <div class="modal-overlay" id="playerModal">
     <div class="modal" style="width: min(620px, 94vw);">
@@ -453,6 +489,10 @@
             <label>Roll Number</label>
             <input type="text" id="loginRoll" required>
           </div>
+          <div class="form-group">
+            <label>PIN / Password</label>
+            <input type="password" id="loginPin" required placeholder="Enter PIN / Password">
+          </div>
           <button type="submit" class="form-btn">Login</button>
         </form>
 
@@ -469,6 +509,10 @@
           <div class="form-group">
             <label>Roll Number</label>
             <input type="text" id="regRoll" required>
+          </div>
+          <div class="form-group">
+            <label>Set a PIN / Password</label>
+            <input type="password" id="regPin" required placeholder="Minimum 4 characters" minlength="4">
           </div>
           <div class="form-group">
             <label>Profile Picture (Optional)</label>
@@ -534,27 +578,53 @@
   'use strict';
 
   /* =========================================================
+     [0] CONSTANTS & DEADLINE LOGIC
+     ========================================================= */
+  const DEADLINE_DATE = new Date('2026-05-15T12:00:00').getTime(); 
+  
+  function isDeadlinePassed() {
+    return new Date().getTime() >= DEADLINE_DATE;
+  }
+
+  function updateCountdown() {
+    const now = new Date().getTime();
+    const distance = DEADLINE_DATE - now;
+    const bannerText = document.getElementById('countdownTimer');
+
+    if (distance < 0) {
+      bannerText.textContent = "DEADLINE PASSED";
+      bannerText.style.color = "var(--red-accent)";
+      document.getElementById('saveBtn').disabled = true;
+      document.getElementById('resetBtn').disabled = true;
+      document.querySelectorAll('.formation-btn').forEach(btn => btn.disabled = true);
+      return;
+    }
+
+    const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+    bannerText.textContent = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+  }
+  setInterval(updateCountdown, 1000);
+  updateCountdown();
+
+  /* =========================================================
      [1] POCKETBASE DATABASE INTEGRATION
      ========================================================= */
   const pb = new PocketBase('https://efljudb.duckdns.org');
   let allPlayers = [];
   let currentUser = null;
+  let allUsersList = []; // For Leaderboard
 
   // Strict Position Mapping based on Database structure
   function mapPosition(rawPos) {
-    if(!rawPos) return 'DEF'; // Fallback / Enthusiasts
+    if(!rawPos) return 'DEF'; 
     let p = rawPos.toLowerCase();
-    
-    // Goalkeepers -> GK
     if(p.includes('goal') || p === 'gk') return 'GK';
-    
-    // Any Midfielder -> MID
     if(p.includes('mid')) return 'MID';
-    
-    // Any Winger or Forward/Striker -> FWD
     if(p.includes('wing') || p.includes('forward') || p.includes('striker')) return 'FWD';
-    
-    // Fullbacks, Centre-Backs, Defenders, Enthusiasts -> DEF
     return 'DEF';
   }
 
@@ -570,17 +640,14 @@
         const badgeUrl = p.expand?.team?.banner ? pb.files.getUrl(p.expand.team, p.expand.team.banner) : null;
         const photoUrl = p.photo ? pb.files.getUrl(p, p.photo) : null;
 
-        // Player Custom Budget Logic (efl_price)
         let price = parseFloat(p.efl_price || p.eflPrice || p['efl price'] || p.price);
-        if (isNaN(price)) {
-            price = 7; // Default fallback if no custom price is found
-        }
+        if (isNaN(price)) price = 7.0; 
 
         return {
           id: p.id,
           name: p.name,
           position: mapPosition(p.position),
-          rawPosition: p.position || '', // Store raw position to check for Wingers later
+          rawPosition: p.position || '', 
           price: price, 
           team: tName,
           teamBadgeHtml: badgeUrl ? `<img src="${badgeUrl}">` : `<span style="font-size:10px; color:black;">${tName.substring(0,3)}</span>`,
@@ -610,13 +677,10 @@
     }
   }
 
-  // Handle immediate preview when selecting a new avatar
   document.getElementById('profAvatar').addEventListener('change', function(e) {
     if (e.target.files && e.target.files[0]) {
       const reader = new FileReader();
-      reader.onload = function(e) {
-        document.getElementById('profAvatarPreview').src = e.target.result;
-      }
+      reader.onload = function(e) { document.getElementById('profAvatarPreview').src = e.target.result; }
       reader.readAsDataURL(e.target.files[0]);
     }
   });
@@ -624,7 +688,6 @@
   function switchAuthTab(tab) {
     document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
-    
     if(tab === 'login') {
       document.querySelectorAll('.auth-tab')[0].classList.add('active');
       document.getElementById('loginForm').classList.add('active');
@@ -638,15 +701,16 @@
     e.preventDefault();
     const batch = document.getElementById('loginBatch').value.trim();
     const roll = document.getElementById('loginRoll').value.trim();
+    const pin = document.getElementById('loginPin').value.trim();
     
     try {
-      const record = await pb.collection('fpl_users').getFirstListItem(`batch="${batch}" && roll="${roll}"`);
+      const record = await pb.collection('fpl_users').getFirstListItem(`batch="${batch}" && roll="${roll}" && password="${pin}"`);
       setCurrentUser(record);
       document.getElementById('authModal').classList.remove('open');
       showToast('Login successful!', 'success');
       loadSquadFromUser();
     } catch (err) {
-      showToast('Account not found. Check batch and roll.', 'error');
+      showToast('Invalid credentials. Check your batch, roll, and PIN.', 'error');
     }
   }
 
@@ -658,13 +722,17 @@
     const name = document.getElementById('regName').value.trim();
     const batch = document.getElementById('regBatch').value.trim();
     const roll = document.getElementById('regRoll').value.trim();
+    const pin = document.getElementById('regPin').value.trim();
+
+    if(pin.length < 4) {
+       showToast('PIN must be at least 4 digits/characters.', 'error');
+       btn.disabled = false; btn.textContent = "Create Account";
+       return;
+    }
 
     try {
-      // Prevent Duplicate Account creation
       let existingUser = null;
-      try {
-        existingUser = await pb.collection('fpl_users').getFirstListItem(`batch="${batch}" && roll="${roll}"`);
-      } catch(ignoreError) {}
+      try { existingUser = await pb.collection('fpl_users').getFirstListItem(`batch="${batch}" && roll="${roll}"`); } catch(ignoreError) {}
 
       if (existingUser) {
         showToast('An account with this Batch and Roll already exists. If this is a mistake, please contact support.', 'error');
@@ -676,11 +744,10 @@
       formData.append('name', name);
       formData.append('batch', batch);
       formData.append('roll', roll);
+      formData.append('password', pin);
       
       const fileInput = document.getElementById('regAvatar');
-      if(fileInput.files.length > 0) {
-        formData.append('avatar', fileInput.files[0]);
-      }
+      if(fileInput.files.length > 0) { formData.append('avatar', fileInput.files[0]); }
       formData.append('squad', '{}');
 
       const record = await pb.collection('fpl_users').create(formData);
@@ -703,9 +770,7 @@
       const formData = new FormData();
       formData.append('name', document.getElementById('profName').value.trim());
       const fileInput = document.getElementById('profAvatar');
-      if(fileInput.files.length > 0) {
-        formData.append('avatar', fileInput.files[0]);
-      }
+      if(fileInput.files.length > 0) { formData.append('avatar', fileInput.files[0]); }
 
       const record = await pb.collection('fpl_users').update(currentUser.id, formData);
       setCurrentUser(record);
@@ -723,6 +788,8 @@
     currentUser = null;
     document.getElementById('profileModal').classList.remove('open');
     updateAuthUI();
+    state.captain = null;
+    state.viceCaptain = null;
     Object.keys(state.slots).forEach(k => state.slots[k] = null);
     renderPitch();
     showToast('Logged out', 'warn');
@@ -760,14 +827,23 @@
      [3] SQUAD SAVING LOGIC & BUDGET
      ========================================================= */
   async function saveSquad() {
+    if(isDeadlinePassed()) {
+      showToast('Deadline has passed! You cannot save squad changes.', 'error');
+      return;
+    }
     if(!currentUser) {
       showToast('Please login to save your squad!', 'error');
       openAuthModal();
       return;
     }
 
-    // Checking Budget Before Save
     const filled = Object.values(state.slots).filter(Boolean);
+    
+    if (filled.length < 11) {
+      showToast(`Complete your starting 11 first! (${filled.length}/11)`, 'error');
+      return;
+    }
+
     let totalBudget = 0;
     filled.forEach(p => totalBudget += p.price);
     
@@ -776,13 +852,20 @@
       return;
     }
 
-    const saveBtn = document.querySelector('.save-btn');
+    if (!state.captain || !state.viceCaptain) {
+      showToast('A Captain (C) and Vice-Captain (VC) must be selected!', 'error');
+      return;
+    }
+
+    const saveBtn = document.getElementById('saveBtn');
     if(saveBtn) saveBtn.innerHTML = "Saving...";
 
     try {
-      const squadData = { formation: state.formation, players: {} };
+      const squadData = { formation: state.formation, players: {}, captain: null, viceCaptain: null };
       for(let key in state.slots) {
         squadData.players[key] = state.slots[key] ? state.slots[key].id : null;
+        if(key === state.captain) squadData.captain = state.slots[key].id;
+        if(key === state.viceCaptain) squadData.viceCaptain = state.slots[key].id;
       }
 
       const updatedRecord = await pb.collection('fpl_users').update(currentUser.id, {
@@ -810,11 +893,17 @@
         }
         
         if(squadData.players && allPlayers.length > 0) {
+          state.captain = null;
+          state.viceCaptain = null;
+
           for(let key in squadData.players) {
             const pId = squadData.players[key];
             if(pId && state.slots[key] !== undefined) {
               const pObj = allPlayers.find(p => p.id === pId);
               state.slots[key] = pObj || null;
+
+              if (squadData.captain === pId) state.captain = key;
+              if (squadData.viceCaptain === pId) state.viceCaptain = key;
             }
           }
           renderPitch();
@@ -827,6 +916,8 @@
      [4] STATE MANAGEMENT & DOM RENDERING
      ========================================================= */
   const FORMATIONS = {
+    '5-4-1': { FWD: 1, MID: 4, DEF: 5, GK: 1 },
+    '4-5-1': { FWD: 1, MID: 5, DEF: 4, GK: 1 },
     '5-3-2': { FWD: 2, MID: 3, DEF: 5, GK: 1 },
     '4-3-3': { FWD: 3, MID: 3, DEF: 4, GK: 1 },
     '4-4-2': { FWD: 2, MID: 4, DEF: 4, GK: 1 },
@@ -834,7 +925,7 @@
     '3-4-3': { FWD: 3, MID: 4, DEF: 3, GK: 1 },
   };
 
-  const state = { formation: '4-4-2', slots: {} };
+  const state = { formation: '4-4-2', slots: {}, captain: null, viceCaptain: null };
 
   function initSlots(formation) {
     const config = FORMATIONS[formation];
@@ -845,6 +936,11 @@
         newSlots[key] = state.slots[key] || null;
       }
     });
+    
+    // Clear C/VC if their slot disappeared
+    if(state.captain && !newSlots.hasOwnProperty(state.captain)) state.captain = null;
+    if(state.viceCaptain && !newSlots.hasOwnProperty(state.viceCaptain)) state.viceCaptain = null;
+    
     state.slots = newSlots;
   }
 
@@ -854,6 +950,7 @@
   function renderPitch() {
     pitch.innerHTML = '<div class="pitch-bottom-lines"></div>';
     const config = FORMATIONS[state.formation];
+    const pastDeadline = isDeadlinePassed();
 
     ROW_ORDER.forEach(pos => {
       const row = document.createElement('div');
@@ -863,7 +960,7 @@
 
       for (let i = 0; i < config[pos]; i++) {
         const key = `${pos}-${i}`;
-        slotsWrap.appendChild(buildSlotEl(key, pos, state.slots[key]));
+        slotsWrap.appendChild(buildSlotEl(key, pos, state.slots[key], pastDeadline));
       }
       row.appendChild(slotsWrap);
       pitch.appendChild(row);
@@ -872,36 +969,84 @@
     updateDashboard();
   }
 
-  function buildSlotEl(slotKey, position, player) {
+  function buildSlotEl(slotKey, position, player, pastDeadline = false, readOnly = false) {
     const wrap = document.createElement('div');
     wrap.className = 'player-slot';
 
     if (player) {
+      let removeBtnHtml = (!pastDeadline && !readOnly) ? `<button class="slot-remove-btn show">✕</button>` : '';
+      
+      let cvcHtml = '';
+      if (readOnly) {
+         if (state.captain === slotKey) cvcHtml = `<div class="read-only-cvc">C</div>`;
+         else if (state.viceCaptain === slotKey) cvcHtml = `<div class="read-only-cvc" style="background:#cbd5e1;">VC</div>`;
+      } else if (!pastDeadline) {
+         cvcHtml = `
+           <button class="cvc-btn btn-c ${state.captain === slotKey ? 'active' : ''}" onclick="setCaptain('${slotKey}', event)">C</button>
+           <button class="cvc-btn btn-vc ${state.viceCaptain === slotKey ? 'active' : ''}" onclick="setViceCaptain('${slotKey}', event)">VC</button>
+         `;
+      } else {
+         // Past deadline, just show indicator if they are C or VC
+         if (state.captain === slotKey) cvcHtml = `<div class="read-only-cvc">C</div>`;
+         else if (state.viceCaptain === slotKey) cvcHtml = `<div class="read-only-cvc" style="background:#cbd5e1;">VC</div>`;
+      }
+
       wrap.innerHTML = `
         <div class="slot-card filled">
+          ${cvcHtml}
           <div class="player-photo-wrap">
             ${player.photoHtml}
             <div class="team-badge">${player.teamBadgeHtml}</div>
           </div>
-          <button class="slot-remove-btn show">✕</button>
+          ${removeBtnHtml}
         </div>
         <span class="slot-name">${player.name.split(' ').pop()}</span>
       `;
-      wrap.querySelector('.slot-remove-btn').onclick = (e) => {
-        e.stopPropagation();
-        state.slots[slotKey] = null;
-        renderPitch();
-      };
+      
+      if(!pastDeadline && !readOnly) {
+         wrap.querySelector('.slot-remove-btn').onclick = (e) => {
+           e.stopPropagation();
+           state.slots[slotKey] = null;
+           if (state.captain === slotKey) state.captain = null;
+           if (state.viceCaptain === slotKey) state.viceCaptain = null;
+           renderPitch();
+         };
+      }
     } else {
       wrap.innerHTML = `
         <div class="slot-card">
-          <div class="slot-empty-icon">＋</div>
+          <div class="slot-empty-icon">${pastDeadline || readOnly ? '🔒' : '＋'}</div>
         </div>
-        <span class="slot-name" style="color:var(--text-muted); background:transparent;">Add Player</span>
+        <span class="slot-name" style="color:var(--text-muted); background:transparent;">${pastDeadline || readOnly ? 'Empty' : 'Add Player'}</span>
       `;
-      wrap.onclick = () => openPlayerModal(slotKey, position);
+      if(!pastDeadline && !readOnly) {
+         wrap.onclick = () => openPlayerModal(slotKey, position);
+      }
     }
     return wrap;
+  }
+
+  function setCaptain(slotKey, e) {
+    e.stopPropagation();
+    if(state.viceCaptain === slotKey) state.viceCaptain = null;
+    state.captain = state.captain === slotKey ? null : slotKey;
+    renderPitch();
+  }
+
+  function setViceCaptain(slotKey, e) {
+    e.stopPropagation();
+    if(state.captain === slotKey) state.captain = null;
+    state.viceCaptain = state.viceCaptain === slotKey ? null : slotKey;
+    renderPitch();
+  }
+
+  function resetSquad() {
+    if(isDeadlinePassed()) return;
+    Object.keys(state.slots).forEach(k => state.slots[k] = null);
+    state.captain = null;
+    state.viceCaptain = null;
+    renderPitch();
+    showToast('Squad cleared!', 'warn');
   }
 
   function updateDashboard() {
@@ -912,69 +1057,156 @@
     const squadProgressFillEl = document.getElementById('squadProgressFill');
     if (squadProgressFillEl) squadProgressFillEl.style.width = `${(filled.length / 11) * 100}%`;
 
-    // 💰 Budget Calculations
-    let totalBudget = 0;
+    let totalBudget = 0.0;
     filled.forEach(p => totalBudget += p.price);
+    totalBudget = Math.round(totalBudget * 10) / 10;
     
     const budgetSpentEl = document.getElementById('budgetSpent');
     const budgetProgressFillEl = document.getElementById('budgetProgressFill');
     
     if(budgetSpentEl) {
        budgetSpentEl.textContent = `${totalBudget}M`;
-       if (totalBudget > 100) {
-           budgetSpentEl.style.color = 'var(--red-accent)';
-       } else {
-           budgetSpentEl.style.color = 'var(--green-neon)';
-       }
+       budgetSpentEl.style.color = totalBudget > 100 ? 'var(--red-accent)' : 'var(--green-neon)';
     }
     
     if(budgetProgressFillEl) {
        let percent = (totalBudget / 100) * 100;
        if(percent > 100) percent = 100;
        budgetProgressFillEl.style.width = `${percent}%`;
-       
-       if (totalBudget > 100) {
-           budgetProgressFillEl.style.background = 'var(--red-accent)';
-       } else {
-           budgetProgressFillEl.style.background = 'var(--gold)';
-       }
+       budgetProgressFillEl.style.background = totalBudget > 100 ? 'var(--red-accent)' : 'var(--gold)';
     }
   }
 
   /* =========================================================
-     [5] EVENTS & MODALS
+     [5] LEADERBOARD & VIEW SQUAD
      ========================================================= */
-  document.getElementById('formationButtons').addEventListener('click', (e) => {
-    if(e.target.tagName !== 'BUTTON') return;
-    document.querySelectorAll('.formation-btn').forEach(btn => btn.classList.remove('active'));
-    e.target.classList.add('active');
-    state.formation = e.target.dataset.formation;
-    initSlots(state.formation);
-    renderPitch();
-  });
+  async function openLeaderboard() {
+    document.getElementById('leaderboardModal').classList.add('open');
+    switchLBTab('overall');
+  }
 
-  document.getElementById('resetBtn').onclick = () => {
-    Object.keys(state.slots).forEach(k => state.slots[k] = null);
-    renderPitch();
-    showToast('Squad cleared!', 'warn');
-  };
+  function switchLBTab(tab) {
+    document.querySelectorAll('#leaderboardModal .auth-tab').forEach(t => t.classList.remove('active'));
+    event.target.classList.add('active');
+    
+    const listEl = document.getElementById('lb-list');
+    listEl.innerHTML = `<div style="text-align:center; padding: 40px; color: var(--text-muted);">Loading ${tab} ranking...</div>`;
+    
+    // Fetch users (if not fetched)
+    pb.collection('fpl_users').getFullList().then(users => {
+       allUsersList = users;
+       // Mock Sorting based on total points. Since points are not calculated yet on backend, default to 0.
+       // Replace this logic with actual points field when backend is ready (e.g., user.total_points)
+       users.sort((a, b) => (b.total_points || 0) - (a.total_points || 0));
 
+       let html = '';
+       users.forEach((u, i) => {
+          let avatarUrl = u.avatar ? pb.files.getUrl(u, u.avatar) : 'https://via.placeholder.com/40';
+          let pts = u.total_points || 0;
+          html += `
+             <div class="lb-user-item" onclick="viewUserSquad('${u.id}')">
+                <div class="lb-rank">#${i+1}</div>
+                <div class="lb-user-info">
+                   <img src="${avatarUrl}" class="lb-avatar">
+                   <div style="font-weight: 700;">${u.name}</div>
+                </div>
+                <div class="lb-pts">${pts}</div>
+             </div>
+          `;
+       });
+       if(users.length === 0) html = `<div style="text-align:center; padding: 40px; color: var(--text-muted);">No managers registered yet.</div>`;
+       listEl.innerHTML = html;
+    }).catch(err => {
+       listEl.innerHTML = `<div style="text-align:center; padding: 40px; color: var(--red-accent);">Error loading leaderboard.</div>`;
+    });
+  }
+
+  function viewUserSquad(userId) {
+     if(!isDeadlinePassed()) {
+         showToast("Squads are hidden until the deadline passes!", "error");
+         return;
+     }
+
+     const user = allUsersList.find(u => u.id === userId);
+     if(!user) return;
+
+     document.getElementById('vs-title').textContent = `${user.name}'s Squad`;
+
+     // Parse user's squad
+     let vsFormation = '4-4-2';
+     let vsSlots = {};
+     let vsCap = null;
+     let vsVC = null;
+
+     if(user.squad) {
+         try {
+             let sq = typeof user.squad === 'string' ? JSON.parse(user.squad) : user.squad;
+             vsFormation = sq.formation || '4-4-2';
+             vsCap = sq.captain || null;
+             vsVC = sq.viceCaptain || null;
+             
+             if(sq.players) {
+                 for(let key in sq.players) {
+                     const pId = sq.players[key];
+                     vsSlots[key] = pId ? allPlayers.find(p => p.id === pId) : null;
+                 }
+             }
+         } catch(e) {}
+     }
+
+     const vsPitch = document.getElementById('vs-pitch');
+     vsPitch.innerHTML = '<div class="pitch-bottom-lines"></div>';
+     const config = FORMATIONS[vsFormation];
+
+     // We temporarily override state variables just for rendering this specific read-only pitch
+     const backupState = { ...state };
+     state.formation = vsFormation;
+     state.captain = null;
+     state.viceCaptain = null;
+     
+     // Find the keys for C and VC
+     for(let key in vsSlots) {
+         if(vsSlots[key] && vsSlots[key].id === vsCap) state.captain = key;
+         if(vsSlots[key] && vsSlots[key].id === vsVC) state.viceCaptain = key;
+     }
+
+     ROW_ORDER.forEach(pos => {
+      const row = document.createElement('div');
+      row.className = 'pitch-row';
+      const slotsWrap = document.createElement('div');
+      slotsWrap.className = 'row-slots';
+
+      for (let i = 0; i < config[pos]; i++) {
+        const key = `${pos}-${i}`;
+        slotsWrap.appendChild(buildSlotEl(key, pos, vsSlots[key], true, true)); // PastDeadline = true, ReadOnly = true
+      }
+      row.appendChild(slotsWrap);
+      vsPitch.appendChild(row);
+    });
+
+    // Restore user state
+    state.formation = backupState.formation;
+    state.captain = backupState.captain;
+    state.viceCaptain = backupState.viceCaptain;
+
+    document.getElementById('viewSquadModal').classList.add('open');
+  }
+
+  /* =========================================================
+     [6] EVENTS & MODALS (Player Selection)
+     ========================================================= */
   let activeModalSlot = null;
   const playerModal = document.getElementById('playerModal');
   const searchInput = document.getElementById('playerSearch');
 
   function openPlayerModal(slotKey, position) {
-    if(!currentUser) {
-      showToast('Please login to build your squad!', 'warn');
-      openAuthModal();
-      return;
-    }
+    if(isDeadlinePassed()) return;
+    if(!currentUser) { showToast('Please login to build your squad!', 'warn'); openAuthModal(); return; }
     
     activeModalSlot = slotKey;
     document.getElementById('modalTitle').textContent = `Select ${position}`;
     searchInput.value = '';
     
-    // Strict Position Filtering Logic with exception for Wingers
     const playersInPos = allPlayers.filter(p => {
       const isWinger = p.rawPosition.toLowerCase().includes('wing');
       if (position === 'MID') return p.position === 'MID' || isWinger;
@@ -989,19 +1221,13 @@
   function renderPlayerList(players) {
     const listEl = document.getElementById('playerList');
     listEl.innerHTML = '';
+    if(players.length === 0) { listEl.innerHTML = '<div style="text-align:center; padding: 20px; color: var(--text-muted);">No players found for this position</div>'; return; }
     
-    if(players.length === 0) {
-      listEl.innerHTML = '<div style="text-align:center; padding: 20px; color: var(--text-muted);">No players found for this position</div>';
-      return;
-    }
-    
-    // Get currently selected players (except the current slot we are replacing, if any)
     const currentSquad = Object.entries(state.slots).filter(([key, val]) => val !== null && key !== activeModalSlot).map(([key, val]) => val);
     const selectedIds = currentSquad.map(p => p.id);
 
     players.forEach(p => {
       const isSelected = selectedIds.includes(p.id);
-      
       const item = document.createElement('div');
       item.className = `player-item ${isSelected ? 'already-selected' : ''}`;
       item.innerHTML = `
@@ -1010,22 +1236,15 @@
           <div class="player-item-name">${p.name} <span style="color:var(--text-muted); font-size:12px; margin-left:6px;">${p.position}</span></div>
           <div class="player-item-meta">${p.teamBadgeHtml} <span style="margin-left:5px;">${p.team}</span></div>
         </div>
-        <div style="font-family: var(--font-display); font-size: 18px; font-weight: 800; color: #39d353;">
-           ${p.price}M
-        </div>
+        <div style="font-family: var(--font-display); font-size: 18px; font-weight: 800; color: #39d353;">${p.price}M</div>
       `;
       
       if(!isSelected) {
         item.onclick = () => {
-          // RULE: MAX 5 PLAYERS FROM THE SAME TEAM
           if (p.team && p.team !== 'Undrafted') {
              const sameTeamCount = currentSquad.filter(sp => sp.team === p.team).length;
-             if (sameTeamCount >= 5) {
-                 showToast(`Maximum 5 players allowed from ${p.team}!`, 'error');
-                 return; // Prevent addition
-             }
+             if (sameTeamCount >= 5) { showToast(`Maximum 5 players allowed from ${p.team}!`, 'error'); return; }
           }
-
           state.slots[activeModalSlot] = p;
           playerModal.classList.remove('open');
           renderPitch();
@@ -1038,19 +1257,15 @@
   searchInput.addEventListener('input', (e) => {
     const term = e.target.value.toLowerCase();
     const pos = activeModalSlot.split('-')[0];
-    
     const filtered = allPlayers.filter(p => {
       const isWinger = p.rawPosition.toLowerCase().includes('wing');
       let matchPos = false;
-      
       if (pos === 'MID') matchPos = (p.position === 'MID' || isWinger);
       else if (pos === 'FWD') matchPos = (p.position === 'FWD' || isWinger);
       else matchPos = (p.position === pos);
-      
       const matchesSearch = p.name.toLowerCase().includes(term) || p.team.toLowerCase().includes(term);
       return matchPos && matchesSearch; 
     });
-    
     renderPlayerList(filtered);
   });
 
@@ -1061,14 +1276,11 @@
     toast.innerHTML = `<span>${type === 'success' ? '✅' : '⚠️'}</span> ${msg}`;
     container.appendChild(toast);
     setTimeout(() => toast.classList.add('show'), 10);
-    setTimeout(() => {
-      toast.classList.remove('show');
-      setTimeout(() => toast.remove(), 400);
-    }, 3000);
+    setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 400); }, 3000);
   }
 
   /* =========================================================
-     [6] INITIALIZATION
+     [7] INITIALIZATION
      ========================================================= */
   async function initApp() {
     checkSession();
