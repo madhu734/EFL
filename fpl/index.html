@@ -356,9 +356,8 @@
             <div class="rule-item"><span class="rule-desc">Category A Price</span><span class="pts-badge">15M</span></div>
             <div class="rule-item"><span class="rule-desc">Category B Price</span><span class="pts-badge">12M</span></div>
             <div class="rule-item"><span class="rule-desc">Icon Player Price</span><span class="pts-badge">10M</span></div>
-            <div class="rule-item"><span class="rule-desc">Category C Price</span><span class="pts-badge">7M</span></div>
+            <div class="rule-item"><span class="rule-desc">Category C / Enthusiast Price</span><span class="pts-badge">7M</span></div>
             <div class="rule-item"><span class="rule-desc">Category GK Price</span><span class="pts-badge">6M</span></div>
-            <div class="rule-item"><span class="rule-desc">Enthusiast / Unassigned Price</span><span class="pts-badge">5M</span></div>
           </div>
         </div>
         
@@ -576,12 +575,12 @@
 
         // Player Budget Logic
         let rawCat = (p.Catagory || p.category || '').trim().toUpperCase();
-        let price = 5; // Default for None/Enthusiast
+        let price = 7; // Default for Category C / Enthusiast / Unassigned
         if (rawCat === 'A') price = 15;
         else if (rawCat === 'B') price = 12;
         else if (rawCat === 'ICON') price = 10;
-        else if (rawCat === 'C') price = 7;
         else if (rawCat === 'GK') price = 6;
+        else price = 7; // All remaining (C, None, etc) are 7M
 
         return {
           id: p.id,
