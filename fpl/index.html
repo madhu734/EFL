@@ -352,6 +352,7 @@
           <h3>Squad Budget & Restrictions</h3>
           <div class="rules-grid">
             <div class="rule-item" style="border-color: var(--gold);"><span class="rule-desc" style="font-weight: 700;">Total Team Budget Maximum</span><span class="pts-badge" style="background: rgba(245,158,11,0.1); color: var(--gold);">100M</span></div>
+            <div class="rule-item" style="border-color: var(--red-accent);"><span class="rule-desc" style="font-weight: 700;">Max players from the same team</span><span class="pts-badge" style="background: rgba(229,62,62,0.1); color: var(--red-accent);">3</span></div>
             <div class="rule-item"><span class="rule-desc">Category A Price</span><span class="pts-badge">15M</span></div>
             <div class="rule-item"><span class="rule-desc">Category B Price</span><span class="pts-badge">12M</span></div>
             <div class="rule-item"><span class="rule-desc">Icon Player Price</span><span class="pts-badge">10M</span></div>
@@ -586,7 +587,7 @@
           id: p.id,
           name: p.name,
           position: mapPosition(p.position),
-          price: price, // Added Price
+          price: price, 
           team: tName,
           teamBadgeHtml: badgeUrl ? `<img src="${badgeUrl}">` : `<span style="font-size:10px; color:black;">${tName.substring(0,3)}</span>`,
           photoHtml: photoUrl ? `<img src="${photoUrl}" class="player-photo">` : `<div class="player-photo-placeholder">${p.name.charAt(0)}</div>`
@@ -997,7 +998,9 @@
       return;
     }
     
-    const selectedIds = Object.values(state.slots).filter(Boolean).map(p => p.id);
+    // Get currently selected players (except the current slot we are replacing, if any)
+    const currentSquad = Object.entries(state.slots).filter(([key, val]) => val !== null && key !== activeModalSlot).map(([key, val]) => val);
+    const selectedIds = currentSquad.map(p => p.id);
 
     players.forEach(p => {
       const isSelected = selectedIds.includes(p.id);
@@ -1017,6 +1020,15 @@
       
       if(!isSelected) {
         item.onclick = () => {
+          // RULE: MAX 3 PLAYERS FROM THE SAME TEAM
+          if (p.team && p.team !== 'Undrafted') {
+             const sameTeamCount = currentSquad.filter(sp => sp.team === p.team).length;
+             if (sameTeamCount >= 3) {
+                 showToast(`Maximum 3 players allowed from ${p.team}!`, 'error');
+                 return; // Prevent addition
+             }
+          }
+
           state.slots[activeModalSlot] = p;
           playerModal.classList.remove('open');
           renderPitch();
