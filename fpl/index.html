@@ -354,8 +354,10 @@
           <div class="rules-grid">
             <div class="rule-item" style="border-color: var(--gold);"><span class="rule-desc" style="font-weight: 700;">Captain (C) Points</span><span class="pts-badge positive">x2</span></div>
             <div class="rule-item"><span class="rule-desc" style="font-size: 12px; color: var(--text-muted);">A Captain and Vice-Captain must be selected. If Captain doesn't play, Vice-Captain's points are doubled.</span></div>
-            <div class="rule-item"><span class="rule-desc">Playing for at least 1 min</span><span class="pts-badge positive">+1</span></div>
-            <div class="rule-item"><span class="rule-desc">Playing the full match</span><span class="pts-badge positive">+2</span></div>
+            <div class="rule-item"><span class="rule-desc">Playing up to 14 mins</span><span class="pts-badge positive">+1</span></div>
+            <div class="rule-item"><span class="rule-desc">Playing 15 mins or more (Full Match)</span><span class="pts-badge positive">+2</span></div>
+            <div class="rule-item" style="border-color: var(--border-subtle);"><span class="rule-desc">Did not play (0 mins)</span><span class="pts-badge" style="background: var(--bg-input); color: var(--text-muted);">0</span></div>
+            <div class="rule-item"><span class="rule-desc" style="font-size: 11px; color: var(--text-muted); line-height: 1.4;">* Negative points (Cards) still apply even if a player did not play (0 mins).</span></div>
             <div class="rule-item"><span class="rule-desc">For each Assist</span><span class="pts-badge positive">+3</span></div>
             <div class="rule-item"><span class="rule-desc">Penalty earned</span><span class="pts-badge positive">+3</span></div>
             <div class="rule-item"><span class="rule-desc">Man of the Match</span><span class="pts-badge positive">+3</span></div>
@@ -415,10 +417,11 @@
       </div>
       <div class="modal-body" style="padding: 0;">
         <div class="auth-tabs" style="margin-bottom: 0; position: sticky; top: 0; background: var(--navy-800); z-index: 10;">
-          <div class="auth-tab active" onclick="switchLBTab('overall')">Overall</div>
-          <div class="auth-tab" onclick="switchLBTab('md1')">MD 1</div>
-          <div class="auth-tab" onclick="switchLBTab('md2')">MD 2</div>
-          <div class="auth-tab" onclick="switchLBTab('md3')">MD 3</div>
+          <div class="auth-tab active" onclick="switchLBTab('Overall')">Overall</div>
+          <div class="auth-tab" onclick="switchLBTab('MD 4')">MD 4</div>
+          <div class="auth-tab" onclick="switchLBTab('MD 5')">MD 5</div>
+          <div class="auth-tab" onclick="switchLBTab('KO 1')">KO 1</div>
+          <div class="auth-tab" onclick="switchLBTab('KOF')">KOF</div>
         </div>
         <div style="padding: 16px; background: var(--bg-input); font-size: 12px; color: var(--text-muted); text-align: center; border-bottom: 1px solid var(--border-subtle);">
           Click on a manager to view their squad <br>(Squads are hidden until the deadline passes)
@@ -1115,7 +1118,7 @@
 
   async function openLeaderboard() {
     document.getElementById('leaderboardModal').classList.add('open');
-    switchLBTab('overall');
+    switchLBTab('Overall');
   }
 
   function switchLBTab(tab) {
