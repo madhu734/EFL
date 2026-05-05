@@ -287,9 +287,15 @@
             </div>
           </div>
         </div>
+
+        <!-- Actions -->
         <div class="panel" style="gap:12px; display:flex; flex-direction:column;">
           <p class="panel-title">Manage Team</p>
-          <button class="save-btn" id="saveBtn" onclick="saveSquad()">💾 Save Squad</button>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+            <button class="save-btn" style="margin-bottom: 0; padding: 10px 4px; font-size: 11px; background: linear-gradient(135deg, #8b5cf6, #6366f1); border-color: #a78bfa; box-shadow: 0 4px 10px rgba(99, 102, 241, 0.3);" onclick="analyzeSquadAI()">Squad analysis</button>
+            <button class="save-btn" style="margin-bottom: 0; padding: 10px 4px; font-size: 11px; background: linear-gradient(135deg, #ec4899, #e11d48); border-color: #f472b6; box-shadow: 0 4px 10px rgba(225, 29, 72, 0.3);" onclick="generatePressConferenceAI()">🎤 Press Conference</button>
+          </div>
+          <button class="save-btn" id="saveBtn" style="padding: 20px; font-size: 1.4rem;" onclick="saveSquad()">💾 Save Squad</button>
           <button class="reset-btn" id="resetBtn" onclick="resetSquad()">↺ Clear Squad</button>
         </div>
       </aside>
@@ -419,6 +425,38 @@
       </div>
       <div class="player-list" id="playerList">
         <div style="text-align:center; padding: 20px; color: var(--text-muted);">Loading...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Modal: AI Analysis ── -->
+  <div class="modal-overlay" id="aiModal">
+    <div class="modal" style="width: min(600px, 94vw); max-height: 85vh;">
+      <div class="modal-header">
+        <span class="modal-title" style="color: #a78bfa; display: flex; align-items: center; gap: 8px;">Squad Analyst</span>
+        <button class="modal-close-btn" onclick="document.getElementById('aiModal').classList.remove('open')">✕</button>
+      </div>
+      <div class="modal-body" style="line-height: 1.6;">
+        <div id="aiContent" style="color: var(--text-primary); font-size: 0.95rem;">
+          <div style="text-align:center; padding: 20px; color: var(--text-muted);">
+            <div class="spinner" style="border-top-color: #a78bfa; border-color: rgba(167, 139, 250, 0.2); width: 30px; height: 30px; margin-bottom: 15px;"></div>
+            <p>Crunching the numbers and evaluating player synergies...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Modal: AI Press Conference ── -->
+  <div class="modal-overlay" id="pressModal">
+    <div class="modal" style="width: min(700px, 94vw); max-height: 85vh;">
+      <div class="modal-header">
+        <span class="modal-title" style="color: #f472b6; display: flex; align-items: center; gap: 8px;">🎤 Press Conference</span>
+        <button class="modal-close-btn" onclick="document.getElementById('pressModal').classList.remove('open')">✕</button>
+      </div>
+      <div class="modal-body" style="line-height: 1.6;">
+        <div id="pressContent" style="color: var(--text-primary); font-size: 0.95rem;">
+        </div>
       </div>
     </div>
   </div>
@@ -1081,10 +1119,151 @@
   }
 
   /* =========================================================
+     GROQ AI INTEGRATION & COOLDOWN LOGIC
+     ========================================================= */
+  function checkAICooldown(featureName) {
+    const key = `fpl_ai_last_call_${featureName}`;
+    const lastCall = localStorage.getItem(key);
+    if (lastCall) {
+      const timePassed = Date.now() - parseInt(lastCall);
+      if (timePassed < 60000) { // 1 minute (60,000 ms) cooldown
+        const remaining = Math.ceil((60000 - timePassed) / 1000);
+        showToast(`Please wait ${remaining} seconds before using the feature again!`, 'warn');
+        return false;
+      }
+    }
+    return true;
+  }
+
+  function setAICooldown(featureName) {
+    const key = `fpl_ai_last_call_${featureName}`;
+    localStorage.setItem(key, Date.now().toString());
+  }
+
+  async function fetchGroqAI(prompt, sysInstruct = "You are an FPL pundit.") {
+    // 🔑 Groq API Key
+    const apiKey = "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"; 
+    const url = "https://api.groq.com/openai/v1/chat/completions";
+    
+    const payload = {
+      model: "llama-3.3-70b-versatile", // 🚀 Groq's Smartest Model
+      messages: [
+        { role: "system", content: sysInstruct },
+        { role: "user", content: prompt }
+      ],
+      temperature: 0.75, // Slightly higher for more creative/funny responses
+      max_tokens: 500    // Increased limit for better, longer output
+    };
+
+    try {
+      const response = await fetch(url, { 
+          method: 'POST', 
+          headers: { 
+              'Authorization': `Bearer ${apiKey}`,
+              'Content-Type': 'application/json' 
+          }, 
+          body: JSON.stringify(payload) 
+      });
+      
+      if (!response.ok) {
+          const errorDetails = await response.json();
+          console.error("Groq API Error Details:", errorDetails);
+          throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      return data.choices[0].message.content || "No response.";
+    } catch (error) {
+      console.error("AI Error:", error);
+      throw new Error("Server busy");
+    }
+  }
+
+  async function analyzeSquadAI() {
+    if (!checkAICooldown('analysis')) return; // Independent cooldown check
+
+    const filled = Object.values(state.slots).filter(Boolean);
+    if (filled.length === 0) {
+      showToast("Add players to your squad first!", "warn");
+      return;
+    }
+
+    document.getElementById('aiModal').classList.add('open');
+    const aiContent = document.getElementById('aiContent');
+    aiContent.innerHTML = `
+      <div style="text-align:center; padding: 40px 20px; color: var(--text-muted);">
+        <div class="spinner" style="border-top-color: #a78bfa; border-color: rgba(167, 139, 250, 0.2); width: 40px; height: 40px; border-width: 4px; margin-bottom: 20px;"></div>
+        <p style="font-weight: 600; font-family: var(--font-display); letter-spacing: 0.05em; font-size: 1.1rem; text-transform: uppercase;">Analyzing Squad...</p>
+      </div>`;
+
+    let totalBudget = 0;
+    const playerNames = filled.map(p => {
+      totalBudget += p.price;
+      return p.name;
+    });
+
+    let captainName = state.captain && state.slots[state.captain] ? state.slots[state.captain].name : "None";
+
+    const prompt = `FPL Squad: ${playerNames.join(', ')}. Cap: ${captainName}. Spent: ${totalBudget.toFixed(1)}M/100M. Form: ${state.formation}. Write an engaging, detailed, and witty analysis on this squad's balance, captaincy choice, and any potential weaknesses in 2-3 short paragraphs.`;
+    const sysInstruct = "You are an expert, slightly sarcastic FPL pundit. Keep it highly entertaining, insightful, and use markdown formatting. Give a solid verdict at the end.";
+
+    try {
+      let analysisText = await fetchGroqAI(prompt, sysInstruct);
+      setAICooldown('analysis'); // Set independent cooldown
+      
+      analysisText = analysisText.replace(/\*\*(.*?)\*\*/g, '<strong style="color: #c4b5fd;">$1</strong>');
+      analysisText = analysisText.replace(/\n/g, '<br>');
+      aiContent.innerHTML = `<div style="padding: 10px;">${analysisText}</div>`;
+    } catch (error) {
+      aiContent.innerHTML = `<div style="text-align:center; color: var(--red-accent); padding: 20px;"><strong>Server is currently busy.</strong><br><br>The AI pundit is handling too many requests. Please try again in a few minutes.</div>`;
+    }
+  }
+
+  async function generatePressConferenceAI() {
+    if (!checkAICooldown('press')) return; // Independent cooldown check
+
+    const filled = Object.values(state.slots).filter(Boolean);
+    if (filled.length < 11) {
+      showToast("Complete your starting 11 first!", "warn");
+      return;
+    }
+
+    document.getElementById('pressModal').classList.add('open');
+    const pressContent = document.getElementById('pressContent');
+    pressContent.innerHTML = `
+      <div style="text-align:center; padding: 40px 20px; color: var(--text-muted);">
+        <div class="spinner" style="border-top-color: #f472b6; border-color: rgba(244, 114, 182, 0.2); width: 40px; height: 40px; border-width: 4px; margin-bottom: 20px;"></div>
+        <p style="font-weight: 600; font-family: var(--font-display); letter-spacing: 0.05em; font-size: 1.1rem; text-transform: uppercase;">Calling journalists... 📸</p>
+      </div>`;
+
+    let highestPrice = 0;
+    let starPlayer = "";
+    const playerNames = filled.map(p => {
+      if(p.price > highestPrice) { highestPrice = p.price; starPlayer = p.name; }
+      return p.name;
+    });
+
+    let captainName = state.captain && state.slots[state.captain] ? state.slots[state.captain].name : "No one";
+
+    const prompt = `Squad: ${playerNames.join(', ')}. Cap: ${captainName}. Star: ${starPlayer}. Write a hilarious and dramatic pre-match press conference transcript. Include 2-3 funny questions from journalists (about spending, captaincy, or relying on the star player) and witty, confident, or defensive answers from the Manager.`;
+    const sysInstruct = "You generate highly humorous, dramatic FPL press conferences in clean HTML. Use <b>Journalist:</b> and <b>Manager:</b> tags. Feel free to use emojis. Make it around 150-200 words.";
+
+    try {
+      let text = await fetchGroqAI(prompt, sysInstruct);
+      setAICooldown('press'); // Set independent cooldown
+      
+      text = text.replace(/```html/g, '').replace(/```/g, '');
+      pressContent.innerHTML = `<div style="padding: 10px;">${text}</div>`;
+    } catch (error) {
+      pressContent.innerHTML = `<div style="text-align:center; color: var(--red-accent); padding: 20px;"><strong>Server is currently busy.</strong><br><br>Too many managers in the press room! Please try again later.</div>`;
+    }
+  }
+
+  /* =========================================================
      INITIALIZATION
      ========================================================= */
   async function initApp() { checkSession(); initSlots(state.formation); renderPitch(); await fetchAllData(); loadSquadFromUser(); }
   initApp();
-  </script>
+</script>
 </body>
 </html>
