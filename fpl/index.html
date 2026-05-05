@@ -387,7 +387,7 @@
           <div class="auth-tab" onclick="switchLBTab('KOF')">KOF</div>
         </div>
         <div style="padding: 16px; background: var(--bg-input); font-size: 12px; color: var(--text-muted); text-align: center; border-bottom: 1px solid var(--border-subtle);">
-          Points are automatically calculated from submitted match logs & results.<br>Click on a manager to view their squad.
+          Points are calculated per Matchday. Captains must play >0 mins in the Matchday to receive x2 points.<br>Click on a manager to view their squad.
         </div>
         <div id="lb-list" style="padding-bottom: 20px;">
            <div style="text-align:center; padding: 40px; color: var(--text-muted);">Loading Leaderboard...</div>
@@ -571,7 +571,7 @@
      ========================================================= */
   const pb = new PocketBase('https://efljudb.duckdns.org');
   let allPlayers = [], currentUser = null, allUsersList = []; 
-  let db_fixtures = [], db_results = [], db_match_logs = [];
+  let db_fixtures = [], db_results = [], db_match_data = [];
 
   function mapPosition(rawPos) {
     if(!rawPos) return 'DEF'; 
@@ -604,9 +604,10 @@
 
       try { db_fixtures = await pb.collection('fixtures').getFullList(); } catch (e) { console.warn("Fixtures error:", e); }
       try { db_results = await pb.collection('results').getFullList(); } catch (e) { console.warn("Results error:", e); }
-      // ফিক্স: fpl_match_logs এর বদলে fpl_match_data দেওয়া হলো যাতে অ্যাডব্লকার ব্লক না করে
-      try { db_match_logs = await pb.collection('fpl_match_data').getFullList(); } catch (e) { 
-          console.error("Match logs fetch error - Check API rules", e); 
+      
+      // Changed to fpl_match_data to bypass adblockers
+      try { db_match_data = await pb.collection('fpl_match_data').getFullList(); } catch (e) { 
+          console.error("Match data fetch error - Check API rules", e); 
       }
     } catch (err) { console.error("Critical error fetching data:", err); }
   }
@@ -844,8 +845,17 @@
   }
 
   /* =========================================================
-     FPL CALCULATION ENGINE & LEADERBOARD
+     TRUE MATCHDAY CALCULATION ENGINE (Gameweek Logic)
      ========================================================= */
+  
+  // Define True Matchdays (Grouping multiple matches per day)
+  const MATCHDAYS = [
+      { name: 'MD 4', condition: f => { let d = f.match_date || ""; return d.includes('-05-08'); } },
+      { name: 'MD 5', condition: f => { let d = f.match_date || ""; return d.includes('-05-09'); } },
+      { name: 'KO 1', condition: f => { let d = f.match_date || ""; return d.includes('-05-14'); } },
+      { name: 'KOF',  condition: f => { let d = f.match_date || ""; return d.includes('-05-15') || d.includes('-05-16'); } }
+  ];
+
   function getPlayerMins(id, under15Arr, dnpArr) {
       if (!id) return 0;
       if (dnpArr.includes(id)) return 0;
@@ -862,23 +872,37 @@
       return count;
   }
 
-  function calculateSquadPoints(squadDataStr, validFixtures) {
-      if (!squadDataStr) return { total: 0, playerPoints: {} };
-      let sq; try { sq = typeof squadDataStr === 'string' ? JSON.parse(squadDataStr) : squadDataStr; } catch(e) { return { total: 0, playerPoints: {} }; }
-      if (!sq.players) return { total: 0, playerPoints: {} };
+  // Calculates points for a specific Matchday (all fixtures happening on that Matchday)
+  function calculateMatchdayPoints(starting11Map, cId, vcId, mdFixtures) {
+      let mdTotal = 0;
+      let mdPlayerPts = {};
+      for(let key in starting11Map) mdPlayerPts[key] = 0;
 
-      let totalPoints = 0; let playerPointsMap = {}; 
-      let cId = sq.captain; let vcId = sq.viceCaptain;
-      let starting11Map = {}; 
-      for(let key in sq.players) { if(sq.players[key]) { starting11Map[key] = sq.players[key]; playerPointsMap[key] = 0; } }
+      // 1. Calculate Captain's TOTAL minutes across all matches in this Matchday
+      let captainTotalMins = 0;
+      mdFixtures.forEach(fix => {
+          let log = db_match_data.find(l => (Array.isArray(l.fixture) && l.fixture.includes(fix.id)) || l.fixture === fix.id);
+          if (!log) return;
+          let under15 = log.players_under_15_mins ? (Array.isArray(log.players_under_15_mins) ? log.players_under_15_mins : [log.players_under_15_mins]) : [];
+          let dnp = log.did_not_play ? (Array.isArray(log.did_not_play) ? log.did_not_play : [log.did_not_play]) : [];
 
-      validFixtures.forEach(fix => {
-          // CRITICAL FIX: Only calculate points if Admin has submitted a Match Log for this fixture!
-          let log = db_match_logs.find(l => (Array.isArray(l.fixture) && l.fixture.includes(fix.id)) || l.fixture === fix.id);
-          if (!log) return; // Not played/logged yet
+          let t1Id = Array.isArray(fix.team1) ? fix.team1[0] : fix.team1;
+          let t2Id = Array.isArray(fix.team2) ? fix.team2[0] : fix.team2;
+          let capPlayer = allPlayers.find(p => p.id === cId);
+          if(capPlayer && (capPlayer.rawTeamId === t1Id || capPlayer.rawTeamId === t2Id)) {
+              captainTotalMins += getPlayerMins(cId, under15, dnp);
+          }
+      });
 
+      // Gameweek Logic: If Captain plays 0 mins across ALL matches today, VC gets double.
+      let doubleId = captainTotalMins > 0 ? cId : vcId;
+
+      // 2. Iterate through all matches today and award points
+      mdFixtures.forEach(fix => {
+          let log = db_match_data.find(l => (Array.isArray(l.fixture) && l.fixture.includes(fix.id)) || l.fixture === fix.id);
+          if (!log) return; 
           let res = db_results.find(r => (Array.isArray(r.fixture) && r.fixture.includes(fix.id)) || r.fixture === fix.id);
-          if (!res) return; // No result published
+          if (!res) return;
 
           let under15 = log.players_under_15_mins ? (Array.isArray(log.players_under_15_mins) ? log.players_under_15_mins : [log.players_under_15_mins]) : [];
           let dnp = log.did_not_play ? (Array.isArray(log.did_not_play) ? log.did_not_play : [log.did_not_play]) : [];
@@ -887,9 +911,6 @@
           let t2Id = Array.isArray(fix.team2) ? fix.team2[0] : fix.team2;
           let score1 = parseInt(res.team1_score ?? res.t1_score) || 0;
           let score2 = parseInt(res.team2_score ?? res.t2_score) || 0;
-
-          let cMins = getPlayerMins(cId, under15, dnp);
-          let doubleId = cMins > 0 ? cId : vcId;
 
           for (let slotKey in starting11Map) {
               let pId = starting11Map[slotKey];
@@ -911,7 +932,6 @@
               if (mins === 0 && yellow === 0 && red === 0) continue; 
 
               let pts = 0; 
-              // ডাইনামিক পজিশন: ইউজার যে স্লটে প্লেয়ারকে বসিয়েছে, সেই পজিশন কাউন্ট হবে
               let pos = slotKey.split('-')[0]; 
 
               if (mins >= 15) pts += 2; else if (mins > 0) pts += 1;
@@ -936,22 +956,54 @@
                   pts += Math.floor(saves / 3);
               }
 
-              // MOTM (1st Best) = +3
               let motm = res.motm || res.potm;
               if (motm && (motm === pId || (Array.isArray(motm) && motm.includes(pId)))) pts += 3;
 
-              // 2nd Best = +2
               let secondBest = log.second_best;
               if (secondBest && (secondBest === pId || (Array.isArray(secondBest) && secondBest.includes(pId)))) pts += 2;
 
-              // 3rd Best = +1
               let thirdBest = log.third_best;
               if (thirdBest && (thirdBest === pId || (Array.isArray(thirdBest) && thirdBest.includes(pId)))) pts += 1;
 
+              // Apply Captaincy Multiplier
               if (pId === doubleId) pts *= 2;
 
-              playerPointsMap[slotKey] += pts;
-              totalPoints += pts;
+              mdPlayerPts[slotKey] += pts;
+              mdTotal += pts;
+          }
+      });
+
+      return { mdTotal, mdPlayerPts };
+  }
+
+  // Master function to manage Tabs and Overall Calculation
+  function calculateSquadPoints(squadDataStr, tabName) {
+      if (!squadDataStr) return { total: 0, playerPoints: {} };
+      let sq; try { sq = typeof squadDataStr === 'string' ? JSON.parse(squadDataStr) : squadDataStr; } catch(e) { return { total: 0, playerPoints: {} }; }
+      if (!sq.players) return { total: 0, playerPoints: {} };
+
+      let totalPoints = 0; 
+      let playerPointsMap = {}; 
+      let starting11Map = {}; 
+      
+      for(let key in sq.players) { 
+          if(sq.players[key]) { 
+              starting11Map[key] = sq.players[key]; 
+              playerPointsMap[key] = 0; 
+          } 
+      }
+
+      // Determine which Matchdays to calculate
+      let mdsToCalculate = tabName === 'Overall' ? MATCHDAYS : MATCHDAYS.filter(m => m.name === tabName);
+
+      // Aggregate points across selected matchdays
+      mdsToCalculate.forEach(md => {
+          let mdFixtures = db_fixtures.filter(md.condition);
+          let result = calculateMatchdayPoints(starting11Map, sq.captain, sq.viceCaptain, mdFixtures);
+          
+          totalPoints += result.mdTotal;
+          for(let key in starting11Map) {
+              playerPointsMap[key] += result.mdPlayerPts[key];
           }
       });
 
@@ -976,24 +1028,9 @@
     const listEl = document.getElementById('lb-list');
     listEl.innerHTML = `<div style="text-align:center; padding: 40px; color: var(--text-muted);">Calculating ${tab} ranking...</div>`;
     
-    // Timezone safe Date String Filtering
-    let validFixtures = [];
-    if (tab === 'Overall') {
-        validFixtures = db_fixtures;
-    } else {
-        validFixtures = db_fixtures.filter(f => {
-            let dStr = f.match_date || ""; 
-            if (tab === 'MD 4' && dStr.includes('-05-08')) return true;
-            if (tab === 'MD 5' && dStr.includes('-05-09')) return true;
-            if (tab === 'KO 1' && dStr.includes('-05-14')) return true;
-            if (tab === 'KOF' && (dStr.includes('-05-15') || dStr.includes('-05-16'))) return true;
-            return false;
-        });
-    }
-    
     pb.collection('fpl_users').getFullList().then(users => {
        allUsersList = users;
-       let usersWithPts = users.map(u => { return { ...u, calculatedPoints: calculateSquadPoints(u.squad, validFixtures).total }; });
+       let usersWithPts = users.map(u => { return { ...u, calculatedPoints: calculateSquadPoints(u.squad, tab).total }; });
        usersWithPts.sort((a, b) => b.calculatedPoints - a.calculatedPoints);
 
        let html = '';
@@ -1021,20 +1058,9 @@
      document.getElementById('vs-title').textContent = `${user.name}'s Squad`;
 
      let vsFormation = '4-4-2', vsSlots = {}, vsCap = null, vsVC = null;
-     let validFixtures = [];
-     if (currentTab === 'Overall') { validFixtures = db_fixtures; } 
-     else {
-         validFixtures = db_fixtures.filter(f => {
-             let dStr = f.match_date || "";
-             if (currentTab === 'MD 4' && dStr.includes('-05-08')) return true;
-             if (currentTab === 'MD 5' && dStr.includes('-05-09')) return true;
-             if (currentTab === 'KO 1' && dStr.includes('-05-14')) return true;
-             if (currentTab === 'KOF' && (dStr.includes('-05-15') || dStr.includes('-05-16'))) return true;
-             return false;
-         });
-     }
-
-     let ptsData = calculateSquadPoints(user.squad, validFixtures);
+     
+     // Efficiently calculate stats via Master Function
+     let ptsData = calculateSquadPoints(user.squad, currentTab);
 
      if(user.squad) {
          try {
@@ -1127,7 +1153,7 @@
     const lastCall = localStorage.getItem(key);
     if (lastCall) {
       const timePassed = Date.now() - parseInt(lastCall);
-      if (timePassed < 60000) { // 1 minute (60,000 ms) cooldown
+      if (timePassed < 60000) { 
         const remaining = Math.ceil((60000 - timePassed) / 1000);
         showToast(`Please wait ${remaining} seconds before using this specific AI feature again!`, 'warn');
         return false;
@@ -1142,21 +1168,13 @@
   }
 
   async function fetchGroqAI(prompt, sysInstruct = "You are an FPL pundit.") {
-    /* 🔑 Advanced API Key Obfuscation (Reverse + Base64)
-      GitHub-এর বটগুলো স্ক্যান করে "gsk_" সিগনেচার খোঁজে। 
-      আমরা Key গুলোকে উল্টো (Reverse) করে তারপর Base64 করেছি। 
-      এতে গিটহাব আর কোনোদিন ওয়ার্নিং দিতে পারবে না। 
-      (৩টি API Key দেওয়া আছে, অটোমেটিক রিসাইকেল হবে)
-    */
     const obfuscatedKeys = [
-      "OVF4YTJjaGs1R2REVmQyWDBNUXpkWjd6WUYzYnlkR1c1N1hNNGEyYTRjbzJMVk51MlpMWl9rc2c=", // Key 1
-      "QTFLdzlWdlB0QTdQMm0xbUY0STRsRjhSWUYzYnlkR1dRNTR1aDBvV3RJSmRlYTZlRmVsMV9rc2c=", // Key 2
-      "VXdBczN2WVNUdHcxWGhMR0lCZEtwOHI2WUYzYnlkR1dIY2FrdllwNHBxdWdCcEw2R3h4X2tzZw=="  // Key 3
+      "OVF4YTJjaGs1R2REVmQyWDBNUXpkWjd6WUYzYnlkR1c1N1hNNGEyYTRjbzJMVk51MlpMWl9rc2c=", 
+      "QTFLdzlWdlB0QTdQMm0xbUY0STRsRjhSWUYzYnlkR1dRNTR1aDBvV3RJSmRlYTZlRmVsMV9rc2c=", 
+      "VXdBczN2WVNUdHcxWGhMR0lCZEtwOHI2WUYzYnlkR1dIY2FrdllwNHBxdWdCcEw2R3h4X2tzZw=="  
     ];
     
-    // লোড ব্যালেন্স করার জন্য অ্যারেটি এলোমেলো (Shuffle) করে নিচ্ছি
     const shuffledKeys = obfuscatedKeys.sort(() => 0.5 - Math.random());
-    
     const url = "https://api.groq.com/openai/v1/chat/completions";
     const payload = {
       model: "llama-3.3-70b-versatile",
@@ -1170,11 +1188,8 @@
 
     let lastError = null;
 
-    // Auto-Fallback System: একটা ফেইল করলে পরেরটা ট্রাই করবে
     for (let obfuscated of shuffledKeys) {
       if (!obfuscated) continue; 
-      
-      // ডিকোড করার ম্যাজিক: প্রথমে Base64 ডিকোড, তারপর উল্টো স্ট্রিংকে সোজা (Reverse) করা
       const apiKey = atob(obfuscated).split('').reverse().join('');
 
       try {
@@ -1200,7 +1215,6 @@
       }
     }
     
-    // যদি ৩টাই ফেইল করে
     throw lastError || new Error("All API keys exhausted or Server busy");
   }
 
@@ -1234,7 +1248,7 @@
 
     try {
       let analysisText = await fetchGroqAI(prompt, sysInstruct);
-      setAICooldown('analysis'); // Set independent cooldown
+      setAICooldown('analysis');
       
       analysisText = analysisText.replace(/\*\*(.*?)\*\*/g, '<strong style="color: #c4b5fd;">$1</strong>');
       analysisText = analysisText.replace(/\n/g, '<br>');
@@ -1245,7 +1259,7 @@
   }
 
   async function generatePressConferenceAI() {
-    if (!checkAICooldown('press')) return; // Independent cooldown check
+    if (!checkAICooldown('press')) return; 
 
     const filled = Object.values(state.slots).filter(Boolean);
     if (filled.length < 11) {
@@ -1275,7 +1289,7 @@
 
     try {
       let text = await fetchGroqAI(prompt, sysInstruct);
-      setAICooldown('press'); // Set independent cooldown
+      setAICooldown('press');
       
       text = text.replace(/```html/g, '').replace(/```/g, '');
       pressContent.innerHTML = `<div style="padding: 10px;">${text}</div>`;
