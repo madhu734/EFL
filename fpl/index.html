@@ -1011,7 +1011,15 @@
               if (mins >= 15) { pts += 2; pBreakdown.push('Played 15+ mins (+2)'); } 
               else if (mins > 0) { pts += 1; pBreakdown.push('Played <15 mins (+1)'); }
 
-              let goals = countEvents(pId, res, teamPrefix + '_goal_');
+              let regularGoals = countEvents(pId, res, teamPrefix + '_goal_');
+              
+              // Count successful penalties as goals
+              let penGoals = 0;
+              if (checkPenMatch(log[teamPrefix + '_pen_taker_1'], pId) && log[teamPrefix + '_pen_scored_1'] === true) penGoals++;
+              if (checkPenMatch(log[teamPrefix + '_pen_taker_2'], pId) && log[teamPrefix + '_pen_scored_2'] === true) penGoals++;
+              
+              let goals = regularGoals + penGoals;
+
               if (goals > 0) {
                   let gPts = 0;
                   if (pos === 'FWD') gPts = goals * 4; 
