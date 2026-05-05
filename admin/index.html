@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EFL Fantasy Admin — Match Logs</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pocketbase/0.21.1/pocketbase.umd.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --bg-void:    #050a14;
+      --bg-deep:    #080f1e;
+      --bg-card:    #0d1829;
+      --bg-raised:  #122033;
+      --bg-hover:   #1a2d47;
+      --border:     rgba(255,255,255,0.08);
+      --gold:       #F0B429;
+      --gold-glow:  rgba(240,180,41,0.25);
+      --emerald:    #39d353;
+      --emerald-glow: rgba(57,211,83,0.2);
+      --rose:       #e53e3e;
+      --rose-glow:  rgba(229,62,62,0.2);
+      --text-primary: #f0f4ff;
+      --text-secondary: #8fa3c0;
+      --text-muted:   #4d6480;
+      --font-display: 'Barlow Condensed', sans-serif;
+      --font-body:    'DM Sans', sans-serif;
+      --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg-void); color: var(--text-primary); font-family: var(--font-body); font-size: 15px; min-height: 100vh; overflow-x: hidden; }
+    body::before { content: ''; position: fixed; inset: 0; background-image: linear-gradient(rgba(57,211,83,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(57,211,83,0.03) 1px, transparent 1px); background-size: 48px 48px; pointer-events: none; z-index: 0; }
+    
+    .app-wrapper { position: relative; z-index: 1; max-width: 1200px; margin: 0 auto; padding: 0 24px 60px; }
+    
+    /* ─── ADMIN LOGIN OVERLAY ─── */
+    #admin-login-overlay {
+      position: fixed; inset: 0; background: rgba(5, 10, 20, 0.95); z-index: 99999;
+      display: flex; align-items: center; justify-content: center; backdrop-filter: blur(15px);
+    }
+    .admin-login-box {
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: 18px;
+      padding: 40px; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+      width: min(400px, 90vw);
+      animation: fadeSlideIn 0.4s ease;
+    }
+    .admin-login-box h2 { font-family: var(--font-display); color: var(--gold); font-size: 28px; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 2px;}
+    .admin-login-box input { width: 100%; padding: 16px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg-deep); color: white; margin-bottom: 20px; outline: none; text-align: center; letter-spacing: 4px; font-size: 18px;}
+    .admin-login-box input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px var(--gold-glow); }
+    .admin-login-box button { width: 100%; padding: 16px; border-radius: 12px; background: linear-gradient(135deg, var(--gold), #c8830a); color: black; font-weight: 800; font-family: var(--font-display); font-size: 18px; border: none; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; transition: 0.2s;}
+    .admin-login-box button:hover { transform: translateY(-2px); box-shadow: 0 4px 20px var(--gold-glow); }
+
+    /* Header */
+    .site-header { padding: 32px 0 28px; display: flex; align-items: center; gap: 18px; border-bottom: 1px solid var(--border); margin-bottom: 36px; }
+    .header-badge { width: 50px; height: 50px; background: linear-gradient(135deg, var(--gold) 0%, #c8830a 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; box-shadow: 0 0 20px var(--gold-glow); }
+    .header-text h1 { font-family: var(--font-display); font-size: 28px; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; line-height: 1; }
+    .header-text p { font-size: 13px; color: var(--gold); font-weight: 600; text-transform: uppercase; margin-top: 6px; letter-spacing: 0.08em; }
+    
+    /* Card & Inputs */
+    .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 18px; padding: 28px; margin-bottom: 24px; box-shadow: 0 8px 32px rgba(0,0,0,0.5); }
+    .card-title { font-family: var(--font-display); font-size: 16px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-secondary); margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+    .card-title::before { content: ''; width: 4px; height: 16px; background: var(--gold); border-radius: 2px; }
+    
+    select { width: 100%; background: var(--bg-deep); border: 1px solid var(--border); border-radius: 12px; color: var(--text-primary); font-family: var(--font-body); font-size: 15px; font-weight: 600; padding: 16px 20px; outline: none; appearance: none; cursor: pointer; transition: all var(--transition); }
+    select:focus { border-color: var(--gold); box-shadow: 0 0 0 4px var(--gold-glow); }
+    select option { background: var(--bg-card); }
+    .field-wrap { position: relative; }
+    .select-icon { position: absolute; right: 20px; top: 50%; transform: translateY(-50%); pointer-events: none; color: var(--gold); font-size: 14px; }
+    
+    /* Fixture Preview */
+    .fixture-preview { display: none; align-items: center; justify-content: center; gap: 24px; padding: 24px; background: var(--bg-raised); border: 1px solid var(--border); border-radius: 12px; margin-top: 20px; animation: fadeSlideIn 0.4s ease; }
+    .fixture-preview.visible { display: flex; }
+    .fixture-team { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+    .fixture-team .crest { width: 80px; height: 80px; border-radius: 50%; background: var(--bg-deep); border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-size: 20px; font-weight: 800; color: var(--text-muted); overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.5); }
+    .fixture-team .crest img { width: 100%; height: 100%; object-fit: cover; }
+    .fixture-team .team-name { font-family: var(--font-display); font-size: 20px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; }
+    .fixture-vs { font-family: var(--font-display); font-size: 26px; font-weight: 900; color: var(--gold); letter-spacing: 0.1em; padding: 10px 20px; background: rgba(240,180,41,0.1); border-radius: 12px; border: 1px solid rgba(240,180,41,0.2); }
+    
+    /* Teams Grid */
+    .teams-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px; }
+    @media (max-width: 900px) { .teams-grid { grid-template-columns: 1fr; } }
+    .team-panel { background: var(--bg-card); border: 1px solid var(--border); border-radius: 18px; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
+    .team-panel-header { padding: 20px; background: var(--bg-raised); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 16px; }
+    .team-panel-crest { width: 44px; height: 44px; border-radius: 50%; background: var(--bg-deep); border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; }
+    .team-panel-crest img { width: 100%; height: 100%; object-fit: cover; }
+    .team-panel-name { font-family: var(--font-display); font-size: 20px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; }
+    
+    /* Player List */
+    .player-list-wrap { padding: 16px; max-height: 500px; overflow-y: auto; flex: 1; }
+    .player-list-wrap::-webkit-scrollbar { width: 6px; }
+    .player-list-wrap::-webkit-scrollbar-track { background: transparent; }
+    .player-list-wrap::-webkit-scrollbar-thumb { background: var(--navy-600); border-radius: 4px; }
+    .player-row { display: flex; align-items: center; gap: 14px; padding: 12px; border-radius: 12px; background: rgba(255,255,255,0.02); border: 1px solid transparent; margin-bottom: 8px; transition: all var(--transition); }
+    .player-row:hover { background: var(--surface-hover); border-color: var(--border); transform: translateX(4px); }
+    .player-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--bg-deep); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; color: var(--text-muted); overflow: hidden; flex-shrink: 0; }
+    .player-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .player-info { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+    .player-name { font-size: 15px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .player-pos { font-size: 11px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; }
+    
+    /* Toggles */
+    .toggle-group { display: flex; gap: 8px; flex-shrink: 0; }
+    .toggle-pill { position: relative; display: flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 20px; border: 1.5px solid var(--border); background: var(--bg-deep); cursor: pointer; font-size: 11px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-secondary); transition: all var(--transition); user-select: none; }
+    .toggle-pill input { display: none; }
+    .toggle-pill.pill-u15:hover { border-color: var(--gold); color: var(--gold); background: rgba(240,180,41,0.05); }
+    .toggle-pill.pill-dnp:hover { border-color: var(--rose); color: var(--rose); background: rgba(229,62,62,0.05);}
+    .toggle-pill.pill-u15.active { background: var(--gold-glow); border-color: var(--gold); color: var(--gold); }
+    .toggle-pill.pill-dnp.active { background: var(--rose-glow); border-color: var(--rose); color: var(--rose); }
+    
+    /* GK Saves Section */
+    .gk-section { padding: 20px; background: var(--bg-raised); border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .gk-section-title { font-family: var(--font-display); font-size: 16px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gold); display: flex; align-items: center; gap: 10px; }
+    .gk-inputs input { width: 80px; padding: 12px; text-align: center; font-size: 18px; font-weight: 700; background: var(--bg-deep); border: 1px solid var(--border); color: var(--text-primary); border-radius: 8px; outline: none;}
+    .gk-inputs input:focus { border-color: var(--gold); }
+    
+    /* Button */
+    .btn-submit { width: 100%; padding: 20px; border: 1px solid #34d399; border-radius: 18px; background: linear-gradient(135deg, #10b981, #059669); color: #ffffff; font-family: var(--font-display); font-size: 20px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 12px; box-shadow: 0 4px 20px rgba(16,185,129,0.3); transition: all var(--transition); }
+    .btn-submit:hover:not(:disabled) { transform: translateY(-3px); box-shadow: 0 8px 30px rgba(16,185,129,0.5); }
+    
+    .hidden { display: none !important; }
+    @keyframes fadeSlideIn { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+    .fade-in { animation: fadeSlideIn 0.4s ease; }
+    
+    /* Summary */
+    .summary-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
+    .summary-row:last-child { border-bottom: none; }
+    .summary-label { color: var(--text-secondary); font-weight: 500; }
+    .summary-chips { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
+    .summary-chip { font-size: 12px; padding: 4px 10px; border-radius: 20px; font-weight: 700; display: flex; align-items: center; gap: 6px; }
+    .summary-chip img { width: 16px; height: 16px; border-radius: 50%; object-fit: cover; }
+    .chip-u15 { background: var(--gold-glow); color: var(--gold); border: 1px solid rgba(240,180,41,0.3); }
+    .chip-dnp { background: var(--rose-glow); color: var(--rose); border: 1px solid rgba(229,62,62,0.3); }
+  </style>
+</head>
+<body>
+
+<!-- ─── ADMIN LOGIN OVERLAY ─── -->
+<div id="admin-login-overlay">
+  <div class="admin-login-box">
+    <h2>Admin Access</h2>
+    <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 24px;">Enter the master password to access the console</p>
+    <input type="password" id="admin-pass-input" placeholder="••••••••" onkeypress="if(event.key === 'Enter') checkAdminPassword()">
+    <button onclick="checkAdminPassword()">Unlock Console</button>
+    <div id="admin-login-error" style="color: var(--rose); font-size: 13px; margin-top: 15px; display: none; font-weight: 600;">❌ Incorrect Password! Access Denied.</div>
+  </div>
+</div>
+
+<div class="app-wrapper">
+  <header class="site-header">
+    <div class="header-badge">📋</div>
+    <div class="header-text">
+      <h1>FPL Admin Console</h1>
+      <p>Log Match Exceptions & Saves</p>
+    </div>
+    <button onclick="logoutAdmin()" style="margin-left: auto; background: var(--bg-card); color: var(--rose); border: 1px solid var(--rose-glow); padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: bold;">Logout Session</button>
+  </header>
+
+  <div class="card" id="fixtureCard">
+    <div class="card-title">1. Select Fixture</div>
+    <div class="field-wrap">
+      <select id="fixtureSelect"><option value="">— Loading fixtures... —</option></select>
+      <span class="select-icon">▼</span>
+    </div>
+    <div class="fixture-preview" id="fixturePreview">
+      <div class="fixture-team" id="previewT1"><div class="crest" id="crestWrapT1"></div><div class="team-name" id="nameT1">—</div></div>
+      <div class="fixture-vs">VS</div>
+      <div class="fixture-team" id="previewT2"><div class="crest" id="crestWrapT2"></div><div class="team-name" id="nameT2">—</div></div>
+    </div>
+    <div id="metaInfo" style="text-align:center; font-size:13px; color:var(--text-muted); margin-top: 15px; font-weight: 600; text-transform: uppercase;"></div>
+  </div>
+
+  <div id="playerSection" class="hidden fade-in">
+    <div class="card-title" style="margin-bottom: 16px;">2. Mark Exceptions & GK Saves</div>
+    <div class="teams-grid" id="teamsGrid"></div>
+
+    <div class="card" id="bonusSection" style="margin-bottom: 24px; padding: 20px;">
+      <div class="card-title" style="color: var(--gold); margin-bottom: 15px;">3. Bonus Points (2nd & 3rd Best)</div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+         <div class="field-wrap">
+           <label style="font-size: 12px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; margin-bottom: 8px; display: block;">2nd Best Player (+2 Pts)</label>
+           <select id="secondBestSelect"><option value="">— Select Player —</option></select>
+           <span class="select-icon">▼</span>
+         </div>
+         <div class="field-wrap">
+           <label style="font-size: 12px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; margin-bottom: 8px; display: block;">3rd Best Player (+1 Pt)</label>
+           <select id="thirdBestSelect"><option value="">— Select Player —</option></select>
+           <span class="select-icon">▼</span>
+         </div>
+      </div>
+    </div>
+
+    <div class="card" id="summaryCard">
+      <div class="card-title" style="color: var(--gold);">Submission Summary</div>
+      <div id="summaryContent"></div>
+    </div>
+
+    <button class="btn-submit" id="submitBtn" onclick="submitMatchLog()">
+      <span id="submitLabel">Submit Match Data</span>
+    </button>
+  </div>
+</div>
+
+<script>
+  /* ─── ADMIN LOGIN LOGIC ─── */
+  function checkAdminPassword() {
+      const pass = document.getElementById('admin-pass-input').value;
+      if (pass === 'efl4@ju') {
+          document.getElementById('admin-login-overlay').style.display = 'none';
+          sessionStorage.setItem('efl_admin_auth', 'true');
+      } else {
+          document.getElementById('admin-login-error').style.display = 'block';
+          document.getElementById('admin-pass-input').value = '';
+      }
+  }
+
+  function logoutAdmin() {
+      sessionStorage.removeItem('efl_admin_auth');
+      location.reload();
+  }
+
+  if (sessionStorage.getItem('efl_admin_auth') !== 'true') {
+      document.getElementById('admin-login-overlay').style.display = 'flex';
+  } else {
+      document.getElementById('admin-login-overlay').style.display = 'none';
+  }
+
+  /* ─── APP LOGIC ─── */
+  const pb = new PocketBase('https://efljudb.duckdns.org');
+  let state = { fixtures: [], selectedFix: null, t1: null, t2: null, t1Players: [], t2Players: [], playerMeta: {} };
+
+  async function init() {
+    try {
+      const result = await pb.collection('fixtures').getFullList({ expand: 'team1,team2', sort: '-match_date' });
+      state.fixtures = result;
+      const sel = document.getElementById('fixtureSelect');
+      sel.innerHTML = '<option value="">— Select Match / Fixture —</option>';
+      result.forEach(f => {
+        const t1 = f.expand?.team1?.name || f.team1; const t2 = f.expand?.team2?.name || f.team2;
+        const date = f.match_date ? new Date(f.match_date).toLocaleDateString('en-GB', { day:'2-digit', month:'short' }) : '';
+        const opt = document.createElement('option'); opt.value = f.id; opt.textContent = `${t1} vs ${t2} ${date ? '('+date+')' : ''}`;
+        sel.appendChild(opt);
+      });
+    } catch(err) { alert('Failed to load fixtures!'); }
+  }
+
+  function getImgUrl(record, filename) { return filename ? pb.files.getUrl(record, filename) : null; }
+
+  document.getElementById('fixtureSelect').addEventListener('change', async function() {
+    const id = this.value;
+    if (!id) { document.getElementById('fixturePreview').classList.remove('visible'); document.getElementById('playerSection').classList.add('hidden'); return; }
+
+    const fix = state.fixtures.find(f => f.id === id); if (!fix) return;
+    state.selectedFix = fix;
+    state.t1 = fix.expand?.team1 || { id: fix.team1, name: 'Team 1' };
+    state.t2 = fix.expand?.team2 || { id: fix.team2, name: 'Team 2' };
+
+    const t1Logo = getImgUrl(state.t1, state.t1.banner); const t2Logo = getImgUrl(state.t2, state.t2.banner);
+    document.getElementById('crestWrapT1').innerHTML = t1Logo ? `<img src="${t1Logo}">` : '?'; document.getElementById('nameT1').textContent = state.t1.name;
+    document.getElementById('crestWrapT2').innerHTML = t2Logo ? `<img src="${t2Logo}">` : '?'; document.getElementById('nameT2').textContent = state.t2.name;
+    
+    document.getElementById('metaInfo').textContent = fix.match_date ? new Date(fix.match_date).toDateString() : '';
+    document.getElementById('fixturePreview').classList.add('visible');
+
+    const players = await pb.collection('players').getFullList({ filter: `team="${state.t1.id}" || team="${state.t2.id}"`, sort: 'position,name' });
+    state.t1Players = players.filter(p => p.team === state.t1.id);
+    state.t2Players = players.filter(p => p.team === state.t2.id);
+    state.playerMeta = {}; [...state.t1Players, ...state.t2Players].forEach(p => state.playerMeta[p.id] = { u15: false, dnp: false });
+
+    // Populate Bonus Points Dropdowns
+    const allMatchPlayers = [...state.t1Players, ...state.t2Players];
+    const sbSelect = document.getElementById('secondBestSelect');
+    const tbSelect = document.getElementById('thirdBestSelect');
+    if (sbSelect && tbSelect) {
+      sbSelect.innerHTML = '<option value="">— Select Player —</option>';
+      tbSelect.innerHTML = '<option value="">— Select Player —</option>';
+      allMatchPlayers.forEach(p => {
+         sbSelect.innerHTML += `<option value="${p.id}">${p.name} (${p.position})</option>`;
+         tbSelect.innerHTML += `<option value="${p.id}">${p.name} (${p.position})</option>`;
+      });
+    }
+
+    renderTeamPanels();
+    document.getElementById('playerSection').classList.remove('hidden'); updateSummary();
+  });
+
+  function renderTeamPanels() {
+    const grid = document.getElementById('teamsGrid'); grid.innerHTML = '';
+    grid.appendChild(buildTeamPanel(state.t1, state.t1Players, 't1'));
+    grid.appendChild(buildTeamPanel(state.t2, state.t2Players, 't2'));
+  }
+
+  function buildTeamPanel(team, players, key) {
+    const panel = document.createElement('div'); panel.className = 'team-panel';
+    const teamLogo = getImgUrl(team, team.banner);
+
+    panel.innerHTML = `<div class="team-panel-header"><div class="team-panel-crest">${teamLogo ? `<img src="${teamLogo}">` : '?'}</div><div class="team-panel-name">${team.name}</div></div>`;
+    
+    const listWrap = document.createElement('div'); listWrap.className = 'player-list-wrap';
+    players.forEach(p => {
+        const row = document.createElement('div'); row.className = 'player-row';
+        let pPhoto = getImgUrl(p, p.photo);
+        row.innerHTML = `
+          <div class="player-avatar">${pPhoto ? `<img src="${pPhoto}">` : p.name.charAt(0)}</div>
+          <div class="player-info"><span class="player-name">${p.name}</span><span class="player-pos">${p.position||'Unknown'}</span></div>
+          <div class="toggle-group">
+            <label class="toggle-pill pill-u15" id="pill-u15-${p.id}"><input type="checkbox" id="u15-${p.id}" onchange="togglePill('${p.id}','u15',this.checked)" /><div class="pill-dot"></div>&lt;15m</label>
+            <label class="toggle-pill pill-dnp" id="pill-dnp-${p.id}"><input type="checkbox" id="dnp-${p.id}" onchange="togglePill('${p.id}','dnp',this.checked)" /><div class="pill-dot"></div>DNP</label>
+          </div>
+        `;
+        listWrap.appendChild(row);
+    });
+    panel.appendChild(listWrap);
+
+    const gkSection = document.createElement('div'); gkSection.className = 'gk-section';
+    gkSection.innerHTML = `<div class="gk-section-title">🧤 Team GK Saves</div><div class="gk-inputs"><input type="number" id="saves-${key}" min="0" value="0" oninput="updateSummary()"/></div>`;
+    panel.appendChild(gkSection);
+
+    return panel;
+  }
+
+  function togglePill(pId, type, checked) {
+    const meta = state.playerMeta[pId];
+    if (type === 'u15') {
+      meta.u15 = checked; if (checked) { meta.dnp = false; document.getElementById(`dnp-${pId}`).checked = false; document.getElementById(`pill-dnp-${pId}`).classList.remove('active'); }
+      document.getElementById(`pill-u15-${pId}`).classList.toggle('active', checked);
+    } else {
+      meta.dnp = checked; if (checked) { meta.u15 = false; document.getElementById(`u15-${pId}`).checked = false; document.getElementById(`pill-u15-${pId}`).classList.remove('active'); }
+      document.getElementById(`pill-dnp-${pId}`).classList.toggle('active', checked);
+    }
+    updateSummary();
+  }
+
+  function updateSummary() {
+    const all = [...state.t1Players, ...state.t2Players];
+    const u15 = all.filter(p => state.playerMeta[p.id].u15).map(p => { let img=getImgUrl(p,p.photo); return `<span class="summary-chip chip-u15">${img?`<img src="${img}">`:''}${p.name.split(' ').pop()}</span>`; }).join('') || '<span style="color:var(--text-muted);">None</span>';
+    const dnp = all.filter(p => state.playerMeta[p.id].dnp).map(p => { let img=getImgUrl(p,p.photo); return `<span class="summary-chip chip-dnp">${img?`<img src="${img}">`:''}${p.name.split(' ').pop()}</span>`; }).join('') || '<span style="color:var(--text-muted);">None</span>';
+    const s1 = parseInt(document.getElementById('saves-t1')?.value)||0; const s2 = parseInt(document.getElementById('saves-t2')?.value)||0;
+
+    document.getElementById('summaryContent').innerHTML = `
+      <div class="summary-row"><span class="summary-label">Played < 15 Mins</span><div class="summary-chips">${u15}</div></div>
+      <div class="summary-row"><span class="summary-label">Did Not Play (DNP)</span><div class="summary-chips">${dnp}</div></div>
+      <div class="summary-row"><span class="summary-label">${state.t1.name} GK Saves</span><span style="font-weight:bold;color:var(--gold);">${s1}</span></div>
+      <div class="summary-row"><span class="summary-label">${state.t2.name} GK Saves</span><span style="font-weight:bold;color:var(--gold);">${s2}</span></div>
+    `;
+  }
+
+  async function submitMatchLog() {
+    const btn = document.getElementById('submitBtn'); btn.disabled = true; btn.textContent = "Submitting...";
+    const all = [...state.t1Players, ...state.t2Players];
+    const u15Ids = all.filter(p => state.playerMeta[p.id].u15).map(p => p.id);
+    const dnpIds = all.filter(p => state.playerMeta[p.id].dnp).map(p => p.id);
+    const s1 = parseInt(document.getElementById('saves-t1')?.value)||0; const s2 = parseInt(document.getElementById('saves-t2')?.value)||0;
+    const secondBest = document.getElementById('secondBestSelect')?.value || null;
+    const thirdBest = document.getElementById('thirdBestSelect')?.value || null;
+
+    try {
+      await pb.collection('fpl_match_logs').create({ 
+          fixture: state.selectedFix.id, 
+          players_under_15_mins: u15Ids, 
+          did_not_play: dnpIds, 
+          t1_saves: s1, 
+          t2_saves: s2,
+          second_best: secondBest,
+          third_best: thirdBest
+      });
+      alert('Match Data Saved Successfully! 🎉'); setTimeout(() => location.reload(), 1000);
+    } catch(err) { alert('Error: Make sure your PocketBase API rules are open (Public)!'); } 
+    finally { btn.disabled = false; btn.textContent = "Submit Match Data"; }
+  }
+  
+  init();
+</script>
+</body>
+</html>
