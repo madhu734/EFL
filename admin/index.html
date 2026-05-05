@@ -336,9 +336,17 @@
         </div>
     </div>
 
-    <!-- ── 3. FPL EXCEPTIONS & GK SAVES ── -->
-    <div class="card">
-        <div class="card-title" style="color: var(--gold);">3. FPL Exceptions & GK Saves</div>
+    <!-- ── 3. PENALTIES (FPL & MAIN SITE SYNC) ── -->
+    <div class="card" id="penaltySection" style="margin-bottom: 24px; padding: 20px;">
+        <div class="card-title" style="color: var(--rose); margin-bottom: 15px;">3. Penalties (FPL & Main Site Sync)</div>
+        <div class="teams-grid" style="margin-bottom: 0;" id="penaltiesGrid">
+           <!-- Handled by generatePenaltyHTML via JS -->
+        </div>
+    </div>
+
+    <!-- ── 4. FPL EXCEPTIONS & GK SAVES ── -->
+    <div class="card" id="playerSection">
+        <div class="card-title" style="color: var(--gold);">4. FPL Exceptions & GK Saves</div>
         <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">Mark players who played under 15 minutes or did not play at all. Also log Goalkeeper saves.</p>
         
         <div class="teams-grid" id="fplTeamsGrid"></div>
@@ -355,9 +363,9 @@
         </div>
     </div>
 
-    <!-- ── 4. BONUS POINTS ── -->
-    <div class="card">
-        <div class="card-title" style="color: var(--brand-accent);">4. Bonus Points (FPL)</div>
+    <!-- ── 5. BONUS POINTS ── -->
+    <div class="card" id="bonusSection">
+        <div class="card-title" style="color: var(--brand-accent);">5. Bonus Points (2nd & 3rd Best)</div>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
              <div class="field-wrap">
                <label style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; display: block;">🥈 2nd Best Player (+2 Pts)</label>
@@ -414,28 +422,89 @@
   const pb = new PocketBase('https://efljudb.duckdns.org');
   let state = { fixtures: [], selectedFix: null, t1: null, t2: null, t1Players: [], t2Players: [], playerMeta: {}, existingResultId: null, existingLogId: null };
 
-  // HTML Generator for Event Selects
+  function showToast(msg, type = 'info') {
+      const icons = { success: '✅', error: '❌', info: '⚡' };
+      const container = document.getElementById('toast-container');
+      if (!container) return;
+      const toast = document.createElement('div');
+      toast.className = `toast toast-${type}`;
+      toast.innerHTML = `<span class="toast-icon">${icons[type]||'ℹ️'}</span><span>${msg}</span>`;
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.classList.add('fade-out');
+        setTimeout(() => toast.remove(), 320);
+      }, type === 'error' ? 5000 : 3500);
+  }
+
+  // HTML Generator for Normal Events
   function generateEventHTML(prefix, eventName, count, icon) {
       let html = `<div class="event-group"><div class="event-label">${icon} ${eventName}</div><div class="event-grid">`;
       for(let i=1; i<=count; i++) {
-          html += `<div class="field-wrap"><select id="${prefix}_${i}" class="event-select"><option value="">-</option></select><span class="select-icon">▼</span></div>`;
+          let idName = `${prefix}_${eventName.toLowerCase().replace(/s$/,'')}_${i}`;
+          html += `<div class="field-wrap"><select id="${idName}" class="event-select"><option value="">-</option></select><span class="select-icon">▼</span></div>`;
       }
       html += `</div></div>`;
       return html;
   }
 
+  // HTML Generator for Penalty Blocks
+  function generatePenaltyHTML(prefix, teamTitle) {
+      return `
+      <div style="background: var(--bg-deep); padding: 16px; border-radius: 12px; border: 1px solid var(--border);">
+          <div style="font-family: var(--font-display); font-size: 16px; font-weight: 800; color: var(--text-primary); margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 8px;">${teamTitle} Penalties</div>
+          
+          <!-- Pen 1 -->
+          <div style="margin-bottom: 12px; padding: 12px; background: rgba(0,0,0,0.2); border-radius: 8px; border: 1px solid var(--border);">
+              <div style="font-size: 11px; font-weight: 700; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase;">Penalty 1</div>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                  <div class="field-wrap">
+                      <select id="${prefix}_pen_earned_1" class="special-select event-select"><option value="">Earned By</option></select><span class="select-icon">▼</span>
+                  </div>
+                  <div class="field-wrap">
+                      <select id="${prefix}_pen_taker_1" class="special-select event-select"><option value="">Taken By</option></select><span class="select-icon">▼</span>
+                  </div>
+              </div>
+              <label style="font-size: 13px; font-weight: 700; color: var(--emerald); display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                  <input type="checkbox" id="${prefix}_pen_scored_1" style="width: 18px; height: 18px; accent-color: var(--emerald);"> Scored Goal? (Auto-syncs)
+              </label>
+          </div>
+          
+          <!-- Pen 2 -->
+          <div style="padding: 12px; background: rgba(0,0,0,0.2); border-radius: 8px; border: 1px solid var(--border);">
+              <div style="font-size: 11px; font-weight: 700; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase;">Penalty 2</div>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                  <div class="field-wrap">
+                      <select id="${prefix}_pen_earned_2" class="special-select event-select"><option value="">Earned By</option></select><span class="select-icon">▼</span>
+                  </div>
+                  <div class="field-wrap">
+                      <select id="${prefix}_pen_taker_2" class="special-select event-select"><option value="">Taken By</option></select><span class="select-icon">▼</span>
+                  </div>
+              </div>
+              <label style="font-size: 13px; font-weight: 700; color: var(--emerald); display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                  <input type="checkbox" id="${prefix}_pen_scored_2" style="width: 18px; height: 18px; accent-color: var(--emerald);"> Scored Goal? (Auto-syncs)
+              </label>
+          </div>
+      </div>`;
+  }
+
   function initEventGrids() {
+      // Normal Events
       document.getElementById('t1_events_container').innerHTML = 
-          generateEventHTML('t1_goal', 'Goals', 6, '⚽') +
-          generateEventHTML('t1_assist', 'Assists', 6, '👟') +
-          generateEventHTML('t1_yellow', 'Yellows', 4, '🟨') +
-          generateEventHTML('t1_red', 'Reds', 2, '🟥');
+          generateEventHTML('t1', 'Goals', 6, '⚽') +
+          generateEventHTML('t1', 'Assists', 6, '👟') +
+          generateEventHTML('t1', 'Yellows', 4, '🟨') +
+          generateEventHTML('t1', 'Reds', 2, '🟥');
           
       document.getElementById('t2_events_container').innerHTML = 
-          generateEventHTML('t2_goal', 'Goals', 6, '⚽') +
-          generateEventHTML('t2_assist', 'Assists', 6, '👟') +
-          generateEventHTML('t2_yellow', 'Yellows', 4, '🟨') +
-          generateEventHTML('t2_red', 'Reds', 2, '🟥');
+          generateEventHTML('t2', 'Goals', 6, '⚽') +
+          generateEventHTML('t2', 'Assists', 6, '👟') +
+          generateEventHTML('t2', 'Yellows', 4, '🟨') +
+          generateEventHTML('t2', 'Reds', 2, '🟥');
+          
+      // Penalty Section
+      document.getElementById('penaltiesGrid').innerHTML = 
+          generatePenaltyHTML('t1', 'Team 1') + 
+          generatePenaltyHTML('t2', 'Team 2');
   }
 
   async function init() {
@@ -528,24 +597,34 @@
       try {
           const [resList, logList] = await Promise.all([
               pb.collection('results').getFullList({ filter: `fixture="${fixtureId}"` }),
-              // ফিক্স: fpl_match_logs এর বদলে fpl_match_data
               pb.collection('fpl_match_data').getFullList({ filter: `fixture="${fixtureId}"` })
           ]);
 
-          // Pre-fill Results
+          // Pre-fill Results (Goals, Assists, Cards, POTM)
           if (resList.length > 0) {
               const r = resList[0];
               state.existingResultId = r.id;
               document.getElementById('team1_score').value = r.team1_score !== undefined ? r.team1_score : (r.t1_score || 0);
               document.getElementById('team2_score').value = r.team2_score !== undefined ? r.team2_score : (r.t2_score || 0);
               
-              document.querySelectorAll('.event-select, .special-select').forEach(sel => {
-                  let val = r[sel.id]; // PB field matching exactly the select ID
-                  if (val) sel.value = Array.isArray(val) ? val[0] : val;
+              ['goal', 'assist', 'yellow', 'red'].forEach(event => {
+                 ['t1', 't2'].forEach(prefix => {
+                     let count = event === 'yellow' ? 4 : (event === 'red' ? 2 : 6);
+                     for(let i=1; i<=count; i++) {
+                         let fieldId = `${prefix}_${event}_${i}`;
+                         let el = document.getElementById(fieldId);
+                         if(el) {
+                             let val = r[fieldId];
+                             if (val) el.value = Array.isArray(val) ? val[0] : val;
+                         }
+                     }
+                 });
               });
+              
+              if(r.potm) document.getElementById('potm').value = Array.isArray(r.potm) ? r.potm[0] : r.potm;
           }
 
-          // Pre-fill FPL Logs
+          // Pre-fill FPL Logs (Penalties, GK Saves, U15, DNP)
           if (logList.length > 0) {
               const l = logList[0];
               state.existingLogId = l.id;
@@ -554,6 +633,23 @@
               
               if(l.second_best) document.getElementById('second_best').value = Array.isArray(l.second_best) ? l.second_best[0] : l.second_best;
               if(l.third_best) document.getElementById('third_best').value = Array.isArray(l.third_best) ? l.third_best[0] : l.third_best;
+
+              // Load Penalty Data automatically
+              ['t1', 't2'].forEach(t => {
+                  [1, 2].forEach(i => {
+                      let earnedId = `${t}_pen_earned_${i}`;
+                      let takerId = `${t}_pen_taker_${i}`;
+                      let scoredId = `${t}_pen_scored_${i}`;
+                      
+                      let elEarned = document.getElementById(earnedId);
+                      let elTaker = document.getElementById(takerId);
+                      let elScored = document.getElementById(scoredId);
+
+                      if(elEarned && l[earnedId]) elEarned.value = Array.isArray(l[earnedId]) ? l[earnedId][0] : l[earnedId];
+                      if(elTaker && l[takerId]) elTaker.value = Array.isArray(l[takerId]) ? l[takerId][0] : l[takerId];
+                      if(elScored && l[scoredId] !== undefined) elScored.checked = !!l[scoredId];
+                  });
+              });
 
               let u15 = Array.isArray(l.players_under_15_mins) ? l.players_under_15_mins : [l.players_under_15_mins].filter(Boolean);
               let dnp = Array.isArray(l.did_not_play) ? l.did_not_play : [l.did_not_play].filter(Boolean);
@@ -569,21 +665,6 @@
       } catch (e) {
           console.error("Error fetching existing data", e);
       }
-  }
-
-  // ফিক্স: showToast ফাংশনটি অ্যাড করা হলো
-  function showToast(msg, type = 'info') {
-      const icons = { success: '✅', error: '❌', info: '⚡' };
-      const container = document.getElementById('toast-container');
-      if (!container) return;
-      const toast = document.createElement('div');
-      toast.className = `toast toast-${type}`;
-      toast.innerHTML = `<span class="toast-icon">${icons[type]||'ℹ️'}</span><span>${msg}</span>`;
-      container.appendChild(toast);
-      setTimeout(() => {
-        toast.classList.add('fade-out');
-        setTimeout(() => toast.remove(), 320);
-      }, type === 'error' ? 5000 : 3500);
   }
 
   function renderFPLTeamPanels() {
@@ -633,7 +714,7 @@
     const btn = document.getElementById('submitBtn'); btn.disabled = true; 
     document.getElementById('submitLabel').innerHTML = '<span class="spinner"></span> Synchronizing...';
 
-    // 1. Gather Results Payload
+    // 1. Base Results Payload
     const resultPayload = {
         fixture: state.selectedFix.id,
         team1_score: parseInt(document.getElementById('team1_score').value) || 0,
@@ -641,14 +722,15 @@
         potm: document.getElementById('potm').value || null
     };
 
+    // Gather Normal Events for Results
     ['t1', 't2'].forEach(prefix => {
-        for(let i=1; i<=6; i++) resultPayload[`${prefix}_goal_${i}`] = document.getElementById(`${prefix}_goal_${i}`).value || null;
-        for(let i=1; i<=6; i++) resultPayload[`${prefix}_assist_${i}`] = document.getElementById(`${prefix}_assist_${i}`).value || null;
-        for(let i=1; i<=4; i++) resultPayload[`${prefix}_yellow_${i}`] = document.getElementById(`${prefix}_yellow_${i}`).value || null;
-        for(let i=1; i<=2; i++) resultPayload[`${prefix}_red_${i}`] = document.getElementById(`${prefix}_red_${i}`).value || null;
+        for(let i=1; i<=6; i++) resultPayload[`${prefix}_goal_${i}`] = document.getElementById(`${prefix}_goal_${i}`)?.value || null;
+        for(let i=1; i<=6; i++) resultPayload[`${prefix}_assist_${i}`] = document.getElementById(`${prefix}_assist_${i}`)?.value || null;
+        for(let i=1; i<=4; i++) resultPayload[`${prefix}_yellow_${i}`] = document.getElementById(`${prefix}_yellow_${i}`)?.value || null;
+        for(let i=1; i<=2; i++) resultPayload[`${prefix}_red_${i}`] = document.getElementById(`${prefix}_red_${i}`)?.value || null;
     });
 
-    // 2. Gather FPL Logs Payload
+    // 2. Base FPL Logs Payload
     const allPlayers = [...state.t1Players, ...state.t2Players];
     const u15Ids = allPlayers.filter(p => state.playerMeta[p.id]?.u15).map(p => p.id);
     const dnpIds = allPlayers.filter(p => state.playerMeta[p.id]?.dnp).map(p => p.id);
@@ -659,16 +741,33 @@
         did_not_play: dnpIds,
         t1_saves: parseInt(document.getElementById('saves-t1').value) || 0,
         t2_saves: parseInt(document.getElementById('saves-t2').value) || 0,
-        second_best: document.getElementById('second_best').value || null,
-        third_best: document.getElementById('third_best').value || null
+        second_best: document.getElementById('second_best')?.value || null,
+        third_best: document.getElementById('third_best')?.value || null
     };
+
+    // Gather Penalties and Auto-Sync to Results Table
+    ['t1', 't2'].forEach(t => {
+        [1, 2].forEach(i => {
+            let earnedVal = document.getElementById(`${t}_pen_earned_${i}`)?.value || null;
+            let takerVal = document.getElementById(`${t}_pen_taker_${i}`)?.value || null;
+            let scoredVal = document.getElementById(`${t}_pen_scored_${i}`)?.checked || false;
+            
+            // FPL Match Data Payload
+            logPayload[`${t}_pen_earned_${i}`] = earnedVal;
+            logPayload[`${t}_pen_taker_${i}`] = takerVal;
+            logPayload[`${t}_pen_scored_${i}`] = scoredVal;
+
+            // ⚡ Auto-Sync Scored Penalties directly to the Result Table Payload!
+            resultPayload[`${t}_pen_goal_${i}`] = (scoredVal && takerVal) ? takerVal : null;
+        });
+    });
 
     try {
         // Save/Update Results
         if (state.existingResultId) await pb.collection('results').update(state.existingResultId, resultPayload);
         else await pb.collection('results').create(resultPayload);
 
-        // Save/Update FPL Match Logs (ফিক্স: fpl_match_logs এর বদলে fpl_match_data)
+        // Save/Update FPL Match Logs (fpl_match_data)
         if (state.existingLogId) await pb.collection('fpl_match_data').update(state.existingLogId, logPayload);
         else await pb.collection('fpl_match_data').create(logPayload);
 
