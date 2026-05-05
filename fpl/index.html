@@ -543,28 +543,65 @@
   });
 
   /* =========================================================
-     CONSTANTS & DEADLINE LOGIC
+     DYNAMIC DEADLINE LOGIC (From Database)
      ========================================================= */
-  const DEADLINE_DATE = new Date('2026-05-08T12:00:00').getTime(); 
-  function isDeadlinePassed() { return new Date().getTime() >= DEADLINE_DATE; }
+  let DEADLINE_DATE = new Date('2026-05-08T12:00:00').getTime(); 
+  let forceLock = false;
+  let enableCountdown = true; // New variable for boolean toggle
+
+  function isDeadlinePassed() { 
+    if (forceLock) return true; 
+    return new Date().getTime() >= DEADLINE_DATE; 
+  }
+
   function updateCountdown() {
     const distance = DEADLINE_DATE - new Date().getTime();
     const bannerText = document.getElementById('countdownTimer');
-    if (distance < 0) {
-      bannerText.textContent = "DEADLINE PASSED";
-      bannerText.style.color = "var(--red-accent)";
-      document.getElementById('saveBtn').disabled = true;
-      document.getElementById('resetBtn').disabled = true;
-      document.querySelectorAll('.formation-btn').forEach(btn => btn.disabled = true);
-      return;
+    
+    const isLocked = forceLock || distance < 0;
+
+    // Lock/Unlock buttons based on state
+    const saveBtn = document.getElementById('saveBtn');
+    if(saveBtn) saveBtn.disabled = isLocked;
+    
+    const resetBtn = document.getElementById('resetBtn');
+    if(resetBtn) resetBtn.disabled = isLocked;
+    
+    document.querySelectorAll('.formation-btn').forEach(btn => btn.disabled = isLocked);
+
+    // Update the banner UI
+    if (forceLock) {
+        if (bannerText) {
+            bannerText.textContent = "LOCKED BY ADMIN 🔒";
+            bannerText.style.color = "var(--red-accent)";
+        }
+    } else if (distance < 0) {
+        if (bannerText) {
+            bannerText.textContent = "DEADLINE PASSED 🔒";
+            bannerText.style.color = "var(--red-accent)";
+        }
+    } else {
+        // App is unlocked (future deadline)
+        if (enableCountdown) {
+            const d = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const h = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const m = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const s = Math.floor((distance % (1000 * 60)) / 1000);
+            
+            if (bannerText) {
+                bannerText.textContent = `${d}d ${h}h ${m}m ${s}s`;
+                bannerText.style.color = "var(--gold)";
+            }
+        } else {
+            if (bannerText) {
+                bannerText.textContent = "SQUAD UNLOCKED 🟢";
+                bannerText.style.color = "var(--green-neon)";
+            }
+        }
     }
-    const d = Math.floor(distance / (1000 * 60 * 60 * 24));
-    const h = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    const m = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-    const s = Math.floor((distance % (1000 * 60)) / 1000);
-    bannerText.textContent = `${d}d ${h}h ${m}m ${s}s`;
   }
-  setInterval(updateCountdown, 1000); updateCountdown();
+  setInterval(updateCountdown, 1000); 
+  updateCountdown();
 
   /* =========================================================
      POCKETBASE & DATA FETCHING
@@ -585,7 +622,36 @@
   async function fetchAllData() {
     try {
       try {
-        const playersRecords = await pb.collection('players').getFullList({ expand: 'team', sort: 'name' });
+          const settings = await pb.collection('system_settings').getFullList({ requestKey: null });
+          if (settings && settings.length > 0) {
+              // Check force_lock
+              forceLock = settings.some(s => {
+                  let v = String(s.force_lock).toLowerCase().trim();
+                  return v === 'true' || v === 'yes' || v === '1' || s.force_lock === true;
+              });
+
+              // Check deadline and the new enable_countdown field
+              let validSetting = settings.find(s => s.deadline);
+              if (validSetting) {
+                  let dStr = validSetting.deadline.replace(' ', 'T'); 
+                  DEADLINE_DATE = new Date(dStr).getTime();
+
+                  if (validSetting.enable_countdown !== undefined) {
+                      let ec = String(validSetting.enable_countdown).toLowerCase().trim();
+                      enableCountdown = (ec === 'true' || ec === 'yes' || ec === '1' || validSetting.enable_countdown === true);
+                  }
+              }
+              updateCountdown(); 
+          }
+      } catch (e) {
+          console.error("Settings fetch error:", e);
+          if (e.status === 403 || e.status === 400) {
+              showToast("System Settings API Rules locked! Please make it Public.", "error");
+          }
+      }
+
+      try {
+        const playersRecords = await pb.collection('players').getFullList({ expand: 'team', sort: 'name', requestKey: null });
         allPlayers = playersRecords.map(p => {
           const teamId = p.expand?.team?.id || null;
           const tName = p.expand?.team?.name || p.expand?.team?.crest_text || 'Undrafted';
@@ -602,13 +668,10 @@
         });
       } catch (e) { console.warn("Players fetch error:", e); }
 
-      try { db_fixtures = await pb.collection('fixtures').getFullList(); } catch (e) { console.warn("Fixtures error:", e); }
-      try { db_results = await pb.collection('results').getFullList(); } catch (e) { console.warn("Results error:", e); }
+      try { db_fixtures = await pb.collection('fixtures').getFullList({ requestKey: null }); } catch (e) { console.warn("Fixtures error:", e); }
+      try { db_results = await pb.collection('results').getFullList({ requestKey: null }); } catch (e) { console.warn("Results error:", e); }
+      try { db_match_data = await pb.collection('fpl_match_data').getFullList({ requestKey: null }); } catch (e) { console.error("Match data fetch error", e); }
       
-      // Changed to fpl_match_data to bypass adblockers
-      try { db_match_data = await pb.collection('fpl_match_data').getFullList(); } catch (e) { 
-          console.error("Match data fetch error - Check API rules", e); 
-      }
     } catch (err) { console.error("Critical error fetching data:", err); }
   }
 
@@ -848,7 +911,6 @@
      TRUE MATCHDAY CALCULATION ENGINE (Gameweek Logic)
      ========================================================= */
   
-  // Define True Matchdays (Grouping multiple matches per day)
   const MATCHDAYS = [
       { name: 'MD 4', condition: f => { let d = f.match_date || ""; return d.includes('-05-08'); } },
       { name: 'MD 5', condition: f => { let d = f.match_date || ""; return d.includes('-05-09'); } },
@@ -872,13 +934,26 @@
       return count;
   }
 
-  // Calculates points for a specific Matchday (all fixtures happening on that Matchday)
   function calculateMatchdayPoints(starting11Map, cId, vcId, mdFixtures) {
       let mdTotal = 0;
       let mdPlayerPts = {};
-      for(let key in starting11Map) mdPlayerPts[key] = 0;
+      let mdBreakdown = {}; 
+      
+      for(let key in starting11Map) {
+          mdPlayerPts[key] = 0;
+          mdBreakdown[key] = [];
+      }
 
-      // 1. Calculate Captain's TOTAL minutes across all matches in this Matchday
+      // --- Helper Functions for Penalty Checking ---
+      const checkPenMatch = (val, id) => {
+          if (!val) return false;
+          return val === id || (Array.isArray(val) && val.includes(id));
+      };
+      const isPenMissed = (takerVal, scoredVal) => {
+          // If a taker exists and scored is false, it's a miss
+          return takerVal && takerVal.length > 0 && scoredVal === false;
+      };
+
       let captainTotalMins = 0;
       mdFixtures.forEach(fix => {
           let log = db_match_data.find(l => (Array.isArray(l.fixture) && l.fixture.includes(fix.id)) || l.fixture === fix.id);
@@ -894,10 +969,8 @@
           }
       });
 
-      // Gameweek Logic: If Captain plays 0 mins across ALL matches today, VC gets double.
       let doubleId = captainTotalMins > 0 ? cId : vcId;
 
-      // 2. Iterate through all matches today and award points
       mdFixtures.forEach(fix => {
           let log = db_match_data.find(l => (Array.isArray(l.fixture) && l.fixture.includes(fix.id)) || l.fixture === fix.id);
           if (!log) return; 
@@ -933,70 +1006,128 @@
 
               let pts = 0; 
               let pos = slotKey.split('-')[0]; 
+              let pBreakdown = []; 
 
-              if (mins >= 15) pts += 2; else if (mins > 0) pts += 1;
+              if (mins >= 15) { pts += 2; pBreakdown.push('Played 15+ mins (+2)'); } 
+              else if (mins > 0) { pts += 1; pBreakdown.push('Played <15 mins (+1)'); }
 
               let goals = countEvents(pId, res, teamPrefix + '_goal_');
-              if (pos === 'FWD') pts += goals * 4; else if (pos === 'MID') pts += goals * 5; else pts += goals * 6; 
-
-              let assists = countEvents(pId, res, teamPrefix + '_assist_'); pts += assists * 3;
-
-              let ownGoals = countEvents(pId, res, oppPrefix + '_goal_'); pts -= ownGoals * 2;
-
-              pts -= yellow * 1; pts -= red * 3;
-
-              if (mins >= 15 && oppScore === 0) {
-                  if (pos === 'GK') pts += 4; else if (pos === 'DEF') pts += 3; else if (pos === 'MID') pts += 1;
+              if (goals > 0) {
+                  let gPts = 0;
+                  if (pos === 'FWD') gPts = goals * 4; 
+                  else if (pos === 'MID') gPts = goals * 5; 
+                  else gPts = goals * 6;
+                  pts += gPts;
+                  pBreakdown.push(`${goals} Goal(s) (+${gPts})`);
               }
 
-              if (mins >= 15 && (pos === 'DEF' || pos === 'GK')) { pts -= Math.floor(oppScore / 2); }
+              let assists = countEvents(pId, res, teamPrefix + '_assist_'); 
+              if (assists > 0) { pts += assists * 3; pBreakdown.push(`${assists} Assist(s) (+${assists * 3})`); }
+
+              let ownGoals = countEvents(pId, res, oppPrefix + '_goal_'); 
+              if (ownGoals > 0) { pts -= ownGoals * 2; pBreakdown.push(`${ownGoals} Own Goal(s) (-${ownGoals * 2})`); }
+
+              if (yellow > 0) { pts -= yellow * 1; pBreakdown.push(`${yellow} Yellow (-${yellow * 1})`); }
+              if (red > 0) { pts -= red * 3; pBreakdown.push(`${red} Red (-${red * 3})`); }
+
+              if (mins >= 15 && oppScore === 0) {
+                  let csPts = 0;
+                  if (pos === 'GK') csPts = 4; else if (pos === 'DEF') csPts = 3; else if (pos === 'MID') csPts = 1;
+                  if (csPts > 0) { pts += csPts; pBreakdown.push(`Clean Sheet (+${csPts})`); }
+              }
+
+              if (mins >= 15 && (pos === 'DEF' || pos === 'GK') && oppScore >= 2) { 
+                  let minusPts = Math.floor(oppScore / 2);
+                  pts -= minusPts; 
+                  pBreakdown.push(`Conceded ${oppScore} (-${minusPts})`);
+              }
+
+              // ---- Penalty Logic Start ----
+              // 1. Penalty Earned (+3)
+              let pensEarned = 0;
+              if (checkPenMatch(log[teamPrefix + '_pen_earned_1'], pId)) pensEarned++;
+              if (checkPenMatch(log[teamPrefix + '_pen_earned_2'], pId)) pensEarned++;
+              if (pensEarned > 0) { 
+                  pts += pensEarned * 3; 
+                  pBreakdown.push(`${pensEarned} Pen Earned (+${pensEarned * 3})`); 
+              }
+
+              // 2. Penalty Missed (-2) for the taker
+              let pensMissed = 0;
+              if (checkPenMatch(log[teamPrefix + '_pen_taker_1'], pId) && log[teamPrefix + '_pen_scored_1'] === false) pensMissed++;
+              if (checkPenMatch(log[teamPrefix + '_pen_taker_2'], pId) && log[teamPrefix + '_pen_scored_2'] === false) pensMissed++;
+              if (pensMissed > 0) { 
+                  pts -= pensMissed * 2; 
+                  pBreakdown.push(`${pensMissed} Pen Missed (-${pensMissed * 2})`); 
+              }
+
+              // 3. Penalty Saved (+5) for the Goalkeeper
+              if (pos === 'GK') {
+                  let pensSaved = 0;
+                  // If opposing team took a pen and missed (scored === false), GK gets a save
+                  if (isPenMissed(log[oppPrefix + '_pen_taker_1'], log[oppPrefix + '_pen_scored_1'])) pensSaved++;
+                  if (isPenMissed(log[oppPrefix + '_pen_taker_2'], log[oppPrefix + '_pen_scored_2'])) pensSaved++;
+                  if (pensSaved > 0) { 
+                      pts += pensSaved * 5; 
+                      pBreakdown.push(`${pensSaved} Pen Saved (+${pensSaved * 5})`); 
+                  }
+              }
+              // ---- Penalty Logic End ----
 
               if (pos === 'GK') {
                   let saves = isT1 ? (log.t1_saves || 0) : (log.t2_saves || 0);
-                  pts += Math.floor(saves / 3);
+                  if (saves >= 3) {
+                      let savePts = Math.floor(saves / 3);
+                      pts += savePts;
+                      pBreakdown.push(`${saves} Saves (+${savePts})`);
+                  }
               }
 
               let motm = res.motm || res.potm;
-              if (motm && (motm === pId || (Array.isArray(motm) && motm.includes(pId)))) pts += 3;
+              if (motm && (motm === pId || (Array.isArray(motm) && motm.includes(pId)))) { pts += 3; pBreakdown.push('POTM (+3)'); }
 
               let secondBest = log.second_best;
-              if (secondBest && (secondBest === pId || (Array.isArray(secondBest) && secondBest.includes(pId)))) pts += 2;
+              if (secondBest && (secondBest === pId || (Array.isArray(secondBest) && secondBest.includes(pId)))) { pts += 2; pBreakdown.push('2nd Best (+2)'); }
 
               let thirdBest = log.third_best;
-              if (thirdBest && (thirdBest === pId || (Array.isArray(thirdBest) && thirdBest.includes(pId)))) pts += 1;
+              if (thirdBest && (thirdBest === pId || (Array.isArray(thirdBest) && thirdBest.includes(pId)))) { pts += 1; pBreakdown.push('3rd Best (+1)'); }
 
-              // Apply Captaincy Multiplier
-              if (pId === doubleId) pts *= 2;
+              if (pId === doubleId && pts !== 0) { 
+                  pts *= 2; 
+                  pBreakdown.push(`<b>Captain (x2)</b>`); 
+              }
 
-              mdPlayerPts[slotKey] += pts;
-              mdTotal += pts;
+              if(pBreakdown.length > 0) {
+                 mdPlayerPts[slotKey] += pts;
+                 mdTotal += pts;
+                 mdBreakdown[slotKey].push(pBreakdown.join(', '));
+              }
           }
       });
 
-      return { mdTotal, mdPlayerPts };
+      return { mdTotal, mdPlayerPts, mdBreakdown };
   }
 
-  // Master function to manage Tabs and Overall Calculation
   function calculateSquadPoints(squadDataStr, tabName) {
-      if (!squadDataStr) return { total: 0, playerPoints: {} };
-      let sq; try { sq = typeof squadDataStr === 'string' ? JSON.parse(squadDataStr) : squadDataStr; } catch(e) { return { total: 0, playerPoints: {} }; }
-      if (!sq.players) return { total: 0, playerPoints: {} };
+      if (!squadDataStr) return { total: 0, playerPoints: {}, playerBreakdowns: {} };
+      let sq; try { sq = typeof squadDataStr === 'string' ? JSON.parse(squadDataStr) : squadDataStr; } catch(e) { return { total: 0, playerPoints: {}, playerBreakdowns: {} }; }
+      if (!sq.players) return { total: 0, playerPoints: {}, playerBreakdowns: {} };
 
       let totalPoints = 0; 
       let playerPointsMap = {}; 
+      let playerBreakdownsMap = {}; 
       let starting11Map = {}; 
       
       for(let key in sq.players) { 
           if(sq.players[key]) { 
               starting11Map[key] = sq.players[key]; 
               playerPointsMap[key] = 0; 
+              playerBreakdownsMap[key] = [];
           } 
       }
 
-      // Determine which Matchdays to calculate
       let mdsToCalculate = tabName === 'Overall' ? MATCHDAYS : MATCHDAYS.filter(m => m.name === tabName);
 
-      // Aggregate points across selected matchdays
       mdsToCalculate.forEach(md => {
           let mdFixtures = db_fixtures.filter(md.condition);
           let result = calculateMatchdayPoints(starting11Map, sq.captain, sq.viceCaptain, mdFixtures);
@@ -1004,10 +1135,18 @@
           totalPoints += result.mdTotal;
           for(let key in starting11Map) {
               playerPointsMap[key] += result.mdPlayerPts[key];
+              if (result.mdBreakdown[key].length > 0) {
+                 let bdStr = result.mdBreakdown[key].join(' | ');
+                 if (tabName === 'Overall') {
+                     playerBreakdownsMap[key].push(`<span style="color:var(--gold); font-weight:700;">${md.name}:</span> ${bdStr}`);
+                 } else {
+                     playerBreakdownsMap[key].push(bdStr);
+                 }
+              }
           }
       });
 
-      return { total: totalPoints, playerPoints: playerPointsMap };
+      return { total: totalPoints, playerPoints: playerPointsMap, playerBreakdowns: playerBreakdownsMap };
   }
 
   document.querySelectorAll('.formation-btn').forEach(btn => {
@@ -1059,7 +1198,6 @@
 
      let vsFormation = '4-4-2', vsSlots = {}, vsCap = null, vsVC = null;
      
-     // Efficiently calculate stats via Master Function
      let ptsData = calculateSquadPoints(user.squad, currentTab);
 
      if(user.squad) {
@@ -1075,15 +1213,46 @@
      
      for(let key in vsSlots) { if(vsSlots[key] && vsSlots[key].id === vsCap) state.captain = key; if(vsSlots[key] && vsSlots[key].id === vsVC) state.viceCaptain = key; }
 
+     let breakdownHtml = `<div style="margin-top: 24px; background: var(--navy-800); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 16px;">
+                            <h4 style="color: var(--gold); font-family: var(--font-display); font-size: 1.2rem; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--border-subtle); padding-bottom: 8px;">📊 Points Breakdown</h4>
+                            <div style="display: flex; flex-direction: column; gap: 10px;">`;
+
      ROW_ORDER.forEach(pos => {
       const row = document.createElement('div'); row.className = 'pitch-row';
       const slotsWrap = document.createElement('div'); slotsWrap.className = 'row-slots';
       for (let i = 0; i < FORMATIONS[vsFormation][pos]; i++) {
         const key = `${pos}-${i}`; let slotPoints = ptsData.playerPoints[key] !== undefined ? ptsData.playerPoints[key] : null;
         slotsWrap.appendChild(buildSlotEl(key, pos, vsSlots[key], true, true, slotPoints));
+        
+        if (vsSlots[key]) {
+            let pName = vsSlots[key].name;
+            let bdowns = ptsData.playerBreakdowns[key] || [];
+            let detailText = bdowns.length > 0 ? bdowns.join('<br>') : '<i style="color: var(--text-muted);">No points registered yet</i>';
+            let ptColor = slotPoints > 0 ? 'var(--green-neon)' : (slotPoints < 0 ? 'var(--red-accent)' : 'var(--text-primary)');
+            
+            breakdownHtml += `
+               <div style="display: flex; flex-direction: column; background: var(--bg-main); padding: 10px 12px; border-radius: 8px; border: 1px solid var(--surface-glass);">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                     <span style="font-weight: 700; font-size: 0.95rem; color: var(--text-primary);">${pName} <span style="color:var(--text-muted); font-size:0.75rem;">(${pos})</span></span>
+                     <span style="font-family: var(--font-display); font-weight: 800; font-size: 1.1rem; color: ${ptColor};">${slotPoints} pts</span>
+                  </div>
+                  <div style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.4;">${detailText}</div>
+               </div>`;
+        }
       }
       row.appendChild(slotsWrap); vsPitch.appendChild(row);
     });
+
+    breakdownHtml += `</div></div>`;
+    
+    let modalBody = document.querySelector('#viewSquadModal .modal-body');
+    let oldBreakdown = document.getElementById('dynamic-breakdown');
+    if(oldBreakdown) oldBreakdown.remove();
+    
+    let bdContainer = document.createElement('div');
+    bdContainer.id = 'dynamic-breakdown';
+    bdContainer.innerHTML = breakdownHtml;
+    modalBody.appendChild(bdContainer);
 
     state.formation = backupState.formation; state.captain = backupState.captain; state.viceCaptain = backupState.viceCaptain;
     document.getElementById('viewSquadModal').classList.add('open');
@@ -1155,7 +1324,7 @@
       const timePassed = Date.now() - parseInt(lastCall);
       if (timePassed < 60000) { 
         const remaining = Math.ceil((60000 - timePassed) / 1000);
-        showToast(`Please wait ${remaining} seconds before using this feature again!`, 'warn');
+        showToast(`Please wait ${remaining} seconds before using this specific AI feature again!`, 'warn');
         return false;
       }
     }
@@ -1291,7 +1460,7 @@
       let text = await fetchGroqAI(prompt, sysInstruct);
       setAICooldown('press');
       
-      text = text.replace(/```html/g, '').replace(/```/g, '');
+      text = text.replace(/```html/g, '').replace(/ কলকাতায়/g, 'ঢাকায়').replace(/```/g, ''); // Small adjustment just in case
       pressContent.innerHTML = `<div style="padding: 10px;">${text}</div>`;
     } catch (error) {
       pressContent.innerHTML = `<div style="text-align:center; color: var(--red-accent); padding: 20px;"><strong>Server is currently busy.</strong><br><br>Too many managers in the press room! Please try again later.</div>`;
@@ -1301,7 +1470,14 @@
   /* =========================================================
      INITIALIZATION
      ========================================================= */
-  async function initApp() { checkSession(); initSlots(state.formation); renderPitch(); await fetchAllData(); loadSquadFromUser(); }
+  async function initApp() { 
+      checkSession(); 
+      initSlots(state.formation); 
+      renderPitch(); 
+      await fetchAllData(); 
+      loadSquadFromUser(); 
+      renderPitch(); 
+  }
   initApp();
 </script>
 </body>
