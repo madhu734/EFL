@@ -528,7 +528,8 @@
       try {
           const [resList, logList] = await Promise.all([
               pb.collection('results').getFullList({ filter: `fixture="${fixtureId}"` }),
-              pb.collection('fpl_match_logs').getFullList({ filter: `fixture="${fixtureId}"` })
+              // ফিক্স: fpl_match_logs এর বদলে fpl_match_data
+              pb.collection('fpl_match_data').getFullList({ filter: `fixture="${fixtureId}"` })
           ]);
 
           // Pre-fill Results
@@ -568,6 +569,21 @@
       } catch (e) {
           console.error("Error fetching existing data", e);
       }
+  }
+
+  // ফিক্স: showToast ফাংশনটি অ্যাড করা হলো
+  function showToast(msg, type = 'info') {
+      const icons = { success: '✅', error: '❌', info: '⚡' };
+      const container = document.getElementById('toast-container');
+      if (!container) return;
+      const toast = document.createElement('div');
+      toast.className = `toast toast-${type}`;
+      toast.innerHTML = `<span class="toast-icon">${icons[type]||'ℹ️'}</span><span>${msg}</span>`;
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.classList.add('fade-out');
+        setTimeout(() => toast.remove(), 320);
+      }, type === 'error' ? 5000 : 3500);
   }
 
   function renderFPLTeamPanels() {
@@ -652,14 +668,14 @@
         if (state.existingResultId) await pb.collection('results').update(state.existingResultId, resultPayload);
         else await pb.collection('results').create(resultPayload);
 
-        // Save/Update FPL Match Logs
-        if (state.existingLogId) await pb.collection('fpl_match_logs').update(state.existingLogId, logPayload);
-        else await pb.collection('fpl_match_logs').create(logPayload);
+        // Save/Update FPL Match Logs (ফিক্স: fpl_match_logs এর বদলে fpl_match_data)
+        if (state.existingLogId) await pb.collection('fpl_match_data').update(state.existingLogId, logPayload);
+        else await pb.collection('fpl_match_data').create(logPayload);
 
-        alert('✅ All Data Synchronized Successfully!');
-        location.reload();
+        showToast('All Data Synchronized Successfully! 🎉', 'success');
+        setTimeout(() => location.reload(), 1500);
     } catch(err) { 
-        alert('❌ Error: Please check PocketBase API rules. Both "results" and "fpl_match_logs" must be Public for Create/Update.'); 
+        showToast('Error: Both "results" and "fpl_match_data" must be Public for Create/Update.', 'error');
         console.error(err);
     } finally { 
         btn.disabled = false; 
