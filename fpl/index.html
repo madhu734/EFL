@@ -1155,7 +1155,7 @@
       const timePassed = Date.now() - parseInt(lastCall);
       if (timePassed < 60000) { 
         const remaining = Math.ceil((60000 - timePassed) / 1000);
-        showToast(`Please wait ${remaining} seconds before using this specific AI feature again!`, 'warn');
+        showToast(`Please wait ${remaining} seconds before using this feature again!`, 'warn');
         return false;
       }
     }
