@@ -71,8 +71,8 @@
     .pitch::before { content: ''; position: absolute; inset: 0; background: linear-gradient(var(--pitch-lines) 0, var(--pitch-lines) 0) 5% 4% / 90% 2px no-repeat, linear-gradient(var(--pitch-lines) 0, var(--pitch-lines) 0) 5% 96% / 90% 2px no-repeat, linear-gradient(var(--pitch-lines) 0, var(--pitch-lines) 0) 5% 4% / 2px 92% no-repeat, linear-gradient(var(--pitch-lines) 0, var(--pitch-lines) 0) 95% 4% / 2px 92% no-repeat, linear-gradient(var(--pitch-lines) 0, var(--pitch-lines) 0) 5% 50% / 90% 1px no-repeat, radial-gradient(circle, transparent 58px, var(--pitch-lines) 58px, var(--pitch-lines) 60px, transparent 60px) 50% 50% / 124px 124px no-repeat, radial-gradient(circle, var(--pitch-lines) 4px, transparent 4px) 50% 50% / 100% 100% no-repeat; pointer-events: none; z-index: 0; }
     .pitch::after { content: ''; position: absolute; top: 4%; left: calc(50% - 120px); width: 240px; height: 80px; border: 2px solid var(--pitch-lines); border-top: none; pointer-events: none; z-index: 0; }
     .pitch-bottom-lines { position: absolute; bottom: 4%; left: calc(50% - 120px); width: 240px; height: 80px; border: 2px solid var(--pitch-lines); border-bottom: none; pointer-events: none; z-index: 0; }
-    .pitch-row { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: 10px; }
-    .row-slots { display: flex; justify-content: center; align-items: center; gap: 15px; width: 100%; flex-wrap: wrap; }
+    .pitch-row { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: 10px; width: 100%; }
+    .row-slots { display: flex; justify-content: center; align-items: center; gap: 15px; width: 100%; flex-wrap: nowrap; }
 
     /* ─── PLAYER PILL ─── */
     .player-slot { display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; transition: transform 0.2s, filter 0.2s; position: relative; }
@@ -195,7 +195,24 @@
     .toast.toast-error { border-left: 4px solid var(--red-accent); }
 
     @media (max-width: 900px) { .main-grid { grid-template-columns: 1fr; } .app-header { flex-direction: column; align-items: flex-start; } .header-controls { width: 100%; justify-content: space-between; } }
-    @media (max-width: 600px) { .slot-card { width: 65px; height: 65px; } .row-slots { gap: 8px; } .formation-btn { font-size: 0.9rem; padding: 6px 14px; } .pitch { min-height: 550px; padding: 15px 10px; } }
+    @media (max-width: 600px) { 
+      .slot-card { width: 52px; height: 52px; border-width: 2px; } 
+      .row-slots { gap: 4px; flex-wrap: nowrap; } 
+      .formation-btn { font-size: 0.85rem; padding: 6px 12px; } 
+      .pitch { min-height: 480px; padding: 15px 5px; } 
+      .slot-name { font-size: 0.7rem; max-width: 55px; padding: 2px 4px; }
+      .read-only-pts { font-size: 9px; padding: 2px 4px; bottom: -10px; }
+      .cvc-btn { width: 18px; height: 18px; font-size: 8px; top: -6px; }
+      .cvc-btn.btn-c { left: -6px; }
+      .cvc-btn.btn-vc { left: 14px; }
+      .read-only-cvc { width: 18px; height: 18px; font-size: 8px; top: -6px; left: -6px; }
+    }
+    @media (max-width: 380px) {
+      .slot-card { width: 44px; height: 44px; border-width: 1.5px; }
+      .slot-name { font-size: 0.6rem; max-width: 48px; }
+      .row-slots { gap: 2px; }
+      .team-badge { width: 18px; height: 18px; bottom: -3px; right: -3px; }
+    }
   </style>
 </head>
 
