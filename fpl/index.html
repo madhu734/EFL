@@ -871,7 +871,9 @@
 
               if (mins === 0 && yellow === 0 && red === 0) continue; 
 
-              let pts = 0; let pos = player.position; 
+              let pts = 0; 
+              // ডাইনামিক পজিশন: ইউজার যে স্লটে প্লেয়ারকে বসিয়েছে, সেই পজিশন কাউন্ট হবে
+              let pos = slotKey.split('-')[0]; 
 
               if (mins >= 15) pts += 2; else if (mins > 0) pts += 1;
 
@@ -895,8 +897,17 @@
                   pts += Math.floor(saves / 3);
               }
 
+              // MOTM (1st Best) = +3
               let motm = res.motm || res.potm;
               if (motm && (motm === pId || (Array.isArray(motm) && motm.includes(pId)))) pts += 3;
+
+              // 2nd Best = +2
+              let secondBest = log.second_best;
+              if (secondBest && (secondBest === pId || (Array.isArray(secondBest) && secondBest.includes(pId)))) pts += 2;
+
+              // 3rd Best = +1
+              let thirdBest = log.third_best;
+              if (thirdBest && (thirdBest === pId || (Array.isArray(thirdBest) && thirdBest.includes(pId)))) pts += 1;
 
               if (pId === doubleId) pts *= 2;
 
