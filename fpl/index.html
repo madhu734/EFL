@@ -11,123 +11,51 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pocketbase/0.21.1/pocketbase.umd.min.js"></script>
 
   <style>
-    /* ═══════════════════════════════════════════════════
-       CSS CUSTOM PROPERTIES — THEME TOKENS
-    ═══════════════════════════════════════════════════ */
+    /* ─── DESIGN TOKENS ─────────────────────────────────────── */
     :root {
-      /* Dark Theme (Default) */
-      --navy-950: #050a14;
-      --navy-900: #080f1e;
-      --navy-800: #0d1829;
-      --navy-700: #122033;
-      --navy-600: #1a2d47;
-      --navy-500: #243b5e;
-      --navy-400: #2e4d7a;
-      
-      --pitch-dark:    #1a5c2e;
-      --pitch-mid:     #1e6b34;
-      --pitch-light:   #22783b;
-      --pitch-lines:   rgba(255,255,255,0.18);
-      
-      --gold:          #f0b429;
-      --green-neon:    #39d353;
-      --red-accent:    #e53e3e;
-      
-      --text-primary:   #f0f4ff;
-      --text-secondary: #8fa3c0;
-      --text-muted:     #4d6480;
-      
-      --surface-glass:  rgba(255,255,255,0.04);
-      --surface-hover:  rgba(255,255,255,0.08);
-      --border-subtle:  rgba(255,255,255,0.08);
-      --bg-input:       #080f1e;
-      --bg-main:        #050a14;
-      
-      --font-display: 'Barlow Condensed', sans-serif;
-      --font-body:    'DM Sans', sans-serif;
-      
-      --radius-pill: 50px;
-      --radius-card: 14px;
-      --shadow-card: 0 8px 32px rgba(0,0,0,0.5);
-      --shadow-glow-gold: 0 0 20px rgba(240,180,41,0.35);
-      --shadow-glow-green: 0 0 20px rgba(57,211,83,0.35);
+      --navy-950: #050a14; --navy-900: #080f1e; --navy-800: #0d1829; --navy-700: #122033;
+      --navy-600: #1a2d47; --navy-500: #243b5e; --navy-400: #2e4d7a;
+      --pitch-dark: #1a5c2e; --pitch-mid: #1e6b34; --pitch-light: #22783b; --pitch-lines: rgba(255,255,255,0.18);
+      --gold: #F0B429; --green-neon: #39d353; --red-accent: #e53e3e;
+      --text-primary: #f0f4ff; --text-secondary: #8fa3c0; --text-muted: #4d6480;
+      --surface-glass: rgba(255,255,255,0.04); --surface-hover: rgba(255,255,255,0.08);
+      --border-subtle: rgba(255,255,255,0.08); --bg-input: #080f1e; --bg-main: #050a14;
+      --font-display: 'Barlow Condensed', sans-serif; --font-body: 'DM Sans', sans-serif;
+      --radius-pill: 50px; --radius-card: 14px;
+      --shadow-card: 0 8px 32px rgba(0,0,0,0.5); --shadow-glow-gold: 0 0 20px rgba(240,180,41,0.35); --shadow-glow-green: 0 0 20px rgba(57,211,83,0.35);
     }
-
-    /* Light Theme Overrides */
     [data-theme="light"] {
-      --navy-950: #f8fafc;
-      --navy-900: #ffffff;
-      --navy-800: #ffffff;
-      --navy-700: #f1f5f9;
-      --navy-600: #e2e8f0;
-      --navy-500: #cbd5e1;
-      --navy-400: #94a3b8;
-
-      --text-primary:   #0f172a;
-      --text-secondary: #475569;
-      --text-muted:     #64748b;
-
-      --surface-glass:  #f8fafc;
-      --surface-hover:  #f1f5f9;
-      --border-subtle:  #e2e8f0;
-      --bg-input:       #ffffff;
-      --bg-main:        #f8fafc;
-
-      --shadow-card: 0 4px 16px rgba(0,0,0,0.05);
-      --shadow-glow-gold: 0 4px 12px rgba(240,180,41,0.2);
-      
-      /* Darker pitch for better contrast in light mode */
-      --pitch-lines:   rgba(255,255,255,0.3);
+      --navy-950: #f8fafc; --navy-900: #ffffff; --navy-800: #ffffff; --navy-700: #f1f5f9;
+      --navy-600: #e2e8f0; --navy-500: #cbd5e1; --navy-400: #94a3b8;
+      --text-primary: #0f172a; --text-secondary: #475569; --text-muted: #64748b;
+      --surface-glass: #f8fafc; --surface-hover: #f1f5f9; --border-subtle: #e2e8f0;
+      --bg-input: #ffffff; --bg-main: #f8fafc;
+      --shadow-card: 0 4px 16px rgba(0,0,0,0.05); --shadow-glow-gold: 0 4px 12px rgba(240,180,41,0.2);
+      --pitch-lines: rgba(255,255,255,0.3);
     }
-
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { font-size: 16px; scroll-behavior: smooth; }
-    body { 
-      font-family: var(--font-body); 
-      background: var(--bg-main); 
-      color: var(--text-primary); 
-      min-height: 100vh; 
-      overflow-x: hidden; 
-      transition: background-color 0.3s, color 0.3s;
-    }
-
-    /* Animated background grid */
-    body::before {
-      content: ''; position: fixed; inset: 0;
-      background-image: linear-gradient(rgba(57,211,83,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(57,211,83,0.03) 1px, transparent 1px);
-      background-size: 48px 48px; pointer-events: none; z-index: 0;
-    }
-    
-    [data-theme="light"] body::before {
-       background-image: linear-gradient(rgba(0,0,0,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,0.03) 1px, transparent 1px);
-    }
-
+    body { font-family: var(--font-body); background: var(--bg-main); color: var(--text-primary); min-height: 100vh; overflow-x: hidden; transition: background-color 0.3s, color 0.3s; }
+    body::before { content: ''; position: fixed; inset: 0; background-image: linear-gradient(rgba(57,211,83,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(57,211,83,0.03) 1px, transparent 1px); background-size: 48px 48px; pointer-events: none; z-index: 0; }
+    [data-theme="light"] body::before { background-image: linear-gradient(rgba(0,0,0,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,0.03) 1px, transparent 1px); }
     .app-container { position: relative; z-index: 1; max-width: 1280px; margin: 0 auto; padding: 0 24px 60px; }
 
-    /* ═══════════════════════════════════════════════════
-       HEADER & DEADLINE BANNER
-    ═══════════════════════════════════════════════════ */
+    /* ─── HEADER ─── */
     .app-header { display: flex; align-items: center; justify-content: space-between; padding: 22px 0 18px; border-bottom: 1px solid var(--border-subtle); gap: 16px; flex-wrap: wrap; transition: border-color 0.3s;}
     .brand { display: flex; align-items: center; gap: 12px; text-decoration: none; }
     .brand-icon { width: 44px; height: 44px; background: linear-gradient(135deg, var(--gold), #c8830a); border-radius: 12px; display: grid; place-items: center; font-size: 22px; box-shadow: var(--shadow-glow-gold); flex-shrink: 0; }
     .brand-text h1 { font-family: var(--font-display); font-size: 1.55rem; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; line-height: 1; color: var(--text-primary); transition: color 0.3s;}
     .brand-text span { font-size: 0.7rem; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gold); }
     .header-controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-
     .deadline-banner { background: var(--navy-800); border-bottom: 2px solid var(--gold); color: var(--text-primary); text-align: center; padding: 10px; font-size: 14px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; box-shadow: 0 4px 12px rgba(0,0,0,0.2); position: relative; z-index: 10; transition: background-color 0.3s, color 0.3s;}
     .deadline-banner span { color: var(--gold); font-family: var(--font-display); font-size: 18px; margin-left: 8px; }
-
-    /* Nav/Auth Buttons */
     .auth-btn { background: var(--surface-glass); border: 1px solid var(--border-subtle); color: var(--text-primary); padding: 8px 16px; border-radius: 8px; font-family: var(--font-body); font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 8px; }
     .auth-btn:hover { border-color: var(--gold); color: var(--gold); background: var(--surface-hover);}
     .auth-avatar { width: 24px; height: 24px; border-radius: 50%; object-fit: cover; background: var(--navy-600); }
-    
     .theme-toggle-btn { background: var(--surface-glass); border: 1px solid var(--border-subtle); color: var(--text-primary); font-size: 16px; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s; flex-shrink: 0;}
     .theme-toggle-btn:hover { border-color: var(--gold); transform: rotate(15deg); }
 
-    /* ═══════════════════════════════════════════════════
-       MAIN GRID & FORMATION
-    ═══════════════════════════════════════════════════ */
+    /* ─── MAIN GRID & PITCH ─── */
     .main-grid { display: grid; grid-template-columns: 1fr 340px; gap: 24px; margin-top: 28px; }
     .formation-bar { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; flex-wrap: wrap; }
     .formation-label { font-family: var(--font-display); font-size: 0.8rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-secondary); white-space: nowrap; transition: color 0.3s;}
@@ -137,9 +65,6 @@
     .formation-btn.active { background: linear-gradient(135deg, var(--gold), #c8830a); border-color: var(--gold); color: var(--navy-950); box-shadow: var(--shadow-glow-gold); transform: translateY(-1px); }
     .formation-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-    /* ═══════════════════════════════════════════════════
-       PITCH DESIGN
-    ═══════════════════════════════════════════════════ */
     .pitch-wrapper { position: relative; border-radius: 18px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.7); }
     [data-theme="light"] .pitch-wrapper { box-shadow: 0 10px 40px rgba(0,0,0,0.15); border: 2px solid var(--border-subtle);}
     .pitch { position: relative; min-height: 650px; padding: 30px 16px; display: flex; flex-direction: column; justify-content: space-evenly; gap: 12px; background-color: var(--pitch-mid); background-image: repeating-linear-gradient( 180deg, transparent, transparent 70px, rgba(0,0,0,0.06) 70px, rgba(0,0,0,0.06) 140px ); }
@@ -149,9 +74,7 @@
     .pitch-row { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: 10px; }
     .row-slots { display: flex; justify-content: center; align-items: center; gap: 15px; width: 100%; flex-wrap: wrap; }
 
-    /* ═══════════════════════════════════════════════════
-       PLAYER PILL & CAPTAINCY
-    ═══════════════════════════════════════════════════ */
+    /* ─── PLAYER PILL ─── */
     .player-slot { display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; transition: transform 0.2s, filter 0.2s; position: relative; }
     .player-slot:hover { transform: translateY(-4px); }
     .slot-card { position: relative; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 2px dashed rgba(255,255,255,0.4); border-radius: var(--radius-pill); width: 85px; height: 85px; transition: all 0.25s ease; overflow: visible; }
@@ -171,8 +94,6 @@
     [data-theme="light"] .slot-remove-btn { border-color: #1e293b; }
     .player-slot:hover .slot-remove-btn.show { display: grid; }
     .slot-name { font-family: var(--font-display); font-size: 0.85rem; font-weight: 700; letter-spacing: 0.04em; text-align: center; color: #fff; max-width: 90px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); border-radius: 6px; padding: 3px 8px; z-index: 10;}
-
-    /* Captain & VC Buttons */
     .cvc-btn { position: absolute; top: -8px; width: 24px; height: 24px; border-radius: 50%; font-size: 10px; font-weight: 900; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 2px solid var(--navy-900); background: #334155; color: #cbd5e1; z-index: 15; transition: all 0.2s; }
     [data-theme="light"] .cvc-btn { border-color: #1e293b; }
     .cvc-btn.btn-c { left: -8px; }
@@ -182,9 +103,7 @@
     .read-only-cvc { position: absolute; top: -8px; left: -8px; width: 24px; height: 24px; border-radius: 50%; font-size: 10px; font-weight: 900; display: flex; align-items: center; justify-content: center; border: 2px solid white; background: var(--gold); color: black; z-index: 15; box-shadow: 0 2px 8px rgba(240, 180, 41, 0.5); }
     .read-only-pts { position: absolute; bottom: -8px; left: -8px; padding: 2px 6px; border-radius: 12px; font-size: 10px; font-weight: 900; background: var(--gold); border: 2px solid white; color: black; z-index: 15; }
 
-    /* ═══════════════════════════════════════════════════
-       SIDEBAR
-    ═══════════════════════════════════════════════════ */
+    /* ─── SIDEBAR ─── */
     .sidebar { display: flex; flex-direction: column; gap: 20px; }
     .panel { background: var(--navy-800); border: 1px solid var(--border-subtle); border-radius: var(--radius-card); padding: 24px; box-shadow: var(--shadow-card); transition: background-color 0.3s, border-color 0.3s;}
     .panel-title { font-family: var(--font-display); font-size: 1rem; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 20px; display: flex; align-items: center; gap: 10px; transition: color 0.3s;}
@@ -195,26 +114,16 @@
     .squad-progress-bar { width: 100%; height: 8px; background: var(--surface-glass); border-radius: 10px; overflow: hidden; border: 1px solid var(--border-subtle);}
     .squad-progress-fill { height: 100%; background: var(--green-neon); width: 0%; transition: width 0.4s ease; box-shadow: var(--shadow-glow-green); }
 
-    /* Buttons */
-    .save-btn { 
-      display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 16px; 
-      background: linear-gradient(135deg, #10b981, #059669); border: 1px solid #34d399; border-radius: 12px; 
-      font-family: var(--font-display); font-size: 1.25rem; font-weight: 800; letter-spacing: 0.08em; 
-      text-transform: uppercase; color: #ffffff; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
-      box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4); margin-bottom: 12px; position: relative; overflow: hidden;
-    }
+    .save-btn { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 16px; background: linear-gradient(135deg, #10b981, #059669); border: 1px solid #34d399; border-radius: 12px; font-family: var(--font-display); font-size: 1.25rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: #ffffff; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4); margin-bottom: 12px; position: relative; overflow: hidden; }
     .save-btn::before { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent); transition: left 0.5s; }
     .save-btn:hover:not(:disabled) { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(16, 185, 129, 0.6); background: linear-gradient(135deg, #34d399, #10b981); border-color: #6ee7b7; }
     .save-btn:hover:not(:disabled)::before { left: 100%; }
     .save-btn:disabled { opacity: 0.5; cursor: not-allowed; filter: grayscale(1); box-shadow: none; }
-    
     .reset-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 12px; background: transparent; border: 1px solid var(--border-subtle); border-radius: 12px; font-family: var(--font-display); font-size: 0.95rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-secondary); cursor: pointer; transition: all 0.2s; }
     .reset-btn:hover:not(:disabled) { border-color: var(--red-accent); color: var(--red-accent); background: rgba(229,62,62,0.07); }
     .reset-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-    /* ═══════════════════════════════════════════════════
-       MODALS
-    ═══════════════════════════════════════════════════ */
+    /* ─── MODALS ─── */
     .modal-overlay { position: fixed; inset: 0; background: rgba(5,10,20,0.85); backdrop-filter: blur(6px); z-index: 1000; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
     [data-theme="light"] .modal-overlay { background: rgba(255,255,255,0.7); }
     .modal-overlay.open { opacity: 1; pointer-events: all; }
@@ -241,13 +150,12 @@
     .player-item.already-selected { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
     .player-avatar { width: 50px; height: 50px; border-radius: 50%; overflow: hidden; background: var(--navy-600); flex-shrink: 0; border: 2px solid var(--border-subtle); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: white;}
     .player-avatar img { width: 100%; height: 100%; object-fit: cover; }
-    
     .player-info { flex: 1; min-width: 0; }
     .player-item-name { font-weight: 700; font-size: 1rem; color: var(--text-primary); transition: color 0.3s;}
     .player-item-meta { font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px; display: flex; align-items: center; gap: 5px; transition: color 0.3s;}
     .player-item-meta img { width: 18px; height: 18px; border-radius: 50%; object-fit: cover; }
     
-    /* Auth Modal Tabs & Forms */
+    /* ─── AUTH FORMS ─── */
     .auth-tabs { display: flex; border-bottom: 1px solid var(--border-subtle); margin-bottom: 20px; transition: border-color 0.3s;}
     .auth-tab { flex: 1; padding: 12px; text-align: center; cursor: pointer; font-weight: 600; color: var(--text-secondary); border-bottom: 2px solid transparent; transition: 0.3s; }
     .auth-tab.active { color: var(--gold); border-color: var(--gold); }
@@ -260,7 +168,7 @@
     .form-btn { background: var(--gold); color: black; padding: 12px; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; margin-top: 10px; transition: 0.2s; }
     .form-btn:hover { opacity: 0.9; }
 
-    /* Leaderboard Styles */
+    /* ─── LEADERBOARD & RULES ─── */
     .lb-user-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid var(--border-subtle); transition: background 0.2s, border-color 0.3s; cursor: pointer; }
     .lb-user-item:hover { background: var(--surface-hover); }
     .lb-rank { font-family: var(--font-display); font-size: 18px; font-weight: 800; color: var(--text-muted); width: 30px; transition: color 0.3s;}
@@ -269,7 +177,6 @@
     .lb-pts { font-family: var(--font-display); font-size: 20px; font-weight: 900; color: var(--green-neon); }
     .lb-tabs-container { margin-bottom: 0; position: sticky; top: 0; background: var(--navy-800); z-index: 10; transition: background-color 0.3s;}
 
-    /* Rules Styles */
     .rules-section { margin-bottom: 24px; }
     .rules-section h3 { font-family: var(--font-display); font-size: 1.2rem; color: var(--gold); text-transform: uppercase; margin-bottom: 12px; letter-spacing: 0.05em; border-bottom: 1px solid var(--border-subtle); padding-bottom: 6px; transition: border-color 0.3s;}
     .rules-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
@@ -279,15 +186,13 @@
     .pts-badge.positive { background: rgba(57,211,83,0.15); color: var(--green-neon); border: 1px solid rgba(57,211,83,0.3); }
     .pts-badge.negative { background: rgba(229,62,62,0.15); color: var(--red-accent); border: 1px solid rgba(229,62,62,0.3); }
     
-    /* ═══════════════════════════════════════════════════
-       TOAST / NOTIFICATION
-    ═══════════════════════════════════════════════════ */
+    /* ─── TOAST ─── */
     .toast-container { position: fixed; bottom: 30px; right: 30px; z-index: 2000; display: flex; flex-direction: column; gap: 10px; align-items: flex-end; }
     .toast { background: var(--navy-800); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 14px 20px; font-size: 0.95rem; font-weight: 600; color: var(--text-primary); box-shadow: var(--shadow-card); transform: translateX(120%); transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1), opacity 0.35s, background-color 0.3s, border-color 0.3s, color 0.3s; display: flex; align-items: center; gap: 10px; }
     .toast.show { transform: translateX(0); }
     .toast.toast-success { border-left: 4px solid var(--green-neon); }
-    .toast.toast-warn    { border-left: 4px solid var(--gold); }
-    .toast.toast-error   { border-left: 4px solid var(--red-accent); }
+    .toast.toast-warn { border-left: 4px solid var(--gold); }
+    .toast.toast-error { border-left: 4px solid var(--red-accent); }
 
     @media (max-width: 900px) { .main-grid { grid-template-columns: 1fr; } .app-header { flex-direction: column; align-items: flex-start; } .header-controls { width: 100%; justify-content: space-between; } }
     @media (max-width: 600px) { .slot-card { width: 65px; height: 65px; } .row-slots { gap: 8px; } .formation-btn { font-size: 0.9rem; padding: 6px 14px; } .pitch { min-height: 550px; padding: 15px 10px; } }
@@ -311,24 +216,16 @@
           <span>Local Tournament</span>
         </div>
       </div>
-
       <div class="header-controls">
         <button class="theme-toggle-btn" onclick="toggleTheme()" id="themeToggleBtn" title="Toggle Dark/Light Mode">☀️</button>
-        <button class="auth-btn" onclick="openLeaderboard()">
-          🏆 Leaderboard
-        </button>
-        <button class="auth-btn" onclick="document.getElementById('rulesModal').classList.add('open')">
-          📜 Rules
-        </button>
-        <button id="authHeaderBtn" class="auth-btn" onclick="openAuthModal()">
-          Login / Register
-        </button>
+        <button class="auth-btn" onclick="openLeaderboard()">🏆 Leaderboard</button>
+        <button class="auth-btn" onclick="document.getElementById('rulesModal').classList.add('open')">📜 Rules</button>
+        <button id="authHeaderBtn" class="auth-btn" onclick="openAuthModal()">Login / Register</button>
       </div>
     </header>
 
     <!-- ── Main Grid ── -->
     <div class="main-grid">
-
       <!-- Left: Pitch Area -->
       <div>
         <div class="formation-bar">
@@ -343,10 +240,8 @@
             <button class="formation-btn" data-formation="3-4-3">3-4-3</button>
           </div>
         </div>
-
         <div class="pitch-wrapper">
           <div class="pitch" id="pitch">
-            <!-- ⚽ Rows injected dynamically by JavaScript -->
             <div class="pitch-bottom-lines"></div>
           </div>
         </div>
@@ -354,7 +249,6 @@
 
       <!-- Right: Sidebar -->
       <aside class="sidebar">
-        <!-- Status -->
         <div class="panel">
           <p class="panel-title">Squad Status</p>
           <div class="squad-progress-wrap">
@@ -366,8 +260,6 @@
               <div class="squad-progress-fill" id="squadProgressFill"></div>
             </div>
           </div>
-          
-          <!-- Budget Progress -->
           <div class="squad-progress-wrap" style="margin-top: 24px;">
             <div class="squad-progress-text">
               <span>Budget Spent:</span>
@@ -378,8 +270,6 @@
             </div>
           </div>
         </div>
-
-        <!-- Actions -->
         <div class="panel" style="gap:12px; display:flex; flex-direction:column;">
           <p class="panel-title">Manage Team</p>
           <button class="save-btn" id="saveBtn" onclick="saveSquad()">💾 Save Squad</button>
@@ -393,13 +283,10 @@
   <div class="modal-overlay" id="rulesModal">
     <div class="modal" style="width: min(700px, 94vw);">
       <div class="modal-header">
-        <div>
-          <span class="modal-title">FPL Point Rules & Budget</span>
-        </div>
+        <span class="modal-title">FPL Point Rules & Budget</span>
         <button class="modal-close-btn" onclick="document.getElementById('rulesModal').classList.remove('open')">✕</button>
       </div>
       <div class="modal-body">
-
         <div class="rules-section">
           <h3>Squad Budget & Restrictions</h3>
           <div class="rules-grid">
@@ -408,7 +295,6 @@
             <div class="rule-item"><span class="rule-desc">Player Prices</span><span class="pts-badge" style="background: var(--bg-input); color: var(--text-muted);">Custom (Check Player List)</span></div>
           </div>
         </div>
-        
         <div class="rules-section">
           <h3>General Rules (All Players)</h3>
           <div class="rules-grid">
@@ -427,7 +313,6 @@
             <div class="rule-item"><span class="rule-desc">Red Card</span><span class="pts-badge negative">-3</span></div>
           </div>
         </div>
-
         <div class="rules-section">
           <h3>Goalkeeper (GK)</h3>
           <div class="rules-grid">
@@ -438,7 +323,6 @@
             <div class="rule-item"><span class="rule-desc">For every 2 goals conceded</span><span class="pts-badge negative">-1</span></div>
           </div>
         </div>
-
         <div class="rules-section">
           <h3>Defender (DEF)</h3>
           <div class="rules-grid">
@@ -447,7 +331,6 @@
             <div class="rule-item"><span class="rule-desc">For every 2 goals conceded</span><span class="pts-badge negative">-1</span></div>
           </div>
         </div>
-
         <div class="rules-section">
           <h3>Midfielder (MID)</h3>
           <div class="rules-grid">
@@ -455,14 +338,12 @@
             <div class="rule-item"><span class="rule-desc">Clean Sheet (Played 15+ mins)</span><span class="pts-badge positive">+1</span></div>
           </div>
         </div>
-
         <div class="rules-section">
           <h3>Forward (FWD)</h3>
           <div class="rules-grid">
             <div class="rule-item"><span class="rule-desc">Goal Scored</span><span class="pts-badge positive">+4</span></div>
           </div>
         </div>
-
       </div>
     </div>
   </div>
@@ -483,7 +364,7 @@
           <div class="auth-tab" onclick="switchLBTab('KOF')">KOF</div>
         </div>
         <div style="padding: 16px; background: var(--bg-input); font-size: 12px; color: var(--text-muted); text-align: center; border-bottom: 1px solid var(--border-subtle);">
-          Points are automatically calculated from match logs & results.<br>Click on a manager to view their squad.
+          Points are automatically calculated from submitted match logs & results.<br>Click on a manager to view their squad.
         </div>
         <div id="lb-list" style="padding-bottom: 20px;">
            <div style="text-align:center; padding: 40px; color: var(--text-muted);">Loading Leaderboard...</div>
@@ -502,7 +383,6 @@
       <div class="modal-body" style="background: var(--bg-main); padding: 16px;">
          <div class="pitch-wrapper" style="transform: scale(0.9); transform-origin: top center; margin-bottom: -60px;">
           <div class="pitch" id="vs-pitch">
-            <!-- Read Only Pitch Injected via JS -->
             <div class="pitch-bottom-lines"></div>
           </div>
         </div>
@@ -514,9 +394,7 @@
   <div class="modal-overlay" id="playerModal">
     <div class="modal" style="width: min(620px, 94vw);">
       <div class="modal-header">
-        <div>
-          <span class="modal-title" id="modalTitle">Select Player</span>
-        </div>
+        <span class="modal-title" id="modalTitle">Select Player</span>
         <button class="modal-close-btn" onclick="document.getElementById('playerModal').classList.remove('open')">✕</button>
       </div>
       <div class="modal-search-wrap">
@@ -528,7 +406,7 @@
     </div>
   </div>
 
-  <!-- ── Modal: Auth (Login/Register) ── -->
+  <!-- ── Modal: Auth & Profile ── -->
   <div class="modal-overlay" id="authModal">
     <div class="modal">
       <div class="modal-header">
@@ -540,53 +418,24 @@
           <div class="auth-tab active" onclick="switchAuthTab('login')">Login</div>
           <div class="auth-tab" onclick="switchAuthTab('register')">Register</div>
         </div>
-
-        <!-- Login Form -->
         <form id="loginForm" class="auth-form active" onsubmit="handleLogin(event)">
-          <div class="form-group">
-            <label>Batch (e.g. 51)</label>
-            <input type="text" id="loginBatch" required>
-          </div>
-          <div class="form-group">
-            <label>Roll Number</label>
-            <input type="text" id="loginRoll" required>
-          </div>
-          <div class="form-group">
-            <label>PIN / Password</label>
-            <input type="password" id="loginPin" required placeholder="Enter PIN / Password">
-          </div>
+          <div class="form-group"><label>Batch (e.g. 51)</label><input type="text" id="loginBatch" required></div>
+          <div class="form-group"><label>Roll Number</label><input type="text" id="loginRoll" required></div>
+          <div class="form-group"><label>PIN / Password</label><input type="password" id="loginPin" required placeholder="Enter PIN / Password"></div>
           <button type="submit" class="form-btn">Login</button>
         </form>
-
-        <!-- Register Form -->
         <form id="registerForm" class="auth-form" onsubmit="handleRegister(event)">
-          <div class="form-group">
-            <label>Your Name</label>
-            <input type="text" id="regName" required>
-          </div>
-          <div class="form-group">
-            <label>Batch (e.g. 51)</label>
-            <input type="text" id="regBatch" required>
-          </div>
-          <div class="form-group">
-            <label>Roll Number</label>
-            <input type="text" id="regRoll" required>
-          </div>
-          <div class="form-group">
-            <label>Set a PIN / Password</label>
-            <input type="password" id="regPin" required placeholder="Minimum 4 characters" minlength="4">
-          </div>
-          <div class="form-group">
-            <label>Profile Picture (Optional)</label>
-            <input type="file" id="regAvatar" accept="image/*">
-          </div>
+          <div class="form-group"><label>Your Name</label><input type="text" id="regName" required></div>
+          <div class="form-group"><label>Batch (e.g. 51)</label><input type="text" id="regBatch" required></div>
+          <div class="form-group"><label>Roll Number</label><input type="text" id="regRoll" required></div>
+          <div class="form-group"><label>Set a PIN / Password</label><input type="password" id="regPin" required placeholder="Minimum 4 characters" minlength="4"></div>
+          <div class="form-group"><label>Profile Picture (Optional)</label><input type="file" id="regAvatar" accept="image/*"></div>
           <button type="submit" class="form-btn">Create Account</button>
         </form>
       </div>
     </div>
   </div>
 
-  <!-- ── Modal: Profile Edit ── -->
   <div class="modal-overlay" id="profileModal">
     <div class="modal">
       <div class="modal-header">
@@ -595,7 +444,6 @@
       </div>
       <div class="modal-body">
         <form id="profileForm" class="auth-form active" onsubmit="handleProfileUpdate(event)">
-          
           <div style="display:flex; justify-content:center; margin-bottom: 15px;">
             <label for="profAvatar" style="cursor: pointer; position: relative;" title="Click to change profile picture">
               <img id="profAvatarPreview" src="" style="width:80px; height:80px; border-radius:50%; object-fit:cover; border:2px solid var(--gold); background: var(--navy-600);">
@@ -603,28 +451,12 @@
             </label>
             <input type="file" id="profAvatar" accept="image/*" style="display:none;">
           </div>
-          
-          <div class="form-group">
-            <label>Name</label>
-            <input type="text" id="profName" required>
-          </div>
-          
+          <div class="form-group"><label>Name</label><input type="text" id="profName" required></div>
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-            <div class="form-group">
-              <label>Batch</label>
-              <input type="text" id="profBatch" readonly style="opacity: 0.6; cursor: not-allowed;" title="Batch cannot be changed">
-            </div>
-            <div class="form-group">
-              <label>Roll Number</label>
-              <input type="text" id="profRoll" readonly style="opacity: 0.6; cursor: not-allowed;" title="Roll cannot be changed">
-            </div>
+            <div class="form-group"><label>Batch</label><input type="text" id="profBatch" readonly style="opacity: 0.6; cursor: not-allowed;" title="Batch cannot be changed"></div>
+            <div class="form-group"><label>Roll Number</label><input type="text" id="profRoll" readonly style="opacity: 0.6; cursor: not-allowed;" title="Roll cannot be changed"></div>
           </div>
-          
-          <div class="form-group" style="margin-top: 15px;">
-            <label>Change PIN / Password (Optional)</label>
-            <input type="password" id="profPassword" placeholder="Leave blank to keep current password" minlength="4">
-          </div>
-          
+          <div class="form-group" style="margin-top: 15px;"><label>Change PIN / Password (Optional)</label><input type="password" id="profPassword" placeholder="Leave blank to keep current password" minlength="4"></div>
           <div style="display:flex; gap: 10px; margin-top: 15px;">
             <button type="submit" class="form-btn" style="flex:1;">Update Profile</button>
             <button type="button" class="form-btn" style="flex:1; background: var(--red-accent); color: white;" onclick="handleLogout()">Logout</button>
@@ -634,29 +466,21 @@
     </div>
   </div>
 
-  <!-- Toast Container -->
   <div class="toast-container" id="toastContainer"></div>
 
-
-  <!-- ══════════════════════════════════════════════════════════════
-       JAVASCRIPT LOGIC
-  ══════════════════════════════════════════════════════════════ -->
   <script>
   'use strict';
 
   /* =========================================================
-     [0] THEME LOGIC
+     THEME LOGIC
      ========================================================= */
   function toggleTheme() {
       const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
       const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-      
       document.documentElement.setAttribute('data-theme', newTheme);
       localStorage.setItem('fpl_theme', newTheme);
-      
       document.getElementById('themeToggleBtn').textContent = newTheme === 'dark' ? '☀️' : '🌙';
   }
-
   const savedTheme = localStorage.getItem('fpl_theme') || 'dark';
   document.documentElement.setAttribute('data-theme', savedTheme);
   document.addEventListener('DOMContentLoaded', () => {
@@ -664,19 +488,13 @@
   });
 
   /* =========================================================
-     [0.1] CONSTANTS & DEADLINE LOGIC
+     CONSTANTS & DEADLINE LOGIC
      ========================================================= */
   const DEADLINE_DATE = new Date('2026-05-08T12:00:00').getTime(); 
-  
-  function isDeadlinePassed() {
-    return new Date().getTime() >= DEADLINE_DATE;
-  }
-
+  function isDeadlinePassed() { return new Date().getTime() >= DEADLINE_DATE; }
   function updateCountdown() {
-    const now = new Date().getTime();
-    const distance = DEADLINE_DATE - now;
+    const distance = DEADLINE_DATE - new Date().getTime();
     const bannerText = document.getElementById('countdownTimer');
-
     if (distance < 0) {
       bannerText.textContent = "DEADLINE PASSED";
       bannerText.style.color = "var(--red-accent)";
@@ -685,29 +503,20 @@
       document.querySelectorAll('.formation-btn').forEach(btn => btn.disabled = true);
       return;
     }
-
-    const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-    bannerText.textContent = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+    const d = Math.floor(distance / (1000 * 60 * 60 * 24));
+    const h = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const m = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+    const s = Math.floor((distance % (1000 * 60)) / 1000);
+    bannerText.textContent = `${d}d ${h}h ${m}m ${s}s`;
   }
-  setInterval(updateCountdown, 1000);
-  updateCountdown();
+  setInterval(updateCountdown, 1000); updateCountdown();
 
   /* =========================================================
-     [1] POCKETBASE DATABASE INTEGRATION
+     POCKETBASE & DATA FETCHING
      ========================================================= */
   const pb = new PocketBase('https://efljudb.duckdns.org');
-  let allPlayers = [];
-  let currentUser = null;
-  let allUsersList = []; 
-  
-  // New Global Data For Point Engine
-  let db_fixtures = [];
-  let db_results = [];
-  let db_match_logs = [];
+  let allPlayers = [], currentUser = null, allUsersList = []; 
+  let db_fixtures = [], db_results = [], db_match_logs = [];
 
   function mapPosition(rawPos) {
     if(!rawPos) return 'DEF'; 
@@ -720,7 +529,6 @@
 
   async function fetchAllData() {
     try {
-      // 1. Fetch Players
       try {
         const playersRecords = await pb.collection('players').getFullList({ expand: 'team', sort: 'name' });
         allPlayers = playersRecords.map(p => {
@@ -728,55 +536,27 @@
           const tName = p.expand?.team?.name || p.expand?.team?.crest_text || 'Undrafted';
           const badgeUrl = p.expand?.team?.banner ? pb.files.getUrl(p.expand.team, p.expand.team.banner) : null;
           const photoUrl = p.photo ? pb.files.getUrl(p, p.photo) : null;
-
           let price = parseFloat(p.efl_price || p.eflPrice || p['efl price'] || p.price);
           if (isNaN(price)) price = 7.0; 
-
           return {
-            id: p.id,
-            name: p.name,
-            position: mapPosition(p.position),
-            rawPosition: p.position || '', 
-            price: price, 
-            rawTeamId: teamId,
-            team: tName,
+            id: p.id, name: p.name, position: mapPosition(p.position), rawPosition: p.position || '', 
+            price: price, rawTeamId: teamId, team: tName,
             teamBadgeHtml: badgeUrl ? `<img src="${badgeUrl}">` : `<span style="font-size:10px; color:black;">${tName.substring(0,3)}</span>`,
             photoHtml: photoUrl ? `<img src="${photoUrl}" class="player-photo">` : `<div class="player-photo-placeholder">${p.name.charAt(0)}</div>`
           };
         });
-      } catch (e) {
-          console.warn("Players fetch error:", e);
-      }
+      } catch (e) { console.warn("Players fetch error:", e); }
 
-      // 2. Fetch Fixtures
-      try {
-          db_fixtures = await pb.collection('fixtures').getFullList({ sort: 'match_date' });
-      } catch (e) {
-          console.warn("Fixtures fetch error:", e);
+      try { db_fixtures = await pb.collection('fixtures').getFullList(); } catch (e) { console.warn("Fixtures error:", e); }
+      try { db_results = await pb.collection('results').getFullList(); } catch (e) { console.warn("Results error:", e); }
+      try { db_match_logs = await pb.collection('fpl_match_logs').getFullList(); } catch (e) { 
+          console.error("Match logs fetch error - Check API rules", e); 
       }
-
-      // 3. Fetch Results
-      try {
-          db_results = await pb.collection('results').getFullList();
-      } catch (e) {
-          console.warn("Results fetch error:", e);
-      }
-
-      // 4. Fetch FPL Match Logs (This often fails if API rules are not set correctly)
-      try {
-          db_match_logs = await pb.collection('fpl_match_logs').getFullList();
-      } catch (e) {
-          console.error("Match logs fetch error - 403 Forbidden:", e);
-          showToast("⚠️ ডাটাবেসের fpl_match_logs এর API Rules ঠিক করুন!", "error");
-      }
-
-    } catch (err) {
-      console.error("Critical error fetching data:", err);
-    }
+    } catch (err) { console.error("Critical error fetching data:", err); }
   }
 
   /* =========================================================
-     [2] AUTH & PROFILING SYSTEM
+     AUTH & SQUAD STATE
      ========================================================= */
   function openAuthModal() {
     if(currentUser) {
@@ -784,33 +564,20 @@
       document.getElementById('profBatch').value = currentUser.batch || '';
       document.getElementById('profRoll').value = currentUser.roll || '';
       document.getElementById('profPassword').value = ''; 
-      document.getElementById('profAvatarPreview').src = currentUser.avatar 
-        ? pb.files.getUrl(currentUser, currentUser.avatar) 
-        : 'https://via.placeholder.com/80?text=User';
+      document.getElementById('profAvatarPreview').src = currentUser.avatar ? pb.files.getUrl(currentUser, currentUser.avatar) : 'https://via.placeholder.com/80?text=User';
       document.getElementById('profileModal').classList.add('open');
-    } else {
-      document.getElementById('authModal').classList.add('open');
-    }
+    } else { document.getElementById('authModal').classList.add('open'); }
   }
-
   document.getElementById('profAvatar').addEventListener('change', function(e) {
     if (e.target.files && e.target.files[0]) {
-      const reader = new FileReader();
-      reader.onload = function(e) { document.getElementById('profAvatarPreview').src = e.target.result; }
-      reader.readAsDataURL(e.target.files[0]);
+      const reader = new FileReader(); reader.onload = function(e) { document.getElementById('profAvatarPreview').src = e.target.result; }; reader.readAsDataURL(e.target.files[0]);
     }
   });
-
   function switchAuthTab(tab) {
     document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
-    if(tab === 'login') {
-      document.querySelectorAll('.auth-tab')[0].classList.add('active');
-      document.getElementById('loginForm').classList.add('active');
-    } else {
-      document.querySelectorAll('.auth-tab')[1].classList.add('active');
-      document.getElementById('registerForm').classList.add('active');
-    }
+    if(tab === 'login') { document.querySelectorAll('.auth-tab')[0].classList.add('active'); document.getElementById('loginForm').classList.add('active'); } 
+    else { document.querySelectorAll('.auth-tab')[1].classList.add('active'); document.getElementById('registerForm').classList.add('active'); }
   }
 
   async function handleLogin(e) {
@@ -818,163 +585,86 @@
     const batch = document.getElementById('loginBatch').value.trim();
     const roll = document.getElementById('loginRoll').value.trim();
     const pin = document.getElementById('loginPin').value.trim();
-    
     try {
       const record = await pb.collection('fpl_users').getFirstListItem(`batch="${batch}" && roll="${roll}" && password="${pin}"`);
-      setCurrentUser(record);
-      document.getElementById('authModal').classList.remove('open');
-      showToast('Login successful!', 'success');
-      loadSquadFromUser();
-    } catch (err) {
-      showToast('Invalid credentials. Check your batch, roll, and PIN/Password.', 'error');
-    }
+      setCurrentUser(record); document.getElementById('authModal').classList.remove('open'); showToast('Login successful!', 'success'); loadSquadFromUser();
+    } catch (err) { showToast('Invalid credentials. Check your batch, roll, and PIN.', 'error'); }
   }
 
   async function handleRegister(e) {
     e.preventDefault();
-    const btn = e.target.querySelector('button[type="submit"]');
-    btn.disabled = true; btn.textContent = "Please wait...";
-
+    const btn = e.target.querySelector('button[type="submit"]'); btn.disabled = true; btn.textContent = "Please wait...";
     const name = document.getElementById('regName').value.trim();
     const batch = document.getElementById('regBatch').value.trim();
     const roll = document.getElementById('regRoll').value.trim();
     const pin = document.getElementById('regPin').value.trim();
 
-    if(pin.length < 4) {
-       showToast('PIN / Password must be at least 4 characters.', 'error');
-       btn.disabled = false; btn.textContent = "Create Account";
-       return;
-    }
+    if(pin.length < 4) { showToast('PIN must be at least 4 characters.', 'error'); btn.disabled = false; btn.textContent = "Create Account"; return; }
 
     try {
-      let existingUser = null;
-      try { existingUser = await pb.collection('fpl_users').getFirstListItem(`batch="${batch}" && roll="${roll}"`); } catch(ignoreError) {}
-
-      if (existingUser) {
-        showToast('An account with this Batch and Roll already exists.', 'error');
-        btn.disabled = false; btn.textContent = "Create Account";
-        return;
-      }
+      let existingUser = null; try { existingUser = await pb.collection('fpl_users').getFirstListItem(`batch="${batch}" && roll="${roll}"`); } catch(err) {}
+      if (existingUser) { showToast('An account with this Batch and Roll already exists.', 'error'); btn.disabled = false; btn.textContent = "Create Account"; return; }
 
       const formData = new FormData();
-      formData.append('name', name);
-      formData.append('batch', batch);
-      formData.append('roll', roll);
-      formData.append('password', pin);
-      
-      const fileInput = document.getElementById('regAvatar');
-      if(fileInput.files.length > 0) { formData.append('avatar', fileInput.files[0]); }
+      formData.append('name', name); formData.append('batch', batch); formData.append('roll', roll); formData.append('password', pin);
+      const fileInput = document.getElementById('regAvatar'); if(fileInput.files.length > 0) { formData.append('avatar', fileInput.files[0]); }
       formData.append('squad', '{}');
 
       const record = await pb.collection('fpl_users').create(formData);
-      setCurrentUser(record);
-      document.getElementById('authModal').classList.remove('open');
-      showToast('Account created successfully!', 'success');
-    } catch (err) {
-      showToast('Error creating account. Please try again later.', 'error');
-    } finally {
-      btn.disabled = false; btn.textContent = "Create Account";
-    }
+      setCurrentUser(record); document.getElementById('authModal').classList.remove('open'); showToast('Account created successfully!', 'success');
+    } catch (err) { showToast('Error creating account.', 'error'); } 
+    finally { btn.disabled = false; btn.textContent = "Create Account"; }
   }
 
   async function handleProfileUpdate(e) {
     e.preventDefault();
-    const btn = e.target.querySelector('button[type="submit"]');
-    btn.disabled = true; btn.textContent = "Updating...";
-
+    const btn = e.target.querySelector('button[type="submit"]'); btn.disabled = true; btn.textContent = "Updating...";
     const newPass = document.getElementById('profPassword').value.trim();
-    if(newPass && newPass.length < 4) {
-       showToast('New PIN / Password must be at least 4 characters.', 'error');
-       btn.disabled = false; btn.textContent = "Update Profile";
-       return;
-    }
+    if(newPass && newPass.length < 4) { showToast('New PIN must be at least 4 chars.', 'error'); btn.disabled = false; btn.textContent = "Update Profile"; return; }
 
     try {
-      const formData = new FormData();
-      formData.append('name', document.getElementById('profName').value.trim());
+      const formData = new FormData(); formData.append('name', document.getElementById('profName').value.trim());
       if(newPass) formData.append('password', newPass);
-
-      const fileInput = document.getElementById('profAvatar');
-      if(fileInput.files.length > 0) { formData.append('avatar', fileInput.files[0]); }
-
+      const fileInput = document.getElementById('profAvatar'); if(fileInput.files.length > 0) { formData.append('avatar', fileInput.files[0]); }
       const record = await pb.collection('fpl_users').update(currentUser.id, formData);
-      setCurrentUser(record);
-      document.getElementById('profileModal').classList.remove('open');
-      document.getElementById('profPassword').value = ''; 
-      showToast('Profile updated!', 'success');
-    } catch (err) {
-      showToast('Profile update failed', 'error');
-    } finally {
-      btn.disabled = false; btn.textContent = "Update Profile";
-    }
+      setCurrentUser(record); document.getElementById('profileModal').classList.remove('open'); document.getElementById('profPassword').value = ''; showToast('Profile updated!', 'success');
+    } catch (err) { showToast('Profile update failed', 'error'); } 
+    finally { btn.disabled = false; btn.textContent = "Update Profile"; }
   }
 
   function handleLogout() {
-    localStorage.removeItem('fpl_user_data');
-    currentUser = null;
-    document.getElementById('profileModal').classList.remove('open');
-    updateAuthUI();
-    state.captain = null;
-    state.viceCaptain = null;
-    Object.keys(state.slots).forEach(k => state.slots[k] = null);
-    renderPitch();
-    showToast('Logged out', 'warn');
+    localStorage.removeItem('fpl_user_data'); currentUser = null; document.getElementById('profileModal').classList.remove('open'); updateAuthUI();
+    state.captain = null; state.viceCaptain = null; Object.keys(state.slots).forEach(k => state.slots[k] = null); renderPitch(); showToast('Logged out', 'warn');
   }
 
-  function setCurrentUser(record) {
-    currentUser = record;
-    localStorage.setItem('fpl_user_data', JSON.stringify(record));
-    updateAuthUI();
-  }
-
+  function setCurrentUser(record) { currentUser = record; localStorage.setItem('fpl_user_data', JSON.stringify(record)); updateAuthUI(); }
   function updateAuthUI() {
     const btn = document.getElementById('authHeaderBtn');
-    if(currentUser) {
-      const avatarUrl = currentUser.avatar ? pb.files.getUrl(currentUser, currentUser.avatar) : 'https://via.placeholder.com/24';
-      btn.innerHTML = `<img src="${avatarUrl}" class="auth-avatar"> ${currentUser.name}`;
-    } else {
-      btn.innerHTML = `Login / Register`;
-    }
+    if(currentUser) { const avatarUrl = currentUser.avatar ? pb.files.getUrl(currentUser, currentUser.avatar) : 'https://via.placeholder.com/24'; btn.innerHTML = `<img src="${avatarUrl}" class="auth-avatar"> ${currentUser.name}`; } 
+    else { btn.innerHTML = `Login / Register`; }
   }
-
   function checkSession() {
     const saved = localStorage.getItem('fpl_user_data');
     if(saved) {
-      currentUser = JSON.parse(saved);
-      updateAuthUI();
-      pb.collection('fpl_users').getOne(currentUser.id).then(rec => {
-        setCurrentUser(rec);
-        loadSquadFromUser();
-      }).catch(e => console.log('Session fetch error', e));
+      currentUser = JSON.parse(saved); updateAuthUI();
+      pb.collection('fpl_users').getOne(currentUser.id).then(rec => { setCurrentUser(rec); loadSquadFromUser(); }).catch(e => console.log('Session fetch error'));
     }
   }
 
   /* =========================================================
-     [3] SQUAD SAVING LOGIC & BUDGET
+     SQUAD RENDER & SAVE
      ========================================================= */
   async function saveSquad() {
-    if(isDeadlinePassed()) {
-      showToast('Deadline has passed! You cannot save squad changes.', 'error');
-      return;
-    }
-    if(!currentUser) {
-      showToast('Please login to save your squad!', 'error');
-      openAuthModal();
-      return;
-    }
+    if(isDeadlinePassed()) { showToast('Deadline passed!', 'error'); return; }
+    if(!currentUser) { showToast('Login to save your squad!', 'error'); openAuthModal(); return; }
 
     const filled = Object.values(state.slots).filter(Boolean);
-    if (filled.length < 11) { showToast(`Complete your starting 11 first! (${filled.length}/11)`, 'error'); return; }
+    if (filled.length < 11) { showToast(`Complete your starting 11 first!`, 'error'); return; }
+    let totalBudget = 0; filled.forEach(p => totalBudget += p.price);
+    if (totalBudget > 100) { showToast(`Budget Exceeded!`, 'error'); return; }
+    if (!state.captain || !state.viceCaptain) { showToast('Captain (C) and Vice-Captain (VC) must be selected!', 'error'); return; }
 
-    let totalBudget = 0;
-    filled.forEach(p => totalBudget += p.price);
-    if (totalBudget > 100) { showToast(`Budget Exceeded! You spent ${totalBudget}M (Max allowed: 100M).`, 'error'); return; }
-
-    if (!state.captain || !state.viceCaptain) { showToast('A Captain (C) and Vice-Captain (VC) must be selected!', 'error'); return; }
-
-    const saveBtn = document.getElementById('saveBtn');
-    if(saveBtn) saveBtn.innerHTML = "Saving...";
-
+    const saveBtn = document.getElementById('saveBtn'); if(saveBtn) saveBtn.innerHTML = "Saving...";
     try {
       const squadData = { formation: state.formation, players: {}, captain: null, viceCaptain: null };
       for(let key in state.slots) {
@@ -982,17 +672,10 @@
         if(key === state.captain) squadData.captain = state.slots[key].id;
         if(key === state.viceCaptain) squadData.viceCaptain = state.slots[key].id;
       }
-
-      const updatedRecord = await pb.collection('fpl_users').update(currentUser.id, {
-        squad: JSON.stringify(squadData)
-      });
-      setCurrentUser(updatedRecord);
-      showToast('Squad saved successfully!', 'success');
-    } catch (err) {
-      showToast('Error saving squad!', 'error');
-    } finally {
-      if(saveBtn) saveBtn.innerHTML = "💾 Save Squad";
-    }
+      const updatedRecord = await pb.collection('fpl_users').update(currentUser.id, { squad: JSON.stringify(squadData) });
+      setCurrentUser(updatedRecord); showToast('Squad saved successfully!', 'success');
+    } catch (err) { showToast('Error saving squad!', 'error'); } 
+    finally { if(saveBtn) saveBtn.innerHTML = "💾 Save Squad"; }
   }
 
   function loadSquadFromUser() {
@@ -1001,256 +684,154 @@
         const squadData = typeof currentUser.squad === 'string' ? JSON.parse(currentUser.squad) : currentUser.squad;
         if(squadData.formation) {
           state.formation = squadData.formation;
-          document.querySelectorAll('.formation-btn').forEach(b => {
-            b.classList.toggle('active', b.dataset.formation === state.formation);
-          });
+          document.querySelectorAll('.formation-btn').forEach(b => b.classList.toggle('active', b.dataset.formation === state.formation));
           initSlots(state.formation);
         }
-        
         if(squadData.players && allPlayers.length > 0) {
-          state.captain = null;
-          state.viceCaptain = null;
-
+          state.captain = null; state.viceCaptain = null;
           for(let key in squadData.players) {
             const pId = squadData.players[key];
             if(pId && state.slots[key] !== undefined) {
-              const pObj = allPlayers.find(p => p.id === pId);
-              state.slots[key] = pObj || null;
-
+              const pObj = allPlayers.find(p => p.id === pId); state.slots[key] = pObj || null;
               if (squadData.captain === pId) state.captain = key;
               if (squadData.viceCaptain === pId) state.viceCaptain = key;
             }
           }
           renderPitch();
         }
-      } catch(e) { console.log('Error parsing squad data', e); }
+      } catch(e) {}
     }
   }
 
-  /* =========================================================
-     [4] STATE MANAGEMENT & DOM RENDERING
-     ========================================================= */
-  const FORMATIONS = {
-    '5-4-1': { FWD: 1, MID: 4, DEF: 5, GK: 1 },
-    '4-5-1': { FWD: 1, MID: 5, DEF: 4, GK: 1 },
-    '5-3-2': { FWD: 2, MID: 3, DEF: 5, GK: 1 },
-    '4-3-3': { FWD: 3, MID: 3, DEF: 4, GK: 1 },
-    '4-4-2': { FWD: 2, MID: 4, DEF: 4, GK: 1 },
-    '3-5-2': { FWD: 2, MID: 5, DEF: 3, GK: 1 },
-    '3-4-3': { FWD: 3, MID: 4, DEF: 3, GK: 1 },
-  };
-
+  const FORMATIONS = { '5-4-1': {FWD:1,MID:4,DEF:5,GK:1}, '4-5-1': {FWD:1,MID:5,DEF:4,GK:1}, '5-3-2': {FWD:2,MID:3,DEF:5,GK:1}, '4-3-3': {FWD:3,MID:3,DEF:4,GK:1}, '4-4-2': {FWD:2,MID:4,DEF:4,GK:1}, '3-5-2': {FWD:2,MID:5,DEF:3,GK:1}, '3-4-3': {FWD:3,MID:4,DEF:3,GK:1} };
   const state = { formation: '4-4-2', slots: {}, captain: null, viceCaptain: null };
 
   function initSlots(formation) {
-    const config = FORMATIONS[formation];
-    const newSlots = {};
-    ['FWD','MID','DEF','GK'].forEach(pos => {
-      for (let i = 0; i < config[pos]; i++) {
-        const key = `${pos}-${i}`;
-        newSlots[key] = state.slots[key] || null;
-      }
-    });
-    
+    const config = FORMATIONS[formation]; const newSlots = {};
+    ['FWD','MID','DEF','GK'].forEach(pos => { for (let i = 0; i < config[pos]; i++) { const key = `${pos}-${i}`; newSlots[key] = state.slots[key] || null; } });
     if(state.captain && !newSlots.hasOwnProperty(state.captain)) state.captain = null;
     if(state.viceCaptain && !newSlots.hasOwnProperty(state.viceCaptain)) state.viceCaptain = null;
-    
     state.slots = newSlots;
   }
 
-  const pitch = document.getElementById('pitch');
-  const ROW_ORDER = ['FWD', 'MID', 'DEF', 'GK'];
+  const pitch = document.getElementById('pitch'); const ROW_ORDER = ['FWD', 'MID', 'DEF', 'GK'];
 
   function renderPitch() {
     pitch.innerHTML = '<div class="pitch-bottom-lines"></div>';
-    const config = FORMATIONS[state.formation];
-    const pastDeadline = isDeadlinePassed();
-
+    const config = FORMATIONS[state.formation]; const pastDeadline = isDeadlinePassed();
     ROW_ORDER.forEach(pos => {
-      const row = document.createElement('div');
-      row.className = 'pitch-row';
-      const slotsWrap = document.createElement('div');
-      slotsWrap.className = 'row-slots';
-
-      for (let i = 0; i < config[pos]; i++) {
-        const key = `${pos}-${i}`;
-        slotsWrap.appendChild(buildSlotEl(key, pos, state.slots[key], pastDeadline));
-      }
-      row.appendChild(slotsWrap);
-      pitch.appendChild(row);
+      const row = document.createElement('div'); row.className = 'pitch-row';
+      const slotsWrap = document.createElement('div'); slotsWrap.className = 'row-slots';
+      for (let i = 0; i < config[pos]; i++) { slotsWrap.appendChild(buildSlotEl(`${pos}-${i}`, pos, state.slots[`${pos}-${i}`], pastDeadline)); }
+      row.appendChild(slotsWrap); pitch.appendChild(row);
     });
-
     updateDashboard();
   }
 
   function buildSlotEl(slotKey, position, player, pastDeadline = false, readOnly = false, points = null) {
-    const wrap = document.createElement('div');
-    wrap.className = 'player-slot';
-
+    const wrap = document.createElement('div'); wrap.className = 'player-slot';
     if (player) {
       let removeBtnHtml = (!pastDeadline && !readOnly) ? `<button class="slot-remove-btn show">✕</button>` : '';
-      
       let cvcHtml = '';
       if (readOnly) {
          if (state.captain === slotKey) cvcHtml = `<div class="read-only-cvc">C</div>`;
          else if (state.viceCaptain === slotKey) cvcHtml = `<div class="read-only-cvc" style="background:#cbd5e1;">VC</div>`;
       } else if (!pastDeadline) {
-         cvcHtml = `
-           <button class="cvc-btn btn-c ${state.captain === slotKey ? 'active' : ''}" onclick="setCaptain('${slotKey}', event)">C</button>
-           <button class="cvc-btn btn-vc ${state.viceCaptain === slotKey ? 'active' : ''}" onclick="setViceCaptain('${slotKey}', event)">VC</button>
-         `;
+         cvcHtml = `<button class="cvc-btn btn-c ${state.captain === slotKey ? 'active' : ''}" onclick="setCaptain('${slotKey}', event)">C</button>
+                    <button class="cvc-btn btn-vc ${state.viceCaptain === slotKey ? 'active' : ''}" onclick="setViceCaptain('${slotKey}', event)">VC</button>`;
       } else {
          if (state.captain === slotKey) cvcHtml = `<div class="read-only-cvc">C</div>`;
          else if (state.viceCaptain === slotKey) cvcHtml = `<div class="read-only-cvc" style="background:#cbd5e1;">VC</div>`;
       }
-
       let ptsHtml = points !== null ? `<div class="read-only-pts">${points} pts</div>` : '';
 
       wrap.innerHTML = `
-        <div class="slot-card filled">
-          ${cvcHtml}
-          ${ptsHtml}
-          <div class="player-photo-wrap">
-            ${player.photoHtml}
-            <div class="team-badge">${player.teamBadgeHtml}</div>
-          </div>
+        <div class="slot-card filled">${cvcHtml}${ptsHtml}
+          <div class="player-photo-wrap">${player.photoHtml}<div class="team-badge">${player.teamBadgeHtml}</div></div>
           ${removeBtnHtml}
-        </div>
-        <span class="slot-name">${player.name.split(' ').pop()}</span>
-      `;
+        </div><span class="slot-name">${player.name.split(' ').pop()}</span>`;
       
       if(!pastDeadline && !readOnly) {
          wrap.querySelector('.slot-remove-btn').onclick = (e) => {
-           e.stopPropagation();
-           state.slots[slotKey] = null;
-           if (state.captain === slotKey) state.captain = null;
-           if (state.viceCaptain === slotKey) state.viceCaptain = null;
+           e.stopPropagation(); state.slots[slotKey] = null;
+           if (state.captain === slotKey) state.captain = null; if (state.viceCaptain === slotKey) state.viceCaptain = null;
            renderPitch();
          };
       }
     } else {
-      wrap.innerHTML = `
-        <div class="slot-card">
-          <div class="slot-empty-icon">${pastDeadline || readOnly ? '🔒' : '＋'}</div>
-        </div>
-        <span class="slot-name" style="color:var(--text-muted); background:transparent;">${pastDeadline || readOnly ? 'Empty' : 'Add Player'}</span>
-      `;
-      if(!pastDeadline && !readOnly) {
-         wrap.onclick = () => openPlayerModal(slotKey, position);
-      }
+      wrap.innerHTML = `<div class="slot-card"><div class="slot-empty-icon">${pastDeadline || readOnly ? '🔒' : '＋'}</div></div>
+        <span class="slot-name" style="color:var(--text-muted); background:transparent;">${pastDeadline || readOnly ? 'Empty' : 'Add Player'}</span>`;
+      if(!pastDeadline && !readOnly) wrap.onclick = () => openPlayerModal(slotKey, position);
     }
     return wrap;
   }
 
-  function setCaptain(slotKey, e) {
-    e.stopPropagation();
-    if(state.viceCaptain === slotKey) state.viceCaptain = null;
-    state.captain = state.captain === slotKey ? null : slotKey;
-    renderPitch();
-  }
-
-  function setViceCaptain(slotKey, e) {
-    e.stopPropagation();
-    if(state.captain === slotKey) state.captain = null;
-    state.viceCaptain = state.viceCaptain === slotKey ? null : slotKey;
-    renderPitch();
-  }
-
-  function resetSquad() {
-    if(isDeadlinePassed()) return;
-    Object.keys(state.slots).forEach(k => state.slots[k] = null);
-    state.captain = null;
-    state.viceCaptain = null;
-    renderPitch();
-    showToast('Squad cleared!', 'warn');
-  }
+  function setCaptain(slotKey, e) { e.stopPropagation(); if(state.viceCaptain === slotKey) state.viceCaptain = null; state.captain = state.captain === slotKey ? null : slotKey; renderPitch(); }
+  function setViceCaptain(slotKey, e) { e.stopPropagation(); if(state.captain === slotKey) state.captain = null; state.viceCaptain = state.viceCaptain === slotKey ? null : slotKey; renderPitch(); }
+  function resetSquad() { if(isDeadlinePassed()) return; Object.keys(state.slots).forEach(k => state.slots[k] = null); state.captain = null; state.viceCaptain = null; renderPitch(); showToast('Squad cleared!', 'warn'); }
 
   function updateDashboard() {
     const filled = Object.values(state.slots).filter(Boolean);
-    const squadCountEl = document.getElementById('squadCount');
-    if (squadCountEl) squadCountEl.textContent = filled.length;
+    if(document.getElementById('squadCount')) document.getElementById('squadCount').textContent = filled.length;
+    if(document.getElementById('squadProgressFill')) document.getElementById('squadProgressFill').style.width = `${(filled.length / 11) * 100}%`;
+    let totalBudget = 0.0; filled.forEach(p => totalBudget += p.price); totalBudget = Math.round(totalBudget * 10) / 10;
     
-    const squadProgressFillEl = document.getElementById('squadProgressFill');
-    if (squadProgressFillEl) squadProgressFillEl.style.width = `${(filled.length / 11) * 100}%`;
-
-    let totalBudget = 0.0;
-    filled.forEach(p => totalBudget += p.price);
-    totalBudget = Math.round(totalBudget * 10) / 10;
-    
-    const budgetSpentEl = document.getElementById('budgetSpent');
-    const budgetProgressFillEl = document.getElementById('budgetProgressFill');
-    
-    if(budgetSpentEl) {
-       budgetSpentEl.textContent = `${totalBudget}M`;
-       budgetSpentEl.style.color = totalBudget > 100 ? 'var(--red-accent)' : 'var(--green-neon)';
+    if(document.getElementById('budgetSpent')) {
+       document.getElementById('budgetSpent').textContent = `${totalBudget}M`;
+       document.getElementById('budgetSpent').style.color = totalBudget > 100 ? 'var(--red-accent)' : 'var(--green-neon)';
     }
-    
-    if(budgetProgressFillEl) {
-       let percent = (totalBudget / 100) * 100;
-       if(percent > 100) percent = 100;
-       budgetProgressFillEl.style.width = `${percent}%`;
-       budgetProgressFillEl.style.background = totalBudget > 100 ? 'var(--red-accent)' : 'var(--gold)';
+    if(document.getElementById('budgetProgressFill')) {
+       let percent = Math.min((totalBudget / 100) * 100, 100);
+       document.getElementById('budgetProgressFill').style.width = `${percent}%`;
+       document.getElementById('budgetProgressFill').style.background = totalBudget > 100 ? 'var(--red-accent)' : 'var(--gold)';
     }
   }
 
   /* =========================================================
-     [5] FPL CALCULATION ENGINE & LEADERBOARD
+     FPL CALCULATION ENGINE & LEADERBOARD
      ========================================================= */
-  
-  // Helpers for Calculation Engine
   function getPlayerMins(id, under15Arr, dnpArr) {
       if (!id) return 0;
       if (dnpArr.includes(id)) return 0;
       if (under15Arr.includes(id)) return 14;
-      return 90; // Default full match
+      return 90; 
   }
 
   function countEvents(id, resObj, fieldPrefix, maxCount = 6) {
       let count = 0;
       for (let i = 1; i <= maxCount; i++) {
           let val = resObj[fieldPrefix + i];
-          if (val) {
-              if (Array.isArray(val) && val.includes(id)) count++;
-              else if (val === id) count++;
-          }
+          if (val) { if (Array.isArray(val) && val.includes(id)) count++; else if (val === id) count++; }
       }
       return count;
   }
 
   function calculateSquadPoints(squadDataStr, validFixtures) {
       if (!squadDataStr) return { total: 0, playerPoints: {} };
-      let sq;
-      try { sq = typeof squadDataStr === 'string' ? JSON.parse(squadDataStr) : squadDataStr; } catch(e) { return { total: 0, playerPoints: {} }; }
+      let sq; try { sq = typeof squadDataStr === 'string' ? JSON.parse(squadDataStr) : squadDataStr; } catch(e) { return { total: 0, playerPoints: {} }; }
       if (!sq.players) return { total: 0, playerPoints: {} };
 
-      let totalPoints = 0;
-      let playerPointsMap = {}; // Will hold points per player slot
-      let cId = sq.captain;
-      let vcId = sq.viceCaptain;
-
-      // Extract starting 11 IDs map
-      let starting11Map = {}; // { 'slotKey' : 'playerID' }
-      for(let key in sq.players) {
-          if(sq.players[key]) {
-             starting11Map[key] = sq.players[key];
-             playerPointsMap[key] = 0; // Initialize
-          }
-      }
+      let totalPoints = 0; let playerPointsMap = {}; 
+      let cId = sq.captain; let vcId = sq.viceCaptain;
+      let starting11Map = {}; 
+      for(let key in sq.players) { if(sq.players[key]) { starting11Map[key] = sq.players[key]; playerPointsMap[key] = 0; } }
 
       validFixtures.forEach(fix => {
-          let res = db_results.find(r => (Array.isArray(r.fixture) && r.fixture.includes(fix.id)) || r.fixture === fix.id);
-          if (!res) return; // No result published yet for this fixture
-
+          // CRITICAL FIX: Only calculate points if Admin has submitted a Match Log for this fixture!
           let log = db_match_logs.find(l => (Array.isArray(l.fixture) && l.fixture.includes(fix.id)) || l.fixture === fix.id);
-          let under15 = log?.players_under_15_mins ? (Array.isArray(log.players_under_15_mins) ? log.players_under_15_mins : [log.players_under_15_mins]) : [];
-          let dnp = log?.did_not_play ? (Array.isArray(log.did_not_play) ? log.did_not_play : [log.did_not_play]) : [];
+          if (!log) return; // Not played/logged yet
+
+          let res = db_results.find(r => (Array.isArray(r.fixture) && r.fixture.includes(fix.id)) || r.fixture === fix.id);
+          if (!res) return; // No result published
+
+          let under15 = log.players_under_15_mins ? (Array.isArray(log.players_under_15_mins) ? log.players_under_15_mins : [log.players_under_15_mins]) : [];
+          let dnp = log.did_not_play ? (Array.isArray(log.did_not_play) ? log.did_not_play : [log.did_not_play]) : [];
 
           let t1Id = Array.isArray(fix.team1) ? fix.team1[0] : fix.team1;
           let t2Id = Array.isArray(fix.team2) ? fix.team2[0] : fix.team2;
           let score1 = parseInt(res.team1_score ?? res.t1_score) || 0;
           let score2 = parseInt(res.team2_score ?? res.t2_score) || 0;
 
-          // Captaincy logic for this specific match
           let cMins = getPlayerMins(cId, under15, dnp);
           let doubleId = cMins > 0 ? cId : vcId;
 
@@ -1259,7 +840,6 @@
               let player = allPlayers.find(p => p.id === pId);
               if (!player) continue;
 
-              // Did player's team play in this fixture?
               let pTeam = player.rawTeamId;
               if (pTeam !== t1Id && pTeam !== t2Id) continue;
 
@@ -1272,57 +852,35 @@
               let yellow = countEvents(pId, res, teamPrefix + '_yellow_', 4);
               let red = countEvents(pId, res, teamPrefix + '_red_', 2);
 
-              if (mins === 0 && yellow === 0 && red === 0) continue; // Didn't play, no cards
+              if (mins === 0 && yellow === 0 && red === 0) continue; 
 
-              let pts = 0;
-              let pos = player.position; // Standardized: FWD, MID, DEF, GK
+              let pts = 0; let pos = player.position; 
 
-              // Appearance
-              if (mins >= 15) pts += 2;
-              else if (mins > 0) pts += 1;
+              if (mins >= 15) pts += 2; else if (mins > 0) pts += 1;
 
-              // Goals
               let goals = countEvents(pId, res, teamPrefix + '_goal_');
-              if (pos === 'FWD') pts += goals * 4;
-              else if (pos === 'MID') pts += goals * 5;
-              else pts += goals * 6; // DEF/GK
+              if (pos === 'FWD') pts += goals * 4; else if (pos === 'MID') pts += goals * 5; else pts += goals * 6; 
 
-              // Assists
-              let assists = countEvents(pId, res, teamPrefix + '_assist_');
-              pts += assists * 3;
+              let assists = countEvents(pId, res, teamPrefix + '_assist_'); pts += assists * 3;
 
-              // Own Goals
-              let ownGoals = countEvents(pId, res, oppPrefix + '_goal_');
-              pts -= ownGoals * 2;
+              let ownGoals = countEvents(pId, res, oppPrefix + '_goal_'); pts -= ownGoals * 2;
 
-              // Cards
-              pts -= yellow * 1;
-              pts -= red * 3;
+              pts -= yellow * 1; pts -= red * 3;
 
-              // Clean Sheet
               if (mins >= 15 && oppScore === 0) {
-                  if (pos === 'GK') pts += 4;
-                  else if (pos === 'DEF') pts += 3;
-                  else if (pos === 'MID') pts += 1;
+                  if (pos === 'GK') pts += 4; else if (pos === 'DEF') pts += 3; else if (pos === 'MID') pts += 1;
               }
 
-              // Goals Conceded (-1 for every 2)
-              if (mins >= 15 && (pos === 'DEF' || pos === 'GK')) {
-                  pts -= Math.floor(oppScore / 2);
-              }
+              if (mins >= 15 && (pos === 'DEF' || pos === 'GK')) { pts -= Math.floor(oppScore / 2); }
 
-              // GK Saves (+1 for every 3)
-              // Auto-detect GK: Since each team has 1 GK, any playing GK gets the team's saves.
-              if (pos === 'GK' && log) {
+              if (pos === 'GK') {
                   let saves = isT1 ? (log.t1_saves || 0) : (log.t2_saves || 0);
                   pts += Math.floor(saves / 3);
               }
 
-              // MOTM
               let motm = res.motm || res.potm;
               if (motm && (motm === pId || (Array.isArray(motm) && motm.includes(pId)))) pts += 3;
 
-              // Check Captain Multiplier
               if (pId === doubleId) pts *= 2;
 
               playerPointsMap[slotKey] += pts;
@@ -1333,61 +891,42 @@
       return { total: totalPoints, playerPoints: playerPointsMap };
   }
 
-  // Leaderboard Modals & Display
   document.querySelectorAll('.formation-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       if (btn.disabled || isDeadlinePassed()) return;
       document.querySelectorAll('.formation-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      state.formation = btn.dataset.formation;
-      initSlots(state.formation);
-      renderPitch();
+      btn.classList.add('active'); state.formation = btn.dataset.formation; initSlots(state.formation); renderPitch();
     });
   });
 
-  async function openLeaderboard() {
-    document.getElementById('leaderboardModal').classList.add('open');
-    switchLBTab('Overall');
-  }
+  async function openLeaderboard() { document.getElementById('leaderboardModal').classList.add('open'); switchLBTab('Overall'); }
 
   function switchLBTab(tab) {
     if(window.event && window.event.target) {
         document.querySelectorAll('#leaderboardModal .auth-tab').forEach(t => t.classList.remove('active'));
         window.event.target.classList.add('active');
     }
-    
     const listEl = document.getElementById('lb-list');
     listEl.innerHTML = `<div style="text-align:center; padding: 40px; color: var(--text-muted);">Calculating ${tab} ranking...</div>`;
     
-    // Filter Fixtures by Tab Date
+    // Timezone safe Date String Filtering
     let validFixtures = [];
     if (tab === 'Overall') {
         validFixtures = db_fixtures;
     } else {
         validFixtures = db_fixtures.filter(f => {
-            if (!f.match_date) return false;
-            let d = new Date(f.match_date);
-            let mm = d.getMonth() + 1; // Month 1-12
-            let dd = d.getDate();      // Day 1-31
-            
-            if (tab === 'MD 4' && mm === 5 && dd === 8) return true;
-            if (tab === 'MD 5' && mm === 5 && dd === 9) return true;
-            if (tab === 'KO 1' && mm === 5 && dd === 14) return true;
-            if (tab === 'KOF' && mm === 5 && (dd === 15 || dd === 16)) return true;
+            let dStr = f.match_date || ""; 
+            if (tab === 'MD 4' && dStr.includes('-05-08')) return true;
+            if (tab === 'MD 5' && dStr.includes('-05-09')) return true;
+            if (tab === 'KO 1' && dStr.includes('-05-14')) return true;
+            if (tab === 'KOF' && (dStr.includes('-05-15') || dStr.includes('-05-16'))) return true;
             return false;
         });
     }
     
     pb.collection('fpl_users').getFullList().then(users => {
        allUsersList = users;
-
-       // Calculate Points for each user
-       let usersWithPts = users.map(u => {
-           let ptsData = calculateSquadPoints(u.squad, validFixtures);
-           return { ...u, calculatedPoints: ptsData.total };
-       });
-
-       // Sort by calculated points
+       let usersWithPts = users.map(u => { return { ...u, calculatedPoints: calculateSquadPoints(u.squad, validFixtures).total }; });
        usersWithPts.sort((a, b) => b.calculatedPoints - a.calculatedPoints);
 
        let html = '';
@@ -1406,41 +945,24 @@
        });
        if(usersWithPts.length === 0) html = `<div style="text-align:center; padding: 40px; color: var(--text-muted);">No managers registered yet.</div>`;
        listEl.innerHTML = html;
-    }).catch(err => {
-       listEl.innerHTML = `<div style="text-align:center; padding: 40px; color: var(--red-accent);">Error loading leaderboard.</div>`;
-    });
+    }).catch(err => { listEl.innerHTML = `<div style="text-align:center; padding: 40px; color: var(--red-accent);">Error loading leaderboard.</div>`; });
   }
 
   function viewUserSquad(userId, currentTab) {
-     if(!isDeadlinePassed()) {
-         showToast("Squads are hidden until the deadline passes!", "error");
-         return;
-     }
-
-     const user = allUsersList.find(u => u.id === userId);
-     if(!user) return;
-
+     if(!isDeadlinePassed()) { showToast("Squads are hidden until the deadline passes!", "error"); return; }
+     const user = allUsersList.find(u => u.id === userId); if(!user) return;
      document.getElementById('vs-title').textContent = `${user.name}'s Squad`;
 
-     let vsFormation = '4-4-2';
-     let vsSlots = {};
-     let vsCap = null;
-     let vsVC = null;
-
-     // Recalculate specific player points for the selected tab
+     let vsFormation = '4-4-2', vsSlots = {}, vsCap = null, vsVC = null;
      let validFixtures = [];
-     if (currentTab === 'Overall') {
-         validFixtures = db_fixtures;
-     } else {
+     if (currentTab === 'Overall') { validFixtures = db_fixtures; } 
+     else {
          validFixtures = db_fixtures.filter(f => {
-             if (!f.match_date) return false;
-             let d = new Date(f.match_date);
-             let mm = d.getMonth() + 1;
-             let dd = d.getDate();
-             if (currentTab === 'MD 4' && mm === 5 && dd === 8) return true;
-             if (currentTab === 'MD 5' && mm === 5 && dd === 9) return true;
-             if (currentTab === 'KO 1' && mm === 5 && dd === 14) return true;
-             if (currentTab === 'KOF' && mm === 5 && (dd === 15 || dd === 16)) return true;
+             let dStr = f.match_date || "";
+             if (currentTab === 'MD 4' && dStr.includes('-05-08')) return true;
+             if (currentTab === 'MD 5' && dStr.includes('-05-09')) return true;
+             if (currentTab === 'KO 1' && dStr.includes('-05-14')) return true;
+             if (currentTab === 'KOF' && (dStr.includes('-05-15') || dStr.includes('-05-16'))) return true;
              return false;
          });
      }
@@ -1450,111 +972,63 @@
      if(user.squad) {
          try {
              let sq = typeof user.squad === 'string' ? JSON.parse(user.squad) : user.squad;
-             vsFormation = sq.formation || '4-4-2';
-             vsCap = sq.captain || null;
-             vsVC = sq.viceCaptain || null;
-             
-             if(sq.players) {
-                 for(let key in sq.players) {
-                     const pId = sq.players[key];
-                     vsSlots[key] = pId ? allPlayers.find(p => p.id === pId) : null;
-                 }
-             }
+             vsFormation = sq.formation || '4-4-2'; vsCap = sq.captain || null; vsVC = sq.viceCaptain || null;
+             if(sq.players) { for(let key in sq.players) { const pId = sq.players[key]; vsSlots[key] = pId ? allPlayers.find(p => p.id === pId) : null; } }
          } catch(e) {}
      }
 
-     const vsPitch = document.getElementById('vs-pitch');
-     vsPitch.innerHTML = '<div class="pitch-bottom-lines"></div>';
-     const config = FORMATIONS[vsFormation];
-
-     const backupState = { ...state };
-     state.formation = vsFormation;
-     state.captain = null;
-     state.viceCaptain = null;
+     const vsPitch = document.getElementById('vs-pitch'); vsPitch.innerHTML = '<div class="pitch-bottom-lines"></div>';
+     const backupState = { ...state }; state.formation = vsFormation; state.captain = null; state.viceCaptain = null;
      
-     for(let key in vsSlots) {
-         if(vsSlots[key] && vsSlots[key].id === vsCap) state.captain = key;
-         if(vsSlots[key] && vsSlots[key].id === vsVC) state.viceCaptain = key;
-     }
+     for(let key in vsSlots) { if(vsSlots[key] && vsSlots[key].id === vsCap) state.captain = key; if(vsSlots[key] && vsSlots[key].id === vsVC) state.viceCaptain = key; }
 
      ROW_ORDER.forEach(pos => {
-      const row = document.createElement('div');
-      row.className = 'pitch-row';
-      const slotsWrap = document.createElement('div');
-      slotsWrap.className = 'row-slots';
-
-      for (let i = 0; i < config[pos]; i++) {
-        const key = `${pos}-${i}`;
-        let slotPoints = ptsData.playerPoints[key] !== undefined ? ptsData.playerPoints[key] : null;
+      const row = document.createElement('div'); row.className = 'pitch-row';
+      const slotsWrap = document.createElement('div'); slotsWrap.className = 'row-slots';
+      for (let i = 0; i < FORMATIONS[vsFormation][pos]; i++) {
+        const key = `${pos}-${i}`; let slotPoints = ptsData.playerPoints[key] !== undefined ? ptsData.playerPoints[key] : null;
         slotsWrap.appendChild(buildSlotEl(key, pos, vsSlots[key], true, true, slotPoints));
       }
-      row.appendChild(slotsWrap);
-      vsPitch.appendChild(row);
+      row.appendChild(slotsWrap); vsPitch.appendChild(row);
     });
 
-    state.formation = backupState.formation;
-    state.captain = backupState.captain;
-    state.viceCaptain = backupState.viceCaptain;
-
+    state.formation = backupState.formation; state.captain = backupState.captain; state.viceCaptain = backupState.viceCaptain;
     document.getElementById('viewSquadModal').classList.add('open');
   }
 
   /* =========================================================
-     [6] PLAYER SELECTION
+     PLAYER SELECTION & MISC
      ========================================================= */
-  let activeModalSlot = null;
-  const playerModal = document.getElementById('playerModal');
-  const searchInput = document.getElementById('playerSearch');
-
+  let activeModalSlot = null; const playerModal = document.getElementById('playerModal'); const searchInput = document.getElementById('playerSearch');
   function openPlayerModal(slotKey, position) {
     if(isDeadlinePassed()) return;
     if(!currentUser) { showToast('Please login to build your squad!', 'warn'); openAuthModal(); return; }
-    
-    activeModalSlot = slotKey;
-    document.getElementById('modalTitle').textContent = `Select ${position}`;
-    searchInput.value = '';
-    
+    activeModalSlot = slotKey; document.getElementById('modalTitle').textContent = `Select ${position}`; searchInput.value = '';
     const playersInPos = allPlayers.filter(p => {
       const isWinger = p.rawPosition.toLowerCase().includes('wing');
       if (position === 'MID') return p.position === 'MID' || isWinger;
       if (position === 'FWD') return p.position === 'FWD' || isWinger;
       return p.position === position; 
     });
-
-    renderPlayerList(playersInPos);
-    playerModal.classList.add('open');
+    renderPlayerList(playersInPos); playerModal.classList.add('open');
   }
 
   function renderPlayerList(players) {
-    const listEl = document.getElementById('playerList');
-    listEl.innerHTML = '';
-    if(players.length === 0) { listEl.innerHTML = '<div style="text-align:center; padding: 20px; color: var(--text-muted);">No players found for this position</div>'; return; }
-    
+    const listEl = document.getElementById('playerList'); listEl.innerHTML = '';
+    if(players.length === 0) { listEl.innerHTML = '<div style="text-align:center; padding: 20px; color: var(--text-muted);">No players found</div>'; return; }
     const currentSquad = Object.entries(state.slots).filter(([key, val]) => val !== null && key !== activeModalSlot).map(([key, val]) => val);
     const selectedIds = currentSquad.map(p => p.id);
 
     players.forEach(p => {
-      const isSelected = selectedIds.includes(p.id);
-      const item = document.createElement('div');
+      const isSelected = selectedIds.includes(p.id); const item = document.createElement('div');
       item.className = `player-item ${isSelected ? 'already-selected' : ''}`;
-      item.innerHTML = `
-        <div class="player-avatar">${p.photoHtml || p.teamBadgeHtml}</div>
-        <div class="player-info">
-          <div class="player-item-name">${p.name} <span style="color:var(--text-muted); font-size:12px; margin-left:6px;">${p.position}</span></div>
-          <div class="player-item-meta">${p.teamBadgeHtml} <span style="margin-left:5px;">${p.team}</span></div>
-        </div>
-        <div style="font-family: var(--font-display); font-size: 18px; font-weight: 800; color: #39d353;">${p.price}M</div>
-      `;
-      
+      item.innerHTML = `<div class="player-avatar">${p.photoHtml || p.teamBadgeHtml}</div>
+        <div class="player-info"><div class="player-item-name">${p.name} <span style="color:var(--text-muted); font-size:12px; margin-left:6px;">${p.position}</span></div><div class="player-item-meta">${p.teamBadgeHtml} <span style="margin-left:5px;">${p.team}</span></div></div>
+        <div style="font-family: var(--font-display); font-size: 18px; font-weight: 800; color: #39d353;">${p.price}M</div>`;
       if(!isSelected) {
         item.onclick = () => {
-          if (p.team && p.team !== 'Undrafted') {
-             const sameTeamCount = currentSquad.filter(sp => sp.team === p.team).length;
-             if (sameTeamCount >= 5) { showToast(`Maximum 5 players allowed from ${p.team}!`, 'error'); return; }
-          }
-          state.slots[activeModalSlot] = p;
-          playerModal.classList.remove('open');
-          renderPitch();
+          if (p.team && p.team !== 'Undrafted') { const sameTeamCount = currentSquad.filter(sp => sp.team === p.team).length; if (sameTeamCount >= 5) { showToast(`Max 5 players allowed from ${p.team}!`, 'error'); return; } }
+          state.slots[activeModalSlot] = p; playerModal.classList.remove('open'); renderPitch();
         };
       }
       listEl.appendChild(item);
@@ -1562,43 +1036,27 @@
   }
 
   searchInput.addEventListener('input', (e) => {
-    const term = e.target.value.toLowerCase();
-    const pos = activeModalSlot.split('-')[0];
+    const term = e.target.value.toLowerCase(); const pos = activeModalSlot.split('-')[0];
     const filtered = allPlayers.filter(p => {
-      const isWinger = p.rawPosition.toLowerCase().includes('wing');
-      let matchPos = false;
-      if (pos === 'MID') matchPos = (p.position === 'MID' || isWinger);
-      else if (pos === 'FWD') matchPos = (p.position === 'FWD' || isWinger);
-      else matchPos = (p.position === pos);
-      const matchesSearch = p.name.toLowerCase().includes(term) || p.team.toLowerCase().includes(term);
-      return matchPos && matchesSearch; 
+      const isWinger = p.rawPosition.toLowerCase().includes('wing'); let matchPos = false;
+      if (pos === 'MID') matchPos = (p.position === 'MID' || isWinger); else if (pos === 'FWD') matchPos = (p.position === 'FWD' || isWinger); else matchPos = (p.position === pos);
+      return matchPos && (p.name.toLowerCase().includes(term) || p.team.toLowerCase().includes(term)); 
     });
     renderPlayerList(filtered);
   });
 
   function showToast(msg, type) {
-    const container = document.getElementById('toastContainer');
-    const toast = document.createElement('div');
-    toast.className = `toast toast-${type}`;
-    toast.innerHTML = `<span>${type === 'success' ? '✅' : '⚠️'}</span> ${msg}`;
-    container.appendChild(toast);
-    setTimeout(() => toast.classList.add('show'), 10);
+    const container = document.getElementById('toastContainer'); const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`; toast.innerHTML = `<span>${type === 'success' ? '✅' : '⚠️'}</span> ${msg}`;
+    container.appendChild(toast); setTimeout(() => toast.classList.add('show'), 10);
     setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 400); }, 3000);
   }
 
   /* =========================================================
-     [7] INITIALIZATION
+     INITIALIZATION
      ========================================================= */
-  async function initApp() {
-    checkSession();
-    initSlots(state.formation);
-    renderPitch();
-    await fetchAllData();
-    loadSquadFromUser(); 
-  }
-
+  async function initApp() { checkSession(); initSlots(state.formation); renderPitch(); await fetchAllData(); loadSquadFromUser(); }
   initApp();
-
   </script>
 </body>
 </html>
