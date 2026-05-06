@@ -312,12 +312,27 @@
     <div class="card">
         <div class="card-title" style="color: var(--emerald);">2. Match Results & Events</div>
         
-        <!-- POTM -->
-        <div style="background: rgba(240,180,41,0.1); border: 1px solid rgba(240,180,41,0.2); padding: 16px; border-radius: 12px; margin-bottom: 24px; text-align: center;">
-            <label style="font-size: 13px; font-weight: 800; color: var(--gold); text-transform: uppercase; margin-bottom: 10px; display: block; letter-spacing: 1px;">🏅 Player of the Match (POTM)</label>
-            <div class="field-wrap" style="max-width: 400px; margin: 0 auto;">
-                <select id="potm" class="special-select"><option value="">— Select Player —</option></select>
-                <span class="select-icon">▼</span>
+        <!-- MATCH AWARDS (POTM, 2nd, 3rd) -->
+        <div style="background: rgba(240,180,41,0.1); border: 1px solid rgba(240,180,41,0.2); padding: 16px; border-radius: 12px; margin-bottom: 24px;">
+            <div style="text-align: center; margin-bottom: 12px;">
+                <label style="font-size: 13px; font-weight: 800; color: var(--gold); text-transform: uppercase; letter-spacing: 1px;">🏅 Match Awards</label>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
+                <div class="field-wrap">
+                    <label style="font-size: 10px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px; display: block; text-align:center;">🥇 POTM (+3 Pts)</label>
+                    <select id="potm" class="special-select"><option value="">— Select —</option></select>
+                    <span class="select-icon">▼</span>
+                </div>
+                <div class="field-wrap">
+                    <label style="font-size: 10px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px; display: block; text-align:center;">🥈 2nd Best (+2 Pts)</label>
+                    <select id="second_best" class="special-select"><option value="">— Select —</option></select>
+                    <span class="select-icon">▼</span>
+                </div>
+                <div class="field-wrap">
+                    <label style="font-size: 10px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px; display: block; text-align:center;">🥉 3rd Best (+1 Pt)</label>
+                    <select id="third_best" class="special-select"><option value="">— Select —</option></select>
+                    <span class="select-icon">▼</span>
+                </div>
             </div>
         </div>
 
@@ -360,23 +375,6 @@
                <label style="font-size: 11px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; display: block; margin-bottom: 8px;" id="gk_label_t2">Team 2 GK Saves</label>
                <input type="number" id="saves-t2" min="0" value="0" style="text-align: center; font-size: 18px; font-weight: 800; color: var(--gold);">
            </div>
-        </div>
-    </div>
-
-    <!-- ── 5. BONUS POINTS ── -->
-    <div class="card" id="bonusSection">
-        <div class="card-title" style="color: var(--brand-accent);">5. Bonus Points (2nd & 3rd Best)</div>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-             <div class="field-wrap">
-               <label style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; display: block;">🥈 2nd Best Player (+2 Pts)</label>
-               <select id="second_best" class="special-select"><option value="">— Select Player —</option></select>
-               <span class="select-icon">▼</span>
-             </div>
-             <div class="field-wrap">
-               <label style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; display: block;">🥉 3rd Best Player (+1 Pt)</label>
-               <select id="third_best" class="special-select"><option value="">— Select Player —</option></select>
-               <span class="select-icon">▼</span>
-             </div>
         </div>
     </div>
 
@@ -559,7 +557,7 @@
     // Reset Meta
     state.playerMeta = {}; [...state.t1Players, ...state.t2Players].forEach(p => state.playerMeta[p.id] = { u15: false, dnp: false });
 
-    // Populate Dropdowns
+    // Populate Dropdowns with Team Short Names instead of Home/Away
     populateDropdowns([...state.t1Players, ...state.t2Players]);
 
     // Build FPL UI
@@ -573,10 +571,15 @@
 
   function populateDropdowns(allMatchPlayers) {
       let options = '<option value="">— Select —</option>';
-      // Sort players alphabetically or by team for better UX
-      allMatchPlayers.forEach(p => {
-          let teamPrefix = p.team === state.t1.id ? '[Home]' : '[Away]';
-          options += `<option value="${p.id}">${teamPrefix} ${p.name} (${(p.position||'').substring(0,3)})</option>`;
+      
+      // Sort players alphabetically for better UX
+      allMatchPlayers.sort((a, b) => a.name.localeCompare(b.name)).forEach(p => {
+          let isT1 = p.team === state.t1.id;
+          let teamObj = isT1 ? state.t1 : state.t2;
+          // Extract short_name or fallback to crest_text or first 3 letters
+          let shortName = teamObj.short_name || teamObj.crest_text || (teamObj.name ? teamObj.name.substring(0, 3).toUpperCase() : 'TBD');
+          
+          options += `<option value="${p.id}">[${shortName}] ${p.name} (${(p.position||'').substring(0,3)})</option>`;
       });
 
       document.querySelectorAll('.event-select, .special-select').forEach(sel => {
