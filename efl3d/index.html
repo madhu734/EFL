@@ -1,0 +1,1601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>EFL Season 4 - The Universe</title>
+  <link rel="icon" type="image/png" href="https://i.postimg.cc/j5DTGgSg/EFL.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@300;500;600;700&family=Inter:wght@400;500;600;800&family=Montserrat:wght@600;700;800;900&display=swap" rel="stylesheet">
+  
+  <!-- Three.js for 3D Graphics -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <!-- OrbitControls for camera movement -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  <!-- GSAP for smooth animations -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <!-- HTML2Canvas for Exporting Cards -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+  <style>
+    /* ─── BASE & TYPOGRAPHY ─── */
+    body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: #02040a; color: #fff; font-family: 'Inter', sans-serif; user-select: none; }
+    #canvas-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
+    
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: rgba(0,0,0,0.3); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb { background: rgba(56,189,248,0.4); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(56,189,248,0.8); }
+
+    /* ─── HUD (Head Up Display) ─── */
+    #hud { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; pointer-events: none; }
+    
+    .header-title { position: absolute; top: 30px; left: 40px; pointer-events: auto; }
+    .header-title h1 { font-family: 'Orbitron', sans-serif; font-size: 38px; font-weight: 900; margin: 0; letter-spacing: 5px; background: linear-gradient(135deg, #38bdf8, #818cf8, #c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-transform: uppercase; filter: drop-shadow(0 0 15px rgba(56,189,248,0.4)); }
+    .header-title p { margin: 0; font-family: 'Rajdhani', sans-serif; font-size: 14px; color: #94a3b8; letter-spacing: 4px; text-transform: uppercase; font-weight: 600;}
+
+    /* HUD NAV TERMINALS */
+    .nav-terminals { position: absolute; top: 30px; right: 40px; display: flex; flex-direction: column; gap: 10px; pointer-events: auto; align-items: flex-end; max-height: 85vh; overflow-y: auto; padding-right: 10px; z-index: 20;}
+    
+    .cyber-btn { background: rgba(15, 23, 42, 0.7); border: 1px solid #38bdf8; border-radius: 8px; color: #38bdf8; padding: 12px 20px; font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; backdrop-filter: blur(8px); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: inset 0 0 15px rgba(56,189,248,0.15), 0 0 10px rgba(0,0,0,0.5); display: flex; align-items: center; gap: 10px; width: 250px; justify-content: flex-start;}
+    .cyber-btn:hover { background: rgba(56, 189, 248, 0.15); box-shadow: 0 0 20px rgba(56,189,248,0.4), inset 0 0 20px rgba(56,189,248,0.3); text-shadow: 0 0 8px #fff; transform: translateX(-5px); border-color: #fff;}
+    
+    .cyber-btn.purple { border-color: #c084fc; color: #c084fc; box-shadow: inset 0 0 15px rgba(192,132,252,0.15); }
+    .cyber-btn.purple:hover { background: rgba(192, 132, 252, 0.15); box-shadow: 0 0 20px rgba(192,132,252,0.4), inset 0 0 20px rgba(192,132,252,0.3); border-color: #fff;}
+
+    .cyber-btn.emerald { border-color: #10b981; color: #10b981; box-shadow: inset 0 0 15px rgba(16,185,129,0.15); }
+    .cyber-btn.emerald:hover { background: rgba(16, 185, 129, 0.15); box-shadow: 0 0 20px rgba(16,185,129,0.4), inset 0 0 20px rgba(16,185,129,0.3); border-color: #fff;}
+
+    .cyber-btn.rose { border-color: #f43f5e; color: #f43f5e; box-shadow: inset 0 0 15px rgba(244,63,94,0.15); }
+    .cyber-btn.rose:hover { background: rgba(244, 63, 94, 0.15); box-shadow: 0 0 20px rgba(244,63,94,0.4), inset 0 0 20px rgba(244,63,94,0.3); border-color: #fff;}
+
+    .cyber-btn.slate { border-color: #94a3b8; color: #94a3b8; box-shadow: inset 0 0 15px rgba(148,163,184,0.15); }
+    .cyber-btn.slate:hover { background: rgba(148, 163, 184, 0.15); box-shadow: 0 0 20px rgba(148,163,184,0.4), inset 0 0 20px rgba(148,163,184,0.3); border-color: #fff;}
+    
+    .cyber-btn.gold { border-color: #F0B429; color: #F0B429; box-shadow: inset 0 0 15px rgba(240,180,41,0.15); }
+    .cyber-btn.gold:hover { background: rgba(240, 180, 41, 0.15); box-shadow: 0 0 20px rgba(240,180,41,0.4), inset 0 0 20px rgba(240,180,41,0.3); border-color: #fff;}
+
+    .bottom-hud { position: absolute; bottom: 30px; left: 0; width: 100%; display: flex; justify-content: center; pointer-events: auto;}
+    .hud-info { background: rgba(0,0,0,0.7); border: 1px solid rgba(255,255,255,0.1); padding: 8px 24px; border-radius: 30px; font-family: 'Rajdhani', sans-serif; font-size: 13px; color: #94a3b8; letter-spacing: 2px; text-transform: uppercase; backdrop-filter: blur(5px); display: flex; gap: 20px;}
+    .hud-info span { color: #38bdf8; font-weight: bold; }
+
+    /* ─── 3D LABELS (DOM OVERLAYS) ─── */
+    .planet-label { position: absolute; transform: translate(-50%, -50%); color: #fff; font-family: 'Orbitron', sans-serif; font-size: 13px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; pointer-events: auto; cursor: pointer; text-shadow: 0 0 15px #000, 0 0 20px rgba(255,255,255,0.6); transition: all 0.3s; white-space: nowrap; background: rgba(0,0,0,0.4); padding: 4px 12px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(4px);}
+    .planet-label:hover { transform: translate(-50%, -50%) scale(1.1); color: #fff; border-color: currentColor; background: rgba(0,0,0,0.8); z-index: 100;}
+    
+    .portal-label { position: absolute; transform: translate(-50%, -50%); color: #e879f9; font-family: 'Orbitron', sans-serif; font-size: 16px; font-weight: 900; letter-spacing: 6px; text-transform: uppercase; text-shadow: 0 0 20px #c084fc, 0 0 40px #a855f7; pointer-events: auto; cursor: pointer; white-space: nowrap; animation: float 3s ease-in-out infinite;}
+    @keyframes float { 0%, 100% { transform: translate(-50%, -50%) translateY(0); } 50% { transform: translate(-50%, -50%) translateY(-10px); } }
+
+    /* ─── HOLOGRAPHIC MODAL ─── */
+    .holo-overlay { position: fixed; inset: 0; background: radial-gradient(circle at center, rgba(15,23,42,0.8) 0%, rgba(2,4,10,0.98) 100%); z-index: 1000; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; backdrop-filter: blur(8px); padding: 20px;}
+    .holo-overlay.active { opacity: 1; pointer-events: auto; }
+    
+    .holo-modal { background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(56,189,248,0.4); border-radius: 20px; width: 100%; max-width: 1200px; max-height: 90vh; display: flex; flex-direction: column; position: relative; box-shadow: 0 0 40px rgba(56,189,248,0.15), inset 0 0 30px rgba(56,189,248,0.1); transform: scale(0.95) translateY(20px); transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); overflow: hidden; }
+    .holo-overlay.active .holo-modal { transform: scale(1) translateY(0); }
+    
+    .modal-header { padding: 20px 30px; border-bottom: 1px solid rgba(56,189,248,0.3); display: flex; justify-content: space-between; align-items: center; background: rgba(2, 6, 23, 0.9); flex-shrink: 0;}
+    .modal-title { display: flex; align-items: center; gap: 15px; }
+    .team-logo { width: 50px; height: 50px; background: #fff; border-radius: 50%; padding: 2px; object-fit: contain; box-shadow: 0 0 20px rgba(255,255,255,0.3); }
+    .team-name { font-family: 'Orbitron', sans-serif; font-size: 24px; font-weight: 900; color: #fff; text-transform: uppercase; letter-spacing: 2px; text-shadow: 0 0 15px rgba(56,189,248,0.6); }
+    
+    .close-btn { background: rgba(244,63,94,0.1); border: 1px solid rgba(244,63,94,0.5); color: #f43f5e; width: 40px; height: 40px; border-radius: 10px; font-size: 20px; font-weight: bold; cursor: pointer; transition: 0.3s; display: grid; place-items: center; backdrop-filter: blur(4px);}
+    .close-btn:hover { background: rgba(244,63,94,0.3); box-shadow: 0 0 20px rgba(244,63,94,0.5); transform: scale(1.1); color: #fff;}
+
+    .modal-body { padding: 25px 30px; overflow-y: auto; display: flex; flex-direction: column; gap: 20px; flex: 1; }
+    
+    /* ─── EXPORT BUTTONS ─── */
+    .export-btn { background: rgba(15,23,42,0.8); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 8px 14px; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: 0.2s; font-family: 'Inter', sans-serif; text-transform: uppercase; letter-spacing: 1px;}
+    .export-btn:hover { background: #38bdf8; color: #000; border-color: #38bdf8; box-shadow: 0 4px 15px rgba(56,189,248,0.4);}
+
+    /* ─── DATA TABLES & GRIDS (HOLO STYLE) ─── */
+    .holo-table-container { width: 100%; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; background: rgba(0,0,0,0.4); overflow-x: auto; }
+    .holo-table { width: 100%; border-collapse: collapse; text-align: left; min-width: 650px;}
+    .holo-table th { background: rgba(56,189,248,0.1); padding: 15px 20px; font-family: 'Orbitron', sans-serif; font-size: 12px; color: #38bdf8; text-transform: uppercase; letter-spacing: 2px; border-bottom: 1px solid rgba(56,189,248,0.3); }
+    .holo-table td { padding: 15px 20px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 14px; font-weight: 600; color: #e2e8f0; }
+    .holo-table tr:hover td { background: rgba(255,255,255,0.05); }
+    .holo-table tr:last-child td { border-bottom: none; }
+
+    .rank-cell { font-family: 'Orbitron', sans-serif; font-size: 18px; font-weight: 900; color: #F0B429; text-shadow: 0 0 10px rgba(240,180,41,0.5); width: 40px; text-align: center;}
+    .pts-cell { font-family: 'Orbitron', sans-serif; font-size: 18px; font-weight: 900; color: #10b981; }
+
+    .form-icon { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; border-radius: 50%; color: #fff; font-size: 10px; font-weight: 900; box-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+    .form-w { background-color: #10b981; }
+    .form-d { background-color: #94a3b8; }
+    .form-l { background-color: #f43f5e; }
+
+    /* ─── RESULTS & FIXTURES LIST ─── */
+    .fixture-list { display: grid; grid-template-columns: 1fr; gap: 20px; }
+    .fixture-card { background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(56,189,248,0.3); padding: 20px; border-radius: 16px; transition: 0.3s; position: relative; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.3);}
+    .fixture-card::after { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, transparent, rgba(255,255,255,0.02)); pointer-events: none; }
+    .fixture-card:hover { border-color: #38bdf8; box-shadow: 0 10px 30px rgba(56,189,248,0.2); transform: translateY(-3px);}
+    .f-header { display: flex; justify-content: space-between; font-family: 'Orbitron', sans-serif; font-size: 10px; color: #94a3b8; letter-spacing: 2px; margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px;}
+    .f-body { display: flex; justify-content: space-between; align-items: flex-start; }
+    .f-team { display: flex; flex-direction: column; gap: 8px; flex: 1; align-items: flex-start;}
+    .f-team.away { align-items: flex-end; text-align: right;}
+    .f-crest { width: 50px; height: 50px; border-radius: 50%; background: #fff; padding: 2px; object-fit: contain; }
+    .f-tname { font-weight: 800; font-size: 16px; text-transform: uppercase; font-family: 'Montserrat', sans-serif;}
+    .f-center { display: flex; flex-direction: column; align-items: center; gap: 5px; padding: 0 20px; min-width: 120px;}
+    .f-vs { font-family: 'Orbitron', sans-serif; font-size: 14px; color: #F0B429; font-weight: 900;}
+    .f-score { font-family: 'Orbitron', sans-serif; font-size: 32px; font-weight: 900; color: #fff; background: rgba(0,0,0,0.5); padding: 4px 16px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); letter-spacing: 2px;}
+
+    .result-scorer-list { font-size: 12px; color: #94a3b8; margin-top: 12px; display: flex; flex-direction: column; gap: 4px; font-weight: 500; font-family: 'Inter', sans-serif;}
+    .result-scorer-list.right { text-align: right; }
+    .scorer-item-og { font-style: italic; color: #f43f5e; }
+    .card-list { font-size: 11px; color: #64748b; margin-top: 6px; display: flex; flex-direction: column; gap: 3px; }
+
+    /* ─── ABOUT PAGE STYLES ─── */
+    .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .about-card { background: rgba(15,23,42,0.6); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 20px; }
+    .about-card h3 { font-family: 'Orbitron', sans-serif; font-size: 16px; color: #38bdf8; text-transform: uppercase; letter-spacing: 2px; margin-top: 0; margin-bottom: 15px; border-bottom: 1px solid rgba(56,189,248,0.3); padding-bottom: 8px;}
+    .about-card p { font-size: 14px; color: #cbd5e1; line-height: 1.7; font-weight: 500; margin-bottom: 10px;}
+    .about-history-list { list-style: none; padding: 0; margin: 0;}
+    .about-history-item { display: flex; gap: 12px; margin-bottom: 16px; align-items: flex-start; }
+    .about-history-dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.2); margin-top: 6px; flex-shrink: 0; }
+    .about-history-dot.current { background: #38bdf8; box-shadow: 0 0 10px #38bdf8;}
+    .rule-title { color: #fff; font-weight: 700; font-family: 'Montserrat', sans-serif;}
+    .rule-text { font-size: 13px; color: #94a3b8; line-height: 1.5; margin-top: 4px;}
+    .about-rules-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .rule-item { display: flex; gap: 12px; }
+    .rule-num { font-family: 'Orbitron', sans-serif; font-weight: 700; color: #38bdf8; font-size: 16px; }
+    .committee-grid { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 16px; }
+    .committee-badge { border: 1px solid rgba(255,255,255,0.1); padding: 12px; border-radius: 8px; font-size: 12px; background: rgba(0,0,0,0.3); }
+    .committee-title { font-weight: 700; color: #fff; }
+    .committee-name { color: #94a3b8; font-style: italic; margin-top: 4px; font-size: 11px; }
+
+    /* ─── PLAYER DIRECTORY ─── */
+    .player-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; }
+    .player-card { background: linear-gradient(180deg, rgba(30, 41, 59, 0.7), rgba(15, 23, 42, 0.9)); border: 1px solid rgba(56,189,248,0.2); border-radius: 12px; padding: 15px; display: flex; align-items: center; gap: 12px; transition: 0.3s; position: relative; overflow: hidden;}
+    .player-card::before { content: ''; position: absolute; left: 0; top: 0; width: 4px; height: 100%; background: #38bdf8; opacity: 0.5; transition: 0.3s;}
+    .player-card:hover { border-color: #38bdf8; transform: translateY(-3px); box-shadow: 0 10px 20px rgba(56,189,248,0.2); }
+    .player-card:hover::before { opacity: 1; box-shadow: 0 0 15px #38bdf8; }
+    .p-avatar { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid #475569; background: #0f172a;}
+    .p-info { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0;}
+    .p-name { font-family: 'Rajdhani', sans-serif; font-size: 16px; font-weight: 700; color: #fff; line-height: 1.1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
+    .p-pos { font-family: 'Orbitron', sans-serif; font-size: 10px; color: #38bdf8; letter-spacing: 1px; font-weight: 600;}
+
+    /* DIRECTORY FILTERS */
+    .directory-filters { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 12px; background: rgba(0,0,0,0.5); padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);}
+    .search-input { background: rgba(15,23,42,0.8); border: 1px solid #38bdf8; color: #fff; padding: 10px 15px; border-radius: 8px; font-family: 'Rajdhani', sans-serif; font-size: 15px; width: 100%; max-width: 280px; outline: none; transition: 0.2s;}
+    .search-input:focus { box-shadow: 0 0 15px rgba(56,189,248,0.3); }
+    .cat-filters { display: flex; gap: 8px; flex-wrap: wrap; flex: 1;}
+    .cat-btn { background: transparent; border: 1px solid #64748b; color: #94a3b8; padding: 6px 12px; border-radius: 20px; font-family: 'Orbitron', sans-serif; font-size: 10px; cursor: pointer; transition: 0.3s; text-transform: uppercase; letter-spacing: 1px;}
+    .cat-btn.active { background: #38bdf8; color: #000; border-color: #38bdf8; font-weight: bold;}
+    .cat-btn:hover:not(.active) { border-color: #38bdf8; color: #fff; }
+
+    /* ─── TOP STATS CARDS ─── */
+    .stats-layout { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+    .stat-col { background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 15px;}
+    .stat-col-title { font-family: 'Orbitron', sans-serif; font-size: 14px; color: #38bdf8; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 15px; border-bottom: 1px solid rgba(56,189,248,0.3); padding-bottom: 8px;}
+    .ts-card { background: rgba(15,23,42,0.8); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; padding: 10px; display: flex; align-items: center; gap: 10px; margin-bottom: 8px; transition: 0.2s;}
+    .ts-rank { font-family: 'Orbitron', sans-serif; font-size: 14px; font-weight: 900; color: #64748b; width: 20px; text-align: center; }
+    .ts-photo { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 2px solid #334155; }
+    .ts-info { flex: 1; min-width: 0;}
+    .ts-name { font-weight: 700; font-size: 13px; color: #fff; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
+    .ts-team { font-size: 9px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px;}
+    .ts-value { font-family: 'Orbitron', sans-serif; font-size: 18px; font-weight: 900; color: #F0B429; }
+
+    /* ─── SUPPORTERS ─── */
+    .sup-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; }
+    .sup-card { background: rgba(15,23,42,0.8); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 15px; text-align: center; position: relative; overflow: hidden; transition: 0.3s;}
+    .sup-card::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: linear-gradient(90deg, #F0B429, #fde047); }
+    .sup-photo { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 3px solid #334155; margin: 0 auto 10px; }
+    .sup-name { font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 800; color: #fff; margin-bottom: 4px; }
+    .sup-batch { font-size: 11px; color: #94a3b8; font-weight: 600; letter-spacing: 1px; text-transform: uppercase;}
+    .sup-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 9px; font-weight: 800; color: #F0B429; background: rgba(240,180,41,0.1); padding: 4px 8px; border-radius: 20px; margin-top: 10px; text-transform: uppercase; border: 1px solid rgba(240,180,41,0.3);}
+
+    /* ─── LOADING SCREEN ─── */
+    #loader { position: fixed; inset: 0; background: #02040a; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 25px; transition: opacity 0.5s ease; }
+    .core-spinner { width: 60px; height: 60px; border: 3px solid transparent; border-top-color: #38bdf8; border-bottom-color: #F0B429; border-radius: 50%; animation: spin 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite; position: relative; }
+    .core-spinner::before { content: ''; position: absolute; inset: 8px; border: 2px solid transparent; border-left-color: #e879f9; border-right-color: #10b981; border-radius: 50%; animation: spin 1.5s linear infinite reverse; }
+    @keyframes spin { 100% { transform: rotate(360deg); } }
+    .load-text { font-family: 'Orbitron', sans-serif; letter-spacing: 5px; font-size: 14px; color: #38bdf8; animation: pulseOpacity 1.5s infinite; text-shadow: 0 0 10px rgba(56,189,248,0.5);}
+    .error-log { font-family: 'Courier New', monospace; font-size: 12px; color: #f43f5e; max-width: 600px; text-align: center; margin-top: 20px; white-space: pre-wrap; display: none; background: rgba(244,63,94,0.1); padding: 15px; border-radius: 8px; border: 1px solid rgba(244,63,94,0.3);}
+    @keyframes pulseOpacity { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+
+    /* ─── MOBILE RESPONSIVENESS ─── */
+    @media (max-width: 768px) {
+      .header-title { top: 20px; left: 20px; }
+      .header-title h1 { font-size: 24px; letter-spacing: 2px;}
+      .header-title p { font-size: 10px; }
+      
+      .nav-terminals { 
+          top: auto; bottom: 20px; left: 0; right: 0; 
+          flex-direction: row; overflow-x: auto; 
+          align-items: center; justify-content: flex-start;
+          padding: 0 20px; margin: 0; width: 100%; 
+          scroll-snap-type: x mandatory;
+      }
+      .nav-terminals::-webkit-scrollbar { display: none; }
+      
+      .cyber-btn { 
+          width: auto; flex-shrink: 0; padding: 10px 16px; 
+          font-size: 11px; scroll-snap-align: start;
+      }
+      
+      .bottom-hud { display: none; }
+      
+      .holo-modal { width: 95vw; height: 85vh; transform: translateY(10px); border-radius: 12px;}
+      .modal-header { padding: 15px 20px; }
+      .team-name { font-size: 18px; }
+      .team-logo { width: 40px; height: 40px; }
+      .close-btn { width: 32px; height: 32px; font-size: 16px; }
+      .modal-body { padding: 15px 20px; gap: 15px;}
+      
+      .planet-label { font-size: 10px; padding: 3px 8px; }
+      .portal-label { font-size: 12px; }
+      
+      .directory-filters { flex-direction: column; align-items: stretch; }
+      .search-input { max-width: 100%; }
+      
+      .about-grid, .about-rules-grid, .stats-layout { grid-template-columns: 1fr; }
+      .f-body { flex-direction: column; gap: 12px; }
+      .f-team, .f-team.away { flex-direction: row; align-items: center; justify-content: center; text-align: center; width: 100%;}
+      .f-team.away { flex-direction: row-reverse; }
+      .result-scorer-list.right { text-align: center; }
+      .result-scorer-list { text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- LOADING SCREEN -->
+  <div id="loader">
+    <div class="core-spinner"></div>
+    <div class="load-text" id="loadStatus">INITIALIZING UNIVERSE...</div>
+    <div class="error-log" id="errorLog"></div>
+  </div>
+
+  <!-- 3D CANVAS -->
+  <div id="canvas-container"></div>
+  
+  <!-- HUD INTERFACE -->
+  <div id="hud">
+    <div class="header-title">
+      <h1>EFL SPATIAL</h1>
+      <p>Interactive Data Universe</p>
+    </div>
+    
+    <div class="nav-terminals">
+      <!-- Player Directory First -->
+      <button class="cyber-btn purple" onclick="openPlayerDirectoryModal()">
+        <span style="font-size: 16px;">🏃‍♂️</span> Player Directory
+      </button>
+      <button class="cyber-btn emerald" onclick="openStandingsModal()">
+        <span style="font-size: 16px;">🏆</span> Points Table
+      </button>
+      <button class="cyber-btn rose" onclick="openStatsModal()">
+        <span style="font-size: 16px;">🔥</span> Results & Stats
+      </button>
+      <button class="cyber-btn" onclick="openFixturesModal()">
+        <span style="font-size: 16px;">📅</span> Match Fixtures
+      </button>
+      <button class="cyber-btn slate" onclick="openSupportersModal()">
+        <span style="font-size: 16px;">🤝</span> Supporters
+      </button>
+      <button class="cyber-btn" onclick="openAboutModal()" style="border-color: #cbd5e1; color: #cbd5e1;">
+        <span style="font-size: 16px;">ℹ️</span> Data Core (About)
+      </button>
+      <button class="cyber-btn gold" onclick="openFantasyPortal()">
+        <span style="font-size: 16px;">🌌</span> FPL Portal
+      </button>
+    </div>
+
+    <div class="bottom-hud">
+      <div class="hud-info">
+        <div>ORBITAL CONTROL: <span>DRAG</span></div>
+        <div>ZOOM: <span>SCROLL</span></div>
+        <div>INTERACT: <span>CLICK PLANETS & PORTALS</span></div>
+      </div>
+    </div>
+
+    <!-- DOM Labels for 3D Objects -->
+    <div id="labels-container"></div>
+  </div>
+
+  <!-- HOLOGRAPHIC MODAL -->
+  <div class="holo-overlay" id="holoModal" onclick="closeModal(event)">
+    <div class="holo-modal" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <div class="modal-title" id="modalTitle">
+          <!-- Content injected via JS -->
+        </div>
+        <button class="close-btn" onclick="closeModal()">✕</button>
+      </div>
+      <div class="modal-body" id="modalBody">
+        <!-- Content injected via JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- HIDDEN EXPORT TEMPLATE FOR STANDINGS -->
+  <div id="standings-export-area" style="position: absolute; top: -10000px; left: -10000px; width: 800px; background: #ffffff; padding: 24px; font-family: 'Inter', sans-serif; color: #111827; overflow: hidden; display: block;">
+       <div id="standings-export-header" style="text-align: center; padding: 24px 24px 16px; background: #ffffff;">
+          <div style="font-family: 'Montserrat', sans-serif; font-size: 28px; font-weight: 900; letter-spacing: 2px; color: #111827;">EFL SEASON 4</div>
+          <div style="font-size: 12px; color: #6b7280; text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; font-weight: 700;">Official Points Table</div>
+       </div>
+       <table id="export-standings-table" style="width: 100%; border-collapse: collapse; text-align: center;">
+            <thead>
+               <tr>
+                  <th style="padding: 12px; font-size: 11px; font-weight: 800; color: #6b7280; text-transform: uppercase; border-bottom: 2px solid #e5e7eb; background: #f9fafb;">Pos</th>
+                  <th style="padding: 12px; font-size: 11px; font-weight: 800; color: #6b7280; text-transform: uppercase; border-bottom: 2px solid #e5e7eb; background: #f9fafb; text-align: left;">Team</th>
+                  <th style="padding: 12px; font-size: 11px; font-weight: 800; color: #6b7280; text-transform: uppercase; border-bottom: 2px solid #e5e7eb; background: #f9fafb;">P</th>
+                  <th style="padding: 12px; font-size: 11px; font-weight: 800; color: #6b7280; text-transform: uppercase; border-bottom: 2px solid #e5e7eb; background: #f9fafb;">W</th>
+                  <th style="padding: 12px; font-size: 11px; font-weight: 800; color: #6b7280; text-transform: uppercase; border-bottom: 2px solid #e5e7eb; background: #f9fafb;">D</th>
+                  <th style="padding: 12px; font-size: 11px; font-weight: 800; color: #6b7280; text-transform: uppercase; border-bottom: 2px solid #e5e7eb; background: #f9fafb;">L</th>
+                  <th style="padding: 12px; font-size: 11px; font-weight: 800; color: #6b7280; text-transform: uppercase; border-bottom: 2px solid #e5e7eb; background: #f9fafb;">GF</th>
+                  <th style="padding: 12px; font-size: 11px; font-weight: 800; color: #6b7280; text-transform: uppercase; border-bottom: 2px solid #e5e7eb; background: #f9fafb;">GA</th>
+                  <th style="padding: 12px; font-size: 11px; font-weight: 800; color: #6b7280; text-transform: uppercase; border-bottom: 2px solid #e5e7eb; background: #f9fafb;">GD</th>
+                  <th style="padding: 12px; font-size: 11px; font-weight: 800; color: #6b7280; text-transform: uppercase; border-bottom: 2px solid #e5e7eb; background: #f9fafb;">Pts</th>
+               </tr>
+            </thead>
+            <tbody id="export-standings-body">
+               <!-- Injected via JS -->
+            </tbody>
+       </table>
+       <div id="standings-export-footer" style="text-align: center; padding: 16px; font-size: 11px; color: #6b7280; border-top: 1px solid #e5e7eb; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-top: 20px;">
+          Jahangirnagar University · Dept. of English
+       </div>
+  </div>
+
+  <!-- HIDDEN EXPORT TEMPLATE FOR MATCH RESULTS -->
+  <div style="position: absolute; top: -10000px; left: -10000px; width: 0; height: 0; overflow: hidden;">
+    <div id="export-result-card" style="width: 800px; background: linear-gradient(135deg, #0f172a, #1e1b4b); border-radius: 24px; padding: 48px; font-family: 'Inter', sans-serif; color: #fff; position: relative; border: 4px solid rgba(255,255,255,0.05); box-sizing: border-box;">
+        <div style="text-align: center; margin-bottom: 40px;">
+            <div style="font-family: 'Montserrat', sans-serif; font-size: 36px; font-weight: 900; letter-spacing: 3px; color: #fff;">EFL SEASON 4</div>
+            <div style="font-size: 14px; color: #94a3b8; text-transform: uppercase; letter-spacing: 2px; font-weight: 700; margin-top: 8px;">Full Time Result</div>
+        </div>
+
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 40px;">
+            <!-- Team 1 -->
+            <div style="display: flex; flex-direction: column; align-items: center; flex: 1;">
+                <div id="erc-t1-crest" style="width: 120px; height: 120px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 32px; color: #fff; border: 4px solid rgba(255,255,255,0.2); box-shadow: 0 10px 30px rgba(0,0,0,0.5); margin-bottom: 16px; overflow: hidden;">T1</div>
+                <div id="erc-t1-name" style="font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 24px; text-transform: uppercase; text-align: center;">TEAM 1</div>
+            </div>
+            
+            <!-- Score -->
+            <div style="display: flex; flex-direction: column; align-items: center; padding: 0 40px;">
+                <div style="background: rgba(0,0,0,0.3); padding: 16px 32px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; gap: 24px;">
+                   <span id="erc-t1-score" style="font-family: 'Montserrat', sans-serif; font-size: 64px; font-weight: 900; color: #fff; line-height: 1;">0</span>
+                   <span style="font-size: 24px; font-weight: 800; color: #64748b;">-</span>
+                   <span id="erc-t2-score" style="font-family: 'Montserrat', sans-serif; font-size: 64px; font-weight: 900; color: #fff; line-height: 1;">0</span>
+                </div>
+            </div>
+
+            <!-- Team 2 -->
+            <div style="display: flex; flex-direction: column; align-items: center; flex: 1;">
+                <div id="erc-t2-crest" style="width: 120px; height: 120px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 32px; color: #fff; border: 4px solid rgba(255,255,255,0.2); box-shadow: 0 10px 30px rgba(0,0,0,0.5); margin-bottom: 16px; overflow: hidden;">T2</div>
+                <div id="erc-t2-name" style="font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 24px; text-transform: uppercase; text-align: center;">TEAM 2</div>
+            </div>
+        </div>
+
+        <!-- Scorers -->
+        <div style="display: flex; justify-content: space-between; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 24px;">
+            <div id="erc-t1-scorers" style="flex: 1; font-size: 16px; color: #cbd5e1; line-height: 1.8; padding-right: 20px;">
+                <!-- Scorers T1 -->
+            </div>
+            <div style="width: 1px; background: rgba(255,255,255,0.1);"></div>
+            <div id="erc-t2-scorers" style="flex: 1; font-size: 16px; color: #cbd5e1; line-height: 1.8; text-align: right; padding-left: 20px;">
+                <!-- Scorers T2 -->
+            </div>
+        </div>
+        
+        <!-- Player of the Match (Export Card) -->
+        <div id="erc-motm-container" style="display: none; text-align: center; margin-top: 30px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px;">
+            <div style="font-size: 12px; color: #f59e0b; text-transform: uppercase; font-weight: 800; letter-spacing: 2px; margin-bottom: 12px;">🏅 Player of the Match</div>
+            <div style="display: inline-flex; align-items: center; gap: 12px; background: rgba(0,0,0,0.3); padding: 8px 24px; border-radius: 40px; border: 1px solid rgba(245,158,11,0.3);">
+                <img id="erc-motm-photo" src="" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid #f59e0b;" crossorigin="anonymous">
+                <span id="erc-motm-name" style="font-family: 'Montserrat', sans-serif; font-size: 18px; font-weight: 800; color: #fff;">NAME</span>
+            </div>
+        </div>
+        
+        <div style="text-align: center; font-size: 12px; color: #64748b; margin-top: 40px; letter-spacing: 2px; text-transform: uppercase; font-weight: 700;">
+            Jahangirnagar University · Dept. of English
+        </div>
+    </div>
+  </div>
+
+  <script>
+    // ════════════════════════════════════════════════════════════════════════
+    // BULLETPROOF CACHED FETCH ENGINE
+    // ════════════════════════════════════════════════════════════════════════
+    const PB_URL = 'https://efljudb.duckdns.org';
+    const CACHE_KEY = 'efl_universe_cache_v1';
+    const CACHE_EXPIRY = 15 * 60 * 1000; // 15 minutes TTL
+    
+    let db_teams = [];
+    let db_players = [];
+    let db_fixtures = [];
+    let db_results = [];
+    let db_supporters = [];
+
+    // Aggregated Stats Maps
+    let playerGoalsMap = {};
+    let playerAssistsMap = {};
+    let playerCardsMap = {};
+
+    function updateLoader(msg) { document.getElementById('loadStatus').textContent = msg; }
+    function showError(err) { 
+        document.getElementById('errorLog').style.display = 'block'; 
+        document.getElementById('errorLog').textContent = err; 
+        document.querySelector('.core-spinner').style.borderColor = '#f43f5e';
+    }
+
+    async function initData() {
+        const cachedStr = localStorage.getItem(CACHE_KEY);
+        const cacheTime = localStorage.getItem(CACHE_KEY + '_time');
+        const now = Date.now();
+        let useCache = false;
+
+        // Try to parse and use cache if valid
+        if (cachedStr && cacheTime && (now - cacheTime < CACHE_EXPIRY)) {
+            try {
+                const cachedData = JSON.parse(cachedStr);
+                if (cachedData.teams && cachedData.players) {
+                    db_teams = cachedData.teams;
+                    db_players = cachedData.players;
+                    db_fixtures = cachedData.fixtures;
+                    db_results = cachedData.results;
+                    db_supporters = cachedData.supporters || [];
+                    useCache = true;
+                }
+            } catch(e) { console.warn("Cache parsing error", e); }
+        }
+
+        if (useCache) {
+            updateLoader('RESTORING FROM LOCAL CACHE...');
+            processAggregatedStats();
+            hideLoaderAndInit3D();
+            // Fetch silently in background to update cache for next time
+            backgroundSync();
+        } else {
+            // No valid cache, show loader and fetch everything
+            await fetchPBData(true);
+        }
+    }
+
+    async function fetchPBData(showLoadingUI = true) {
+      try {
+        const fetchOptions = { cache: 'no-store' };
+
+        if(showLoadingUI) updateLoader('GATHERING GALAXY SECTORS (TEAMS)...');
+        try { 
+            const res = await fetch(`${PB_URL}/api/collections/teams/records?perPage=100`, fetchOptions); 
+            if(res.ok) { const data = await res.json(); db_teams = data.items || []; }
+        } catch(e) { console.warn("Teams collection issue.", e); }
+        
+        if(showLoadingUI) updateLoader('GATHERING LIFEFORMS (PLAYERS)...');
+        try { 
+            const res = await fetch(`${PB_URL}/api/collections/players/records?perPage=500`, fetchOptions); 
+            if(res.ok) { const data = await res.json(); db_players = data.items || []; }
+        } catch(e) { console.warn("Players collection issue.", e); }
+        
+        if(showLoadingUI) updateLoader('CALCULATING TRAJECTORIES (FIXTURES)...');
+        try { 
+            const res = await fetch(`${PB_URL}/api/collections/fixtures/records?perPage=100`, fetchOptions); 
+            if(res.ok) { 
+                const data = await res.json(); 
+                db_fixtures = (data.items || []).sort((a, b) => new Date(a.match_date || 0) - new Date(b.match_date || 0));
+            }
+        } catch(e) { console.warn("Fixtures collection issue.", e); }
+        
+        if(showLoadingUI) updateLoader('FETCHING HISTORICAL DATA (RESULTS)...');
+        try { 
+            const res = await fetch(`${PB_URL}/api/collections/results/records?perPage=100`, fetchOptions); 
+            if(res.ok) { const data = await res.json(); db_results = data.items || []; }
+        } catch(e) { console.warn("Results issue."); }
+
+        if(showLoadingUI) updateLoader('GATHERING ALLIES (SUPPORTERS)...');
+        try { 
+            const res = await fetch(`${PB_URL}/api/collections/supporters/records?perPage=200`, fetchOptions); 
+            if(res.ok) { 
+                const data = await res.json(); 
+                db_supporters = (data.items || []).sort((a, b) => new Date(b.created) - new Date(a.created));
+            }
+        } catch(e) { console.warn("Supporters issue."); }
+
+        // Save successful fetch to local cache
+        const dataToCache = {
+            teams: db_teams,
+            players: db_players,
+            fixtures: db_fixtures,
+            results: db_results,
+            supporters: db_supporters
+        };
+        try {
+            localStorage.setItem(CACHE_KEY, JSON.stringify(dataToCache));
+            localStorage.setItem(CACHE_KEY + '_time', Date.now());
+        } catch(e) { console.warn("Could not save to localStorage", e); }
+
+        if(showLoadingUI) {
+            processAggregatedStats();
+            hideLoaderAndInit3D();
+        }
+
+      } catch (error) {
+        console.error("Critical Fetch Error:", error);
+        if(showLoadingUI) {
+            updateLoader('SYSTEM ERROR: DATALINK SEVERED');
+            showError(`Failed to fetch core collections.\nDetails: ${error.message}`);
+        }
+      }
+    }
+
+    async function backgroundSync() {
+        await fetchPBData(false);
+    }
+
+    function hideLoaderAndInit3D() {
+        gsap.to('#loader', { opacity: 0, duration: 0.8, delay: 0.1, onComplete: () => {
+          document.getElementById('loader').style.display = 'none';
+          init3DUniverse();
+        }});
+    }
+
+    // --- Core Data Helpers (Mirrors 2D Site exactly) ---
+    function getPbImageUrl(record, fileName) {
+      if (!fileName) return 'https://via.placeholder.com/200?text=?';
+      return `${PB_URL}/api/files/${record.collectionId}/${record.id}/${fileName}`;
+    }
+
+    function getPBLinkedTeamId(player) {
+      const t = player.team;
+      if (!t) return null;
+      if (Array.isArray(t)) return t.length > 0 ? t[0] : null;
+      return t;
+    }
+
+    function getTeamPlayers(teamId) {
+      return db_players.filter(p => getPBLinkedTeamId(p) === teamId);
+    }
+
+    function getTeamName(teamObj) {
+      if(!teamObj) return 'Undrafted';
+      return teamObj.name || teamObj.crest_text || 'TBD';
+    }
+
+    function formatDate(dateStr) {
+      if(!dateStr) return 'TBA';
+      return new Date(dateStr).toLocaleString('en-US', { weekday: 'short', day: 'numeric', month: 'short', hour: 'numeric', minute:'2-digit', hour12: true });
+    }
+    
+    function isLightColor(color) {
+        if (!color) return false;
+        let hex = color.replace('#', '').trim();
+        if (hex.toLowerCase() === 'white') return true;
+        if (hex.length === 3) hex = hex.split('').map(c => c + c).join('');
+        if (hex.length !== 6) return false;
+        let r = parseInt(hex.substring(0, 2), 16), g = parseInt(hex.substring(2, 4), 16), b = parseInt(hex.substring(4, 6), 16);
+        return ((0.299 * r + 0.587 * g + 0.114 * b) / 255) > 0.8; 
+    }
+    function getSafeCrestTextColor(bgColor) { return isLightColor(bgColor) ? '#1e293b' : '#ffffff'; }
+
+    // ════════════════════════════════════════════════════════════════════════
+    // FULL STATS AGGREGATION ENGINE (From Main Site)
+    // ════════════════════════════════════════════════════════════════════════
+    function extractScorers(res, teamPrefix) {
+        let ids = [];
+        // Normal Goals
+        for (let i = 1; i <= 6; i++) {
+            let val = res[`${teamPrefix}_goal_${i}`];
+            if (val) { if (Array.isArray(val)) ids.push(...val); else ids.push(val); }
+        }
+        // Penalty Goals
+        for (let i = 1; i <= 2; i++) {
+            let val = res[`${teamPrefix}_pen_goal_${i}`];
+            if (val) { if (Array.isArray(val)) ids.push(...val); else ids.push(val); }
+        }
+        return ids;
+    }
+
+    function extractAssists(res, teamPrefix) {
+        let ids = [];
+        for (let i = 1; i <= 6; i++) {
+            let val = res[`${teamPrefix}_assist_${i}`];
+            if (val) { if (Array.isArray(val)) ids.push(...val); else ids.push(val); }
+        }
+        return ids;
+    }
+
+    function extractFields(res, prefix, maxCount) {
+        let ids = [];
+        for (let i = 1; i <= maxCount; i++) {
+            let val = res[`${prefix}_${i}`];
+            if (val) { if (Array.isArray(val)) ids.push(...val); else ids.push(val); }
+        }
+        return ids;
+    }
+
+    function processAggregatedStats() {
+        playerGoalsMap = {}; playerAssistsMap = {}; playerCardsMap = {};
+        
+        db_results.forEach(res => {
+            const fixtureId = Array.isArray(res.fixture) ? res.fixture[0] : res.fixture;
+            const fixture = db_fixtures.find(f => f.id === fixtureId);
+            if (!fixture) return;
+
+            const t1Id = Array.isArray(fixture.team1) ? fixture.team1[0] : fixture.team1;
+            const t2Id = Array.isArray(fixture.team2) ? fixture.team2[0] : fixture.team2;
+
+            // Goals (Includes penalties)
+            ['t1', 't2'].forEach(prefix => {
+                let scorersRaw = extractScorers(res, prefix);
+                let teamId = prefix === 't1' ? t1Id : t2Id;
+                scorersRaw.forEach(val => {
+                    let strVal = String(val).trim();
+                    if (strVal && strVal.toLowerCase() !== 'n/a') {
+                        const player = db_players.find(p => p.id === strVal || (p.name && p.name.toLowerCase() === strVal.toLowerCase()));
+                        if (player && getPBLinkedTeamId(player) === teamId) {
+                            playerGoalsMap[player.id] = (playerGoalsMap[player.id] || 0) + 1;
+                        }
+                    }
+                });
+            });
+
+            // Assists
+            ['t1', 't2'].forEach(prefix => {
+                let assistsRaw = extractAssists(res, prefix);
+                assistsRaw.forEach(val => {
+                    let strVal = String(val).trim();
+                    if (strVal && strVal.toLowerCase() !== 'n/a') {
+                        const player = db_players.find(p => p.id === strVal || (p.name && p.name.toLowerCase() === strVal.toLowerCase()));
+                        if (player) { playerAssistsMap[player.id] = (playerAssistsMap[player.id] || 0) + 1; }
+                    }
+                });
+            });
+
+            // Cards
+            ['t1', 't2'].forEach(prefix => {
+                let yellows = extractFields(res, `${prefix}_yellow`, 4);
+                let reds = extractFields(res, `${prefix}_red`, 2);
+
+                yellows.forEach(val => {
+                    let strVal = String(val).trim();
+                    if (strVal && strVal.toLowerCase() !== 'n/a') {
+                        const p = db_players.find(p => p.id === strVal || (p.name && p.name.toLowerCase() === strVal.toLowerCase()));
+                        if (p) {
+                            if(!playerCardsMap[p.id]) playerCardsMap[p.id] = { yellow: 0, red: 0, pts: 0 };
+                            playerCardsMap[p.id].yellow += 1;
+                            playerCardsMap[p.id].pts += 1; 
+                        }
+                    }
+                });
+                reds.forEach(val => {
+                    let strVal = String(val).trim();
+                    if (strVal && strVal.toLowerCase() !== 'n/a') {
+                        const p = db_players.find(p => p.id === strVal || (p.name && p.name.toLowerCase() === strVal.toLowerCase()));
+                        if (p) {
+                            if(!playerCardsMap[p.id]) playerCardsMap[p.id] = { yellow: 0, red: 0, pts: 0 };
+                            playerCardsMap[p.id].red += 1;
+                            playerCardsMap[p.id].pts += 2; 
+                        }
+                    }
+                });
+            });
+        });
+    }
+
+    // ════════════════════════════════════════════════════════════════════════
+    // LEAGUE STANDINGS ENGINE
+    // ════════════════════════════════════════════════════════════════════════
+    function generateStandings() {
+        let standings = {};
+        db_teams.forEach(team => {
+            standings[team.id] = { 
+                id: team.id, team: team, P: 0, W: 0, D: 0, L: 0, GF: 0, GA: 0, GD: 0, Pts: 0, formMatches: [] 
+            };
+        });
+
+        db_results.forEach(res => {
+            const fixtureId = Array.isArray(res.fixture) ? res.fixture[0] : res.fixture;
+            const fixture = db_fixtures.find(f => f.id === fixtureId);
+            if (!fixture) return;
+
+            const t1Id = Array.isArray(fixture.team1) ? fixture.team1[0] : fixture.team1;
+            const t2Id = Array.isArray(fixture.team2) ? fixture.team2[0] : fixture.team2;
+            
+            if (!standings[t1Id] || !standings[t2Id]) return;
+
+            const score1 = parseInt(res.team1_score !== undefined ? res.team1_score : res.t1_score) || 0;
+            const score2 = parseInt(res.team2_score !== undefined ? res.team2_score : res.t2_score) || 0;
+
+            standings[t1Id].P += 1; standings[t2Id].P += 1;
+            standings[t1Id].GF += score1; standings[t1Id].GA += score2;
+            standings[t2Id].GF += score2; standings[t2Id].GA += score1;
+
+            let outcome1, outcome2;
+            if (score1 > score2) { 
+                standings[t1Id].W += 1; standings[t1Id].Pts += 3; standings[t2Id].L += 1; 
+                outcome1 = 'W'; outcome2 = 'L';
+            } 
+            else if (score2 > score1) { 
+                standings[t2Id].W += 1; standings[t2Id].Pts += 3; standings[t1Id].L += 1; 
+                outcome1 = 'L'; outcome2 = 'W';
+            } 
+            else { 
+                standings[t1Id].D += 1; standings[t1Id].Pts += 1; standings[t2Id].D += 1; standings[t2Id].Pts += 1; 
+                outcome1 = 'D'; outcome2 = 'D';
+            }
+            
+            let matchDate = fixture.match_date ? new Date(fixture.match_date).getTime() : 0;
+            standings[t1Id].formMatches.push({ outcome: outcome1, date: matchDate });
+            standings[t2Id].formMatches.push({ outcome: outcome2, date: matchDate });
+        });
+
+        let standingsArr = Object.values(standings);
+        standingsArr.forEach(st => st.GD = st.GF - st.GA);
+        standingsArr.sort((a, b) => {
+            if (b.Pts !== a.Pts) return b.Pts - a.Pts;
+            if (b.GD !== a.GD) return b.GD - a.GD;
+            return b.GF - a.GF;
+        });
+
+        return standingsArr;
+    }
+
+    // ════════════════════════════════════════════════════════════════════════
+    // THREE.JS UNIVERSE ENGINE
+    // ════════════════════════════════════════════════════════════════════════
+    let scene, camera, renderer, controls;
+    let planets = []; 
+    let labels = []; 
+    let portalMesh;
+
+    function init3DUniverse() {
+      const container = document.getElementById('canvas-container');
+      const labelsContainer = document.getElementById('labels-container');
+
+      scene = new THREE.Scene();
+      scene.fog = new THREE.FogExp2(0x02040a, 0.0015);
+
+      camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 3000);
+      camera.position.set(0, 200, 400);
+
+      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setPixelRatio(window.devicePixelRatio);
+      container.appendChild(renderer.domElement);
+
+      controls = new THREE.OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+      controls.dampingFactor = 0.05;
+      controls.maxDistance = 800;
+      controls.minDistance = 50;
+
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+      scene.add(ambientLight);
+      
+      const centerLight = new THREE.PointLight(0xc084fc, 3, 800);
+      centerLight.position.set(0, 0, 0);
+      scene.add(centerLight);
+
+      createStarfield();
+      createPortal(labelsContainer);
+      createTeamPlanets(labelsContainer);
+      setupInteractions();
+      animate();
+
+      window.addEventListener('resize', onWindowResize, false);
+    }
+
+    function createStarfield() {
+      const starGeo = new THREE.BufferGeometry();
+      const starCount = 4000;
+      const posArray = new Float32Array(starCount * 3);
+      for(let i=0; i<starCount*3; i++) { posArray[i] = (Math.random() - 0.5) * 1500; }
+      starGeo.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+      const starMat = new THREE.PointsMaterial({ size: 1.2, color: 0xffffff, transparent: true, opacity: 0.6 });
+      const starMesh = new THREE.Points(starGeo, starMat);
+      scene.add(starMesh);
+    }
+
+    function createPortal(labelsContainer) {
+      const pGeo = new THREE.TorusGeometry(30, 8, 16, 100);
+      const pMat = new THREE.MeshBasicMaterial({ color: 0xa855f7, wireframe: true, transparent: true, opacity: 0.6 });
+      portalMesh = new THREE.Mesh(pGeo, pMat);
+      portalMesh.rotation.x = Math.PI / 2;
+      scene.add(portalMesh);
+
+      const pLabel = document.createElement('div');
+      pLabel.className = 'portal-label';
+      pLabel.innerHTML = 'FANTASY<br>PORTAL';
+      pLabel.style.textAlign = 'center';
+      pLabel.onclick = () => openFantasyPortal();
+      
+      labelsContainer.appendChild(pLabel);
+      portalMesh.userData = { isPortal: true, domElement: pLabel };
+    }
+
+    function createTeamPlanets(labelsContainer) {
+      const radius = 180; 
+      const planetGeo = new THREE.SphereGeometry(12, 32, 32);
+      
+      db_teams.forEach((team, index) => {
+        const angle = (index / db_teams.length) * Math.PI * 2;
+        const x = Math.cos(angle) * radius;
+        const z = Math.sin(angle) * radius;
+        const y = (Math.random() - 0.5) * 60;
+
+        const planetColor = team.crest_bg || ['#38bdf8', '#34d399', '#fbbf24', '#f43f5e', '#a855f7', '#f472b6'][index % 6];
+        
+        const planetMat = new THREE.MeshStandardMaterial({ 
+          color: planetColor, emissive: planetColor, emissiveIntensity: 0.3, roughness: 0.2, metalness: 0.8
+        });
+
+        const planetMesh = new THREE.Mesh(planetGeo, planetMat);
+        planetMesh.position.set(x, y, z);
+        
+        planetMesh.userData = { isTeam: true, teamData: team, baseAngle: angle, orbitSpeed: 0.0005 + (Math.random() * 0.0005) };
+        
+        scene.add(planetMesh);
+        planets.push(planetMesh);
+
+        const label = document.createElement('div');
+        label.className = 'planet-label';
+        label.textContent = getTeamName(team);
+        label.onclick = () => focusOnPlanet(planetMesh);
+        labelsContainer.appendChild(label);
+        labels.push({ mesh: planetMesh, domElement: label });
+
+        const pCount = getTeamPlayers(team.id).length;
+        for(let i=0; i<pCount; i++) {
+          const moonGeo = new THREE.SphereGeometry(1, 8, 8);
+          const moonMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+          const moon = new THREE.Mesh(moonGeo, moonMat);
+          const mDist = 18 + Math.random() * 12;
+          const mAngle = (i / pCount) * Math.PI * 2;
+          moon.position.set(Math.cos(mAngle)*mDist, (Math.random()-0.5)*15, Math.sin(mAngle)*mDist);
+          planetMesh.add(moon);
+          moon.userData = { angle: mAngle, dist: mDist, speed: 0.005 + Math.random()*0.015 };
+        }
+      });
+    }
+
+    function setupInteractions() {
+      const raycaster = new THREE.Raycaster();
+      const mouse = new THREE.Vector2();
+
+      window.addEventListener('click', (event) => {
+        if(event.target.tagName !== 'CANVAS') return;
+        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+        mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+        raycaster.setFromCamera(mouse, camera);
+        
+        const intersects = raycaster.intersectObjects([...planets, portalMesh]);
+        if(intersects.length > 0) {
+          const object = intersects[0].object;
+          if(object.userData.isTeam) focusOnPlanet(object);
+          if(object.userData.isPortal) openFantasyPortal();
+        }
+      });
+      
+      window.addEventListener('mousemove', (event) => {
+        if(event.target.tagName !== 'CANVAS') return;
+        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+        mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+        raycaster.setFromCamera(mouse, camera);
+        const intersects = raycaster.intersectObjects([...planets, portalMesh]);
+        document.body.style.cursor = intersects.length > 0 ? 'pointer' : 'default';
+      });
+    }
+
+    function focusOnPlanet(planetMesh) {
+      const targetPos = new THREE.Vector3();
+      planetMesh.getWorldPosition(targetPos);
+      
+      const camOffset = targetPos.clone().normalize().multiplyScalar(60);
+      const newCamPos = targetPos.clone().add(camOffset);
+      newCamPos.y += 20;
+
+      gsap.to(camera.position, { x: newCamPos.x, y: newCamPos.y, z: newCamPos.z, duration: 1.5, ease: "power3.inOut" });
+      gsap.to(controls.target, { x: targetPos.x, y: targetPos.y, z: targetPos.z, duration: 1.5, ease: "power3.inOut",
+        onComplete: () => openTeamModal(planetMesh.userData.teamData)
+      });
+    }
+
+    function animate() {
+      requestAnimationFrame(animate);
+      
+      if(portalMesh) { portalMesh.rotation.z += 0.01; portalMesh.scale.x = 1 + Math.sin(Date.now() * 0.002) * 0.05; portalMesh.scale.y = 1 + Math.sin(Date.now() * 0.002) * 0.05;}
+
+      planets.forEach(planet => {
+        planet.userData.baseAngle += planet.userData.orbitSpeed;
+        const radius = 180;
+        planet.position.x = Math.cos(planet.userData.baseAngle) * radius;
+        planet.position.z = Math.sin(planet.userData.baseAngle) * radius;
+        planet.rotation.y += 0.01;
+
+        planet.children.forEach(moon => {
+           moon.userData.angle += moon.userData.speed;
+           moon.position.x = Math.cos(moon.userData.angle) * moon.userData.dist;
+           moon.position.z = Math.sin(moon.userData.angle) * moon.userData.dist;
+        });
+      });
+
+      controls.update();
+      renderer.render(scene, camera);
+      updateLabels();
+    }
+
+    function updateLabels() {
+      const vector = new THREE.Vector3();
+      const halfWidth = window.innerWidth / 2;
+      const halfHeight = window.innerHeight / 2;
+
+      labels.forEach(labelData => {
+        vector.setFromMatrixPosition(labelData.mesh.matrixWorld);
+        vector.project(camera);
+        if(vector.z > 1) { labelData.domElement.style.display = 'none'; return; }
+        labelData.domElement.style.display = 'block';
+        const x = (vector.x * halfWidth) + halfWidth;
+        const y = -(vector.y * halfHeight) + halfHeight;
+        labelData.domElement.style.left = `${x}px`;
+        labelData.domElement.style.top = `${y - 40}px`;
+      });
+
+      if(portalMesh && portalMesh.userData.domElement) {
+        vector.setFromMatrixPosition(portalMesh.matrixWorld);
+        vector.project(camera);
+        if(vector.z <= 1) {
+            portalMesh.userData.domElement.style.display = 'block';
+            portalMesh.userData.domElement.style.left = `${(vector.x * halfWidth) + halfWidth}px`;
+            portalMesh.userData.domElement.style.top = `${-(vector.y * halfHeight) + halfHeight - 50}px`;
+        } else { portalMesh.userData.domElement.style.display = 'none'; }
+      }
+    }
+
+    function onWindowResize() {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+    // ════════════════════════════════════════════════════════════════════════
+    // HOLOGRAPHIC UI LOGIC & MODALS
+    // ════════════════════════════════════════════════════════════════════════
+    const holoModal = document.getElementById('holoModal');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalBody = document.getElementById('modalBody');
+
+    function openTeamModal(team) {
+      const logoUrl = getPbImageUrl(team, team.logo || team.crest || team.banner);
+      let logoHtml;
+      if (logoUrl && !logoUrl.includes('No+Photo')) {
+          logoHtml = `<img src="${logoUrl}" class="team-logo">`;
+      } else {
+          logoHtml = `<div class="team-logo" style="display:grid;place-items:center;color:#000;font-weight:bold;font-family:'Inter',sans-serif;">${team.crest_text || 'FC'}</div>`;
+      }
+      
+      modalTitle.innerHTML = `${logoHtml} <div class="team-name">${getTeamName(team)}</div>`;
+      
+      const players = getTeamPlayers(team.id);
+      let pCards = '';
+      if(players.length === 0) pCards = '<div style="color:#64748b; font-size:14px; text-align:center; padding: 40px; border: 1px dashed rgba(255,255,255,0.1); border-radius: 12px; grid-column:1/-1;">Squad to be announced.</div>';
+      
+      players.forEach(p => {
+        const pPhoto = getPbImageUrl(p, p.avatar || p.photo || p.image);
+        let pImg = '';
+        if (pPhoto && !pPhoto.includes('No+Photo')) {
+            pImg = `<img src="${pPhoto}" class="p-avatar">`;
+        } else {
+            pImg = `<div class="p-avatar" style="display:grid;place-items:center;color:#64748b;font-family:'Inter',sans-serif;">?</div>`;
+        }
+        
+        pCards += `
+          <div class="player-card">
+            ${pImg}
+            <div class="p-info">
+              <span class="p-name">${p.name}</span>
+              <span class="p-pos">${p.position ? p.position.split('—')[0] : 'UNKNOWN'}</span>
+            </div>
+          </div>
+        `;
+      });
+
+      // Show Manager & Owner Images
+      let mgrImgHtml = team.manager_photo ? `<img src="${getPbImageUrl(team, team.manager_photo)}" style="width:30px;height:30px;border-radius:50%;object-fit:cover;border:1px solid #38bdf8;">` : '';
+      let ownImgHtml = team.owner_photo ? `<img src="${getPbImageUrl(team, team.owner_photo)}" style="width:30px;height:30px;border-radius:50%;object-fit:cover;border:1px solid #38bdf8;">` : '';
+
+      modalBody.innerHTML = `
+        <div style="display:flex; justify-content:space-between; margin-bottom: 10px; font-family:'Rajdhani', sans-serif;">
+            <div style="background:rgba(255,255,255,0.05); padding:8px 16px; border-radius:6px; font-size:14px; display:flex; align-items:center; gap:10px;">
+                ${mgrImgHtml} Manager: <strong style="color:#38bdf8;">${team.manager_name || 'TBD'}</strong>
+            </div>
+            <div style="background:rgba(255,255,255,0.05); padding:8px 16px; border-radius:6px; font-size:14px; display:flex; align-items:center; gap:10px;">
+                ${ownImgHtml} Owner: <strong style="color:#38bdf8;">${team.owner_name || 'TBD'}</strong>
+            </div>
+        </div>
+        <div style="font-family:'Orbitron',sans-serif; color:#94a3b8; font-size:12px; margin-bottom:5px; letter-spacing:2px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:5px;">ACTIVE ROSTER (${players.length})</div>
+        <div class="player-grid">${pCards}</div>
+      `;
+
+      holoModal.classList.add('active');
+    }
+
+    function openStandingsModal() {
+      gsap.to(camera.position, { x: 0, y: 300, z: 500, duration: 1 });
+      gsap.to(controls.target, { x: 0, y: 0, z: 0, duration: 1 });
+
+      modalTitle.innerHTML = `<div class="team-name" style="color:#10b981; text-shadow:0 0 15px rgba(16,185,129,0.5);">GALACTIC STANDINGS</div>`;
+      
+      const standings = generateStandings();
+      let tableRows = '';
+      
+      standings.forEach((st, idx) => {
+          let crestUrl = getPbImageUrl(st.team, st.team.banner || st.team.logo || st.team.crest);
+          let crestHtml = (crestUrl && !crestUrl.includes('No+Photo')) 
+              ? `<img src="${crestUrl}" style="width:28px;height:28px;border-radius:50%;object-fit:contain;background:#fff;padding:1px;">` 
+              : `<div style="width:28px;height:28px;border-radius:50%;background:#fff;color:#000;display:grid;place-items:center;font-size:9px;font-weight:bold;">${st.team.crest_text||'FC'}</div>`;
+          
+          let formHtml = st.formMatches
+              .sort((a, b) => a.date - b.date) 
+              .slice(-5)                       
+              .map(f => {
+                  if (f.outcome === 'W') return `<span class="form-icon form-w">✓</span>`;
+                  if (f.outcome === 'D') return `<span class="form-icon form-d">-</span>`;
+                  if (f.outcome === 'L') return `<span class="form-icon form-l">✗</span>`;
+              }).join('');
+              
+          if (!formHtml) formHtml = `<span style="color:#94a3b8; font-size:11px; font-weight:600;">N/A</span>`;
+
+          tableRows += `
+          <tr>
+              <td class="rank-cell">#${idx + 1}</td>
+              <td style="display:flex; align-items:center; gap:10px; font-family:'Orbitron',sans-serif; font-size:13px;">${crestHtml} ${getTeamName(st.team)}</td>
+              <td>${st.P}</td>
+              <td>${st.W}</td>
+              <td>${st.D}</td>
+              <td>${st.L}</td>
+              <td>${st.GD > 0 ? '+'+st.GD : st.GD}</td>
+              <td class="pts-cell">${st.Pts}</td>
+              <td><div style="display:flex; gap:4px;">${formHtml}</div></td>
+          </tr>`;
+      });
+
+      if(standings.length === 0) tableRows = '<tr><td colspan="9" style="text-align:center;">No data available.</td></tr>';
+
+      modalBody.innerHTML = `
+        <div style="display:flex; justify-content:flex-end; margin-bottom:10px;">
+            <button class="export-btn" onclick="downloadStandings()">⬇️ Download Points Table</button>
+        </div>
+        <div class="holo-table-container">
+            <table class="holo-table">
+                <thead>
+                    <tr>
+                        <th style="width:50px;">POS</th>
+                        <th>FACTION</th>
+                        <th title="Played">P</th>
+                        <th title="Won">W</th>
+                        <th title="Drawn">D</th>
+                        <th title="Lost">L</th>
+                        <th title="Goal Difference">GD</th>
+                        <th>PTS</th>
+                        <th>LAST 5</th>
+                    </tr>
+                </thead>
+                <tbody>${tableRows}</tbody>
+            </table>
+        </div>
+      `;
+      // Pre-render the hidden export HTML
+      renderExportStandingsHTML(standings);
+      holoModal.classList.add('active');
+    }
+
+    function openStatsModal() {
+      gsap.to(camera.position, { x: 0, y: 300, z: 500, duration: 1 });
+      gsap.to(controls.target, { x: 0, y: 0, z: 0, duration: 1 });
+
+      modalTitle.innerHTML = `<div class="team-name" style="color:#f43f5e; text-shadow:0 0 15px rgba(244,63,94,0.5);">RESULTS & BATTLE RECORDS</div>`;
+      
+      const topScorers = Object.entries(playerGoalsMap).map(([id, count]) => ({ p: db_players.find(p=>p.id===id), count })).filter(i=>i.p).sort((a,b)=>b.count-a.count).slice(0,5);
+      const topAssists = Object.entries(playerAssistsMap).map(([id, count]) => ({ p: db_players.find(p=>p.id===id), count })).filter(i=>i.p).sort((a,b)=>b.count-a.count).slice(0,5);
+      const topCards = Object.entries(playerCardsMap).map(([id, stats]) => ({ p: db_players.find(p=>p.id===id), ...stats })).filter(i=>i.p).sort((a,b)=>b.pts-a.pts).slice(0,5);
+
+      function buildCard(item, index, valHtml) {
+          const t = db_teams.find(tm => tm.id === getPBLinkedTeamId(item.p));
+          const tName = t ? getTeamName(t) : 'Undrafted';
+          let pImg = getPbImageUrl(item.p, item.p.photo);
+          if(pImg.includes('No+Photo')) pImg = 'https://via.placeholder.com/40';
+
+          return `
+          <div class="ts-card">
+             <div class="ts-rank">#${index+1}</div>
+             <img src="${pImg}" class="ts-photo" crossorigin="anonymous">
+             <div class="ts-info">
+                <div class="ts-name">${item.p.name}</div>
+                <div class="ts-team">${tName}</div>
+             </div>
+             ${valHtml}
+          </div>`;
+      }
+
+      let scorersHtml = topScorers.length ? topScorers.map((i, idx) => buildCard(i, idx, `<div class="ts-value">${i.count} <span style="font-size:10px; color:#94a3b8;">⚽</span></div>`)).join('') : '<div style="color:#64748b;font-size:12px;">No goals detected.</div>';
+      let assistsHtml = topAssists.length ? topAssists.map((i, idx) => buildCard(i, idx, `<div class="ts-value" style="color:#38bdf8;">${i.count} <span style="font-size:10px; color:#94a3b8;">🎯</span></div>`)).join('') : '<div style="color:#64748b;font-size:12px;">No assists detected.</div>';
+      let cardsHtml = topCards.length ? topCards.map((i, idx) => buildCard(i, idx, `<div class="ts-value" style="display:flex;gap:5px;">${i.red>0?`<span style="color:#f43f5e;">🟥${i.red}</span>`:''}${i.yellow>0?`<span style="color:#fbbf24;">🟨${i.yellow}</span>`:''}</div>`)).join('') : '<div style="color:#64748b;font-size:12px;">No cards detected.</div>';
+
+      // ─── BUILD MATCH RESULTS (LEFT COLUMN) ───
+      let resultsHtml = '';
+      if(db_results.length === 0) {
+          resultsHtml = '<div style="color:#64748b; font-size:14px; text-align:center; padding: 40px; border: 1px dashed rgba(255,255,255,0.1); border-radius: 12px;">No results published yet.</div>';
+      } else {
+          db_results.forEach(res => {
+              const fixtureId = Array.isArray(res.fixture) ? res.fixture[0] : res.fixture;
+              const fixture = db_fixtures.find(f => f.id === fixtureId);
+              if (!fixture) return;
+
+              const t1Id = Array.isArray(fixture.team1) ? fixture.team1[0] : fixture.team1;
+              const t2Id = Array.isArray(fixture.team2) ? fixture.team2[0] : fixture.team2;
+              
+              const t1 = db_teams.find(t => t.id === t1Id) || { name: 'TBD', crest_text: '?' };
+              const t2 = db_teams.find(t => t.id === t2Id) || { name: 'TBD', crest_text: '?' };
+
+              const score1 = parseInt(res.team1_score !== undefined ? res.team1_score : res.t1_score) || 0;
+              const score2 = parseInt(res.team2_score !== undefined ? res.team2_score : res.t2_score) || 0;
+
+              let t1Logo = getPbImageUrl(t1, t1.banner || t1.logo);
+              let t2Logo = getPbImageUrl(t2, t2.banner || t2.logo);
+              let t1Html = (!t1Logo || t1Logo.includes('No+Photo')) ? `<div class="f-crest" style="color:#000;font-size:14px;">${t1.crest_text||'FC'}</div>` : `<img src="${t1Logo}" class="f-crest" crossorigin="anonymous">`;
+              let t2Html = (!t2Logo || t2Logo.includes('No+Photo')) ? `<div class="f-crest" style="color:#000;font-size:14px;">${t2.crest_text||'FC'}</div>` : `<img src="${t2Logo}" class="f-crest" crossorigin="anonymous">`;
+
+              // Scorers & Cards Lists for Result Card
+              let t1ScorersRaw = extractScorers(res, 't1');
+              let t1Counts = {};
+              t1ScorersRaw.forEach(val => { if(val && String(val).trim() !== 'n/a') t1Counts[String(val).trim()] = (t1Counts[String(val).trim()] || 0) + 1; });
+              let t1ScorersUI = [];
+              Object.keys(t1Counts).forEach(id => {
+                  let p = db_players.find(x => x.id === id);
+                  let n = p ? p.name : id;
+                  let suf = t1Counts[id] > 1 ? ` (${t1Counts[id]})` : '';
+                  // Check if it's a penalty. Simple approach: no tag on UI for penalties based on db_results.
+                  t1ScorersUI.push(`<div>⚽ ${n}${suf}</div>`);
+              });
+              let t1CardsArr = [];
+              extractFields(res, 't1_yellow', 4).forEach(v => { let p = db_players.find(x=>x.id===v); t1CardsArr.push(`<div>🟨 ${p?p.name:v}</div>`); });
+              extractFields(res, 't1_red', 2).forEach(v => { let p = db_players.find(x=>x.id===v); t1CardsArr.push(`<div>🟥 ${p?p.name:v}</div>`); });
+
+              let t2ScorersRaw = extractScorers(res, 't2');
+              let t2Counts = {};
+              t2ScorersRaw.forEach(val => { if(val && String(val).trim() !== 'n/a') t2Counts[String(val).trim()] = (t2Counts[String(val).trim()] || 0) + 1; });
+              let t2ScorersUI = [];
+              Object.keys(t2Counts).forEach(id => {
+                  let p = db_players.find(x => x.id === id);
+                  let n = p ? p.name : id;
+                  let suf = t2Counts[id] > 1 ? ` (${t2Counts[id]})` : '';
+                  t2ScorersUI.push(`<div>${n}${suf} ⚽</div>`);
+              });
+              let t2CardsArr = [];
+              extractFields(res, 't2_yellow', 4).forEach(v => { let p = db_players.find(x=>x.id===v); t2CardsArr.push(`<div>${p?p.name:v} 🟨</div>`); });
+              extractFields(res, 't2_red', 2).forEach(v => { let p = db_players.find(x=>x.id===v); t2CardsArr.push(`<div>${p?p.name:v} 🟥</div>`); });
+
+              let motmHtml = '';
+              let motmId = res.motm || res.potm;
+              if (motmId) {
+                  let id = Array.isArray(motmId) ? motmId[0] : motmId;
+                  let motmPlayer = db_players.find(p => p.id === id);
+                  if (motmPlayer) {
+                      let motmPhoto = getPbImageUrl(motmPlayer, motmPlayer.photo);
+                      motmHtml = `
+                      <div style="width: 100%; display: flex; justify-content: center; margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(255,255,255,0.1);">
+                          <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); padding: 4px 12px; border-radius: 20px;">
+                              <span style="font-size: 14px;">🏅</span>
+                              <span style="font-size: 10px; font-weight: 800; color: #F0B429; text-transform: uppercase; letter-spacing: 0.5px;">POTM:</span>
+                              <img src="${motmPhoto}" style="width: 20px; height: 20px; border-radius: 50%; object-fit: cover; border: 1px solid #F0B429;" crossorigin="anonymous">
+                              <span style="font-size: 12px; font-weight: 700; color: #fff;">${motmPlayer.name}</span>
+                          </div>
+                      </div>`;
+                  }
+              }
+
+              resultsHtml += `
+              <div class="fixture-card">
+                  <div class="f-header">
+                      <span>${fixture.match_type || 'Match Result'}</span>
+                      <span style="color:#38bdf8;">Full Time</span>
+                  </div>
+                  <div class="f-body">
+                      <div class="f-team">
+                          ${t1Html}
+                          <span class="f-tname">${getTeamName(t1)}</span>
+                          <div class="result-scorer-list">${t1ScorersUI.join('')}</div>
+                          <div class="card-list">${t1CardsArr.join('')}</div>
+                      </div>
+                      <div class="f-center">
+                          <div class="f-score">${score1} - ${score2}</div>
+                      </div>
+                      <div class="f-team away">
+                          ${t2Html}
+                          <span class="f-tname">${getTeamName(t2)}</span>
+                          <div class="result-scorer-list right">${t2ScorersUI.join('')}</div>
+                          <div class="card-list" style="text-align: right;">${t2CardsArr.join('')}</div>
+                      </div>
+                  </div>
+                  ${motmHtml}
+                  <div style="display:flex; justify-content:center; margin-top:15px;">
+                      <button class="export-btn" onclick="downloadMatchCard('${res.id}')">⬇️ Download Result Card</button>
+                  </div>
+              </div>`;
+          });
+      }
+
+      modalBody.innerHTML = `
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px;">
+           <div style="flex:2; min-width: 300px;">
+              <h3 style="font-family:'Orbitron',sans-serif; color:#38bdf8; margin-top:0;">MATCH RESULTS</h3>
+              <div class="fixture-list">${resultsHtml}</div>
+           </div>
+           <div style="flex:1; min-width: 280px; display: flex; flex-direction: column; gap: 20px;">
+              <div class="stat-col"><div class="stat-col-title">TOP SCORERS</div>${scorersHtml}</div>
+              <div class="stat-col"><div class="stat-col-title" style="color:#38bdf8;">TOP ASSISTS</div>${assistsHtml}</div>
+              <div class="stat-col"><div class="stat-col-title" style="color:#f43f5e;">KUNG-FU PLAYERS</div>${cardsHtml}</div>
+           </div>
+        </div>
+      `;
+      holoModal.classList.add('active');
+    }
+
+    function openFixturesModal() {
+      gsap.to(camera.position, { x: 0, y: 300, z: 500, duration: 1 });
+      gsap.to(controls.target, { x: 0, y: 0, z: 0, duration: 1 });
+
+      modalTitle.innerHTML = `<div class="team-name" style="color:#38bdf8; text-shadow:0 0 15px rgba(56,189,248,0.5);">MATCH TRANSMISSIONS</div>`;
+      
+      const now = new Date().getTime();
+      let fixHtml = '';
+      
+      let validFixtures = db_fixtures.filter(f => {
+          if (f.match_date && new Date(f.match_date).getTime() < now) return false;
+          return true;
+      });
+
+      if(validFixtures.length === 0) {
+          fixHtml = '<div style="color:#64748b; font-size:14px; text-align:center; padding: 40px; border: 1px dashed rgba(255,255,255,0.1); border-radius: 12px; grid-column:1/-1;">No upcoming transmissions detected.</div>';
+      } else {
+          validFixtures.forEach(f => {
+            let t1Id = Array.isArray(f.team1) ? f.team1[0] : f.team1;
+            let t2Id = Array.isArray(f.team2) ? f.team2[0] : f.team2;
+            const t1 = db_teams.find(t => t.id === t1Id) || { name: 'TBD', crest_text: '?' };
+            const t2 = db_teams.find(t => t.id === t2Id) || { name: 'TBD', crest_text: '?' };
+            
+            let t1Logo = getPbImageUrl(t1, t1.banner || t1.logo);
+            let t2Logo = getPbImageUrl(t2, t2.banner || t2.logo);
+            
+            let t1Html = (!t1Logo || t1Logo.includes('No+Photo')) ? `<div class="f-crest" style="color:#000;font-size:14px;">${t1.crest_text||'FC'}</div>` : `<img src="${t1Logo}" class="f-crest">`;
+            let t2Html = (!t2Logo || t2Logo.includes('No+Photo')) ? `<div class="f-crest" style="color:#000;font-size:14px;">${t2.crest_text||'FC'}</div>` : `<img src="${t2Logo}" class="f-crest">`;
+
+            fixHtml += `
+              <div class="fixture-card">
+                <div class="f-header">
+                    <span>${f.match_type || 'League Match'}</span>
+                    <span>${formatDate(f.match_date)}</span>
+                </div>
+                <div class="f-body" style="align-items: center;">
+                    <div class="f-team">
+                        ${t1Html}
+                        <span class="f-tname">${getTeamName(t1)}</span>
+                    </div>
+                    <div class="f-center"><div class="f-vs">VS</div></div>
+                    <div class="f-team away">
+                        ${t2Html}
+                        <span class="f-tname">${getTeamName(t2)}</span>
+                    </div>
+                </div>
+              </div>
+            `;
+          });
+      }
+
+      modalBody.innerHTML = `<div class="fixture-list">${fixHtml}</div>`;
+      holoModal.classList.add('active');
+    }
+
+    // ─── PLAYER DIRECTORY (Logos Added next to Team) ───
+    let currentFilteredPlayers = [];
+    
+    function openPlayerDirectoryModal(category = 'All') {
+      gsap.to(camera.position, { x: 0, y: 300, z: 500, duration: 1 });
+      gsap.to(controls.target, { x: 0, y: 0, z: 0, duration: 1 });
+
+      modalTitle.innerHTML = `<div class="team-name" style="color:#c084fc; text-shadow:0 0 15px rgba(192,132,252,0.5);">GLOBAL PLAYER DIRECTORY</div>`;
+      
+      const searchTerm = document.getElementById('holoSearch') ? document.getElementById('holoSearch').value.toLowerCase() : '';
+
+      currentFilteredPlayers = db_players.filter(p => {
+          let rawCat = (p.Catagory || p.category || '').trim();
+          let c = 'All';
+          if (/icon/i.test(rawCat)) c = 'Icon';
+          else if (/^A$/i.test(rawCat)) c = 'A';
+          else if (/^B$/i.test(rawCat)) c = 'B';
+          else if (/^C$/i.test(rawCat)) c = 'C';
+          else if (/^GK$/i.test(rawCat)) c = 'GK';
+
+          const matchesCat = category === 'All' ? true : c === category;
+          const matchesSearch = p.name.toLowerCase().includes(searchTerm);
+          return matchesCat && matchesSearch;
+      });
+
+      let pCards = '';
+      if(currentFilteredPlayers.length === 0) {
+          pCards = '<div style="color:#64748b; font-size:14px; text-align:center; padding: 40px; border: 1px dashed rgba(255,255,255,0.1); border-radius: 12px; grid-column:1/-1;">No players found matching criteria.</div>';
+      } else {
+          currentFilteredPlayers.forEach((p, idx) => {
+              const pPhoto = getPbImageUrl(p, p.avatar || p.photo || p.image);
+              let pImg = '';
+              if (pPhoto && !pPhoto.includes('No+Photo')) {
+                  pImg = `<img src="${pPhoto}" class="p-avatar">`;
+              } else {
+                  pImg = `<div class="p-avatar" style="display:grid;place-items:center;color:#64748b;font-family:'Inter',sans-serif;">?</div>`;
+              }
+
+              const t = db_teams.find(tm => tm.id === getPBLinkedTeamId(p));
+              const tName = t ? getTeamName(t) : 'Undrafted';
+              let tLogoHtml = '';
+              if(t) {
+                 const tLogoUrl = getPbImageUrl(t, t.logo || t.crest || t.banner);
+                 if(tLogoUrl && !tLogoUrl.includes('No+Photo')) {
+                     tLogoHtml = `<img src="${tLogoUrl}" style="width:12px;height:12px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:4px;">`;
+                 } else {
+                     tLogoHtml = `<span style="background:#fff;color:#000;border-radius:50%;width:12px;height:12px;display:inline-flex;align-items:center;justify-content:center;font-size:6px;font-weight:bold;margin-right:4px;">${t.crest_text||'FC'}</span>`;
+                 }
+              }
+              
+              pCards += `
+                <div class="player-card">
+                  ${pImg}
+                  <div class="p-info">
+                    <span class="p-name">${p.name}</span>
+                    <span class="p-pos">${p.position ? p.position.split('—')[0] : 'UNKNOWN'}</span>
+                    <span style="font-size:10px; color:#94a3b8; text-transform:uppercase; font-weight:600; display:flex; align-items:center;">
+                        ${tLogoHtml}${tName}
+                    </span>
+                  </div>
+                </div>
+              `;
+          });
+      }
+
+      modalBody.innerHTML = `
+        <div class="directory-filters">
+            <input type="text" id="holoSearch" class="search-input" placeholder="Search Database..." value="${searchTerm}" onkeyup="openPlayerDirectoryModal('${category}')">
+            <div class="cat-filters">
+                <button class="cat-btn ${category==='All'?'active':''}" onclick="openPlayerDirectoryModal('All')">ALL</button>
+                <button class="cat-btn ${category==='Icon'?'active':''}" onclick="openPlayerDirectoryModal('Icon')">ICON</button>
+                <button class="cat-btn ${category==='A'?'active':''}" onclick="openPlayerDirectoryModal('A')">CAT A</button>
+                <button class="cat-btn ${category==='B'?'active':''}" onclick="openPlayerDirectoryModal('B')">CAT B</button>
+                <button class="cat-btn ${category==='C'?'active':''}" onclick="openPlayerDirectoryModal('C')">CAT C</button>
+                <button class="cat-btn ${category==='GK'?'active':''}" onclick="openPlayerDirectoryModal('GK')">GK</button>
+            </div>
+        </div>
+        <div class="player-grid">${pCards}</div>
+      `;
+      holoModal.classList.add('active');
+    }
+
+    function openAboutModal() {
+      gsap.to(camera.position, { x: 0, y: 300, z: 500, duration: 1 });
+      gsap.to(controls.target, { x: 0, y: 0, z: 0, duration: 1 });
+
+      modalTitle.innerHTML = `<div class="team-name" style="color:#cbd5e1; text-shadow:0 0 15px rgba(203,213,225,0.5);">DATA CORE: EFL INFO</div>`;
+      
+      modalBody.innerHTML = `
+        <div class="about-grid">
+            <div class="about-card">
+                <h3>THE TOURNAMENT</h3>
+                <p>The English Football League (EFL) is the annual intra-departmental football tournament organized by students of the Department of English, Jahangirnagar University. Now entering its 4th season, EFL has grown into a celebrated tradition that brings together football enthusiasts from all batches.</p>
+            </div>
+            <div class="about-card">
+                <h3>SEASON HISTORY</h3>
+                <ul class="about-history-list">
+                    <li class="about-history-item"><div class="about-history-dot"></div><div><div class="rule-title">Season 1</div><div class="rule-text">Inaugural edition. The tradition begins by Batch 48.</div></div></li>
+                    <li class="about-history-item"><div class="about-history-dot"></div><div><div class="rule-title">Season 2</div><div class="rule-text">Expanded format with more teams and players.</div></div></li>
+                    <li class="about-history-item"><div class="about-history-dot"></div><div><div class="rule-title">Season 3</div><div class="rule-text">Record participation and memorable finals.</div></div></li>
+                    <li class="about-history-item"><div class="about-history-dot current"></div><div><div class="rule-title" style="color:#38bdf8;">Season 4 — Current</div><div class="rule-text">Now with dedicated digital spatial platform introduced by Batch 51.</div></div></li>
+                </ul>
+            </div>
+            <div class="about-card" style="grid-column: 1/-1;">
+                <h3>TOURNAMENT RULES</h3>
+                <div class="about-rules-grid">
+                    <div class="rule-item"><div class="rule-num">01</div><div><span class="rule-title">Tournament Format:</span> <br><span class="rule-text">In the primary group stage, all teams will play against each other. The top 4 teams on the points table will advance. Semi-final 1: 1st vs 4th. Semi-final 2: 2nd vs 3rd. The winners will play the Final.</span></div></div>
+                    <div class="rule-item"><div class="rule-num">02</div><div><span class="rule-title">Match Duration:</span> <br><span class="rule-text">Each match consists of 30 minutes (15 minutes per half) with a 10-minute half-time break.</span></div></div>
+                    <div class="rule-item"><div class="rule-num">03</div><div><span class="rule-title">Walkover & Forfeit:</span> <br><span class="rule-text">Teams must be present at the Central Field at the scheduled time. If one team fails to appear, the opponent gets a 2-0 win. If both teams fail to appear, both will be considered to have lost by 1 goal.</span></div></div>
+                    <div class="rule-item"><div class="rule-num">04</div><div><span class="rule-title">Knockout Ties:</span> <br><span class="rule-text">If a knockout match ends in a draw, the winner will be decided directly through a penalty shootout tiebreaker.</span></div></div>
+                </div>
+            </div>
+            <div class="about-card" style="grid-column: 1/-1;">
+                <h3>ORGANIZING COMMITTEE</h3>
+                <p>EFL Season 4 is organized by dedicated student volunteers from the Department of English, Jahangirnagar University.</p>
+                <div class="committee-grid">
+                    <div class="committee-badge"><div class="committee-title">Tournament Director</div><div class="committee-name">UTAU -(The Watcher)</div></div>
+                    <div class="committee-badge"><div class="committee-title">Registration Lead & Logistics</div><div class="committee-name">Sayem</div></div>
+                    <div class="committee-badge"><div class="committee-title">Media & Comms</div><div class="committee-name">Madhu, Indrolal</div></div>
+                    <div class="committee-badge"><div class="committee-title">Alumni Dealers</div><div class="committee-name">Akon & Sayem</div></div>
+                    <div class="committee-badge"><div class="committee-title">Rules</div><div class="committee-name">Yacchine, Jannat, Atik, Shishir</div></div>
+                </div>
+            </div>
+        </div>
+      `;
+      holoModal.classList.add('active');
+    }
+
+    function openSupportersModal() {
+      gsap.to(camera.position, { x: 0, y: 300, z: 500, duration: 1 });
+      gsap.to(controls.target, { x: 0, y: 0, z: 0, duration: 1 });
+
+      modalTitle.innerHTML = `<div class="team-name" style="color:#94a3b8; text-shadow:0 0 15px rgba(148,163,184,0.5);">ALLIED FORCES (SUPPORTERS)</div>`;
+      
+      let supHtml = '';
+      if(db_supporters.length === 0) supHtml = '<div style="color:#64748b; font-size:14px; text-align:center; padding: 40px; border: 1px dashed rgba(255,255,255,0.1); border-radius: 12px; grid-column:1/-1;">No allies registered yet.</div>';
+      
+      db_supporters.forEach(sup => {
+          let pImg = getPbImageUrl(sup, sup.photo);
+          if (pImg.includes('No+Photo')) pImg = 'https://via.placeholder.com/80';
+
+          let sName = sup.name || sup.NAME || sup.Name || 'Anonymous';
+          let sBatch = sup.batch || sup.Batch || sup.BATCH || '';
+          
+          let badge = '';
+          if(sup.supported_team && sup.supported_team !== 'decide_later' && !sup.supported_team.includes('TBD')) {
+              let t = db_teams.find(tm => tm.id === sup.supported_team);
+              if(t) badge = `<div class="sup-badge">Supporting ${getTeamName(t)}</div>`;
+          }
+
+          supHtml += `
+          <div class="sup-card">
+              <img src="${pImg}" class="sup-photo">
+              <div class="sup-name">${sName}</div>
+              <div class="sup-batch">Batch: ${sBatch}</div>
+              ${badge}
+          </div>`;
+      });
+
+      modalBody.innerHTML = `<div class="sup-grid">${supHtml}</div>`;
+      holoModal.classList.add('active');
+    }
+
+    function openFantasyPortal() {
+      gsap.to(camera.position, { x: 0, y: 10, z: 40, duration: 1.5, ease: "power2.inOut" });
+      gsap.to(controls.target, { x: 0, y: 0, z: 0, duration: 1.5, ease: "power2.inOut" });
+
+      modalTitle.innerHTML = `<div class="team-name" style="color:#F0B429; text-shadow:0 0 20px #F0B429;">FANTASY PORTAL</div>`;
+      
+      modalBody.innerHTML = `
+        <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; text-align:center;">
+            <div style="font-size:64px; margin-bottom:10px;">🌌</div>
+            <h2 style="color:#F0B429; font-family:'Orbitron', sans-serif; font-size:32px; font-weight:900; letter-spacing:4px; margin:0 0 15px 0;">ENTER THE FANTASY REALM</h2>
+            <p style="color:#94a3b8; font-family:'Inter', sans-serif; font-size:16px; max-width:500px; line-height:1.6; margin-bottom:30px;">
+                Manage your squad, track live points, and compete on the global leaderboard against other commanders.
+            </p>
+            <button class="cyber-btn gold" style="width:auto; padding:15px 40px; font-size:16px; justify-content:center;" onclick="window.location.href='/fpl/'">ACCESS FPL PORTAL</button>
+        </div>
+      `;
+      holoModal.classList.add('active');
+    }
+
+    function closeModal(event) {
+      if(event && event.target !== holoModal && !event.target.classList.contains('close-btn')) return;
+      holoModal.classList.remove('active');
+      gsap.to(camera.position, { x: 0, y: 200, z: 400, duration: 1.5, ease: "power2.out" });
+      gsap.to(controls.target, { x: 0, y: 0, z: 0, duration: 1.5, ease: "power2.out" });
+    }
+
+    // ─── HTML2CANVAS DOWNLOAD FUNCTIONS ───
+    function renderExportStandingsHTML(standingsArr) {
+        let exportHtml = '';
+        standingsArr.forEach((stats, index) => {
+            const team = stats.team;
+            const crestBg = team.crest_bg || '#1d4ed8';
+            const crestTextCol = getSafeCrestTextColor(crestBg);
+            const teamName = team.name || team.crest_text || 'Unnamed Team';
+            let crestHtml = team.banner ? `<img src="${getPbImageUrl(team, team.banner)}" style="width:28px;height:28px;object-fit:cover;border-radius:50%;" crossorigin="anonymous">` : `<div style="width:28px;height:28px;border-radius:50%;background:${crestBg};color:${crestTextCol};display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:bold;">${team.crest_text||'FC'}</div>`;
+            const gdDisplay = stats.GD > 0 ? `+${stats.GD}` : stats.GD;
+
+            exportHtml += `
+            <tr>
+                <td style="padding:14px 12px; border-bottom:1px solid #e5e7eb; font-weight:800; color:#6b7280;">${index + 1}</td>
+                <td style="padding:14px 12px; border-bottom:1px solid #e5e7eb; text-align:left; display:flex; align-items:center; gap:12px;">${crestHtml} <span style="font-family:'Montserrat',sans-serif; font-weight:700; font-size:13px; text-transform:uppercase;">${teamName}</span></td>
+                <td style="padding:14px 12px; border-bottom:1px solid #e5e7eb; font-weight:600;">${stats.P}</td>
+                <td style="padding:14px 12px; border-bottom:1px solid #e5e7eb; font-weight:600;">${stats.W}</td>
+                <td style="padding:14px 12px; border-bottom:1px solid #e5e7eb; font-weight:600;">${stats.D}</td>
+                <td style="padding:14px 12px; border-bottom:1px solid #e5e7eb; font-weight:600;">${stats.L}</td>
+                <td style="padding:14px 12px; border-bottom:1px solid #e5e7eb; font-weight:600;">${stats.GF}</td>
+                <td style="padding:14px 12px; border-bottom:1px solid #e5e7eb; font-weight:600;">${stats.GA}</td>
+                <td style="padding:14px 12px; border-bottom:1px solid #e5e7eb; font-weight:800;">${gdDisplay}</td>
+                <td style="padding:14px 12px; border-bottom:1px solid #e5e7eb;"><span style="background:rgba(17,24,39,0.05); padding:4px 12px; border-radius:6px; font-family:'Montserrat',sans-serif; font-weight:900; color:#111827; font-size:16px;">${stats.Pts}</span></td>
+            </tr>`;
+        });
+        document.getElementById('export-standings-body').innerHTML = exportHtml;
+    }
+
+    function downloadStandings() {
+        const tableArea = document.getElementById('standings-export-area');
+        
+        html2canvas(tableArea, { scale: 2, useCORS: true, backgroundColor: '#FFFFFF' }).then(canvas => {
+            const link = document.createElement('a');
+            link.download = `EFL_S4_Points_Table.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        });
+    }
+
+    function downloadMatchCard(resultId) {
+        const res = db_results.find(r => r.id === resultId);
+        if (!res) return;
+
+        const fixtureId = Array.isArray(res.fixture) ? res.fixture[0] : res.fixture;
+        const fixture = db_fixtures.find(f => f.id === fixtureId);
+        if (!fixture) return;
+
+        const team1Id = Array.isArray(fixture.team1) ? fixture.team1[0] : fixture.team1;
+        const team2Id = Array.isArray(fixture.team2) ? fixture.team2[0] : fixture.team2;
+        
+        const t1 = db_teams.find(t => t.id === team1Id) || { name: 'T1', crest_text: 'T1', crest_bg: '#111827' };
+        const t2 = db_teams.find(t => t.id === team2Id) || { name: 'T2', crest_text: 'T2', crest_bg: '#111827' };
+
+        document.getElementById('erc-t1-crest').style.background = t1.crest_bg || '#111827';
+        document.getElementById('erc-t1-crest').style.color = getSafeCrestTextColor(t1.crest_bg);
+        document.getElementById('erc-t1-crest').innerHTML = t1.banner ? `<img src="${getPbImageUrl(t1, t1.banner)}" style="width:100%;height:100%;object-fit:contain;" crossorigin="anonymous">` : (t1.crest_text || 'T1');
+        document.getElementById('erc-t1-name').textContent = t1.name || t1.crest_text || 'T1';
+        document.getElementById('erc-t1-score').textContent = parseInt(res.team1_score ?? res.t1_score) || 0;
+
+        document.getElementById('erc-t2-crest').style.background = t2.crest_bg || '#111827';
+        document.getElementById('erc-t2-crest').style.color = getSafeCrestTextColor(t2.crest_bg);
+        document.getElementById('erc-t2-crest').innerHTML = t2.banner ? `<img src="${getPbImageUrl(t2, t2.banner)}" style="width:100%;height:100%;object-fit:contain;" crossorigin="anonymous">` : (t2.crest_text || 'T2');
+        document.getElementById('erc-t2-name').textContent = t2.name || t2.crest_text || 'T2';
+        document.getElementById('erc-t2-score').textContent = parseInt(res.team2_score ?? res.t2_score) || 0;
+
+        // Scorers
+        let t1Html = '';
+        extractScorers(res, 't1').forEach(id => {
+            let p = db_players.find(x => x.id === id);
+            t1Html += `<div>⚽ ${p ? p.name : id}</div>`;
+        });
+        
+        let t1CardsArr = [];
+        extractFields(res, 't1_yellow', 4).forEach(v => { let p = db_players.find(x=>x.id===v); t1CardsArr.push(`<div style="color:#f59e0b;">🟨 ${p?p.name:v}</div>`); });
+        extractFields(res, 't1_red', 2).forEach(v => { let p = db_players.find(x=>x.id===v); t1CardsArr.push(`<div style="color:#ef4444;">🟥 ${p?p.name:v}</div>`); });
+        let t1CardsHtml = t1CardsArr.length ? `<div style="margin-top:12px;">${t1CardsArr.join('')}</div>` : '';
+        document.getElementById('erc-t1-scorers').innerHTML = t1Html + t1CardsHtml;
+
+        let t2Html = '';
+        extractScorers(res, 't2').forEach(id => {
+            let p = db_players.find(x => x.id === id);
+            t2Html += `<div>${p ? p.name : id} ⚽</div>`;
+        });
+        
+        let t2CardsArr = [];
+        extractFields(res, 't2_yellow', 4).forEach(v => { let p = db_players.find(x=>x.id===v); t2CardsArr.push(`<div style="color:#f59e0b;">${p?p.name:v} 🟨</div>`); });
+        extractFields(res, 't2_red', 2).forEach(v => { let p = db_players.find(x=>x.id===v); t2CardsArr.push(`<div style="color:#ef4444;">${p?p.name:v} 🟥</div>`); });
+        let t2CardsHtml = t2CardsArr.length ? `<div style="margin-top:12px;">${t2CardsArr.join('')}</div>` : '';
+        document.getElementById('erc-t2-scorers').innerHTML = t2Html + t2CardsHtml;
+
+        // MOTM
+        let motmId = res.motm || res.potm;
+        let motmContainer = document.getElementById('erc-motm-container');
+        if (motmId) {
+            let id = Array.isArray(motmId) ? motmId[0] : motmId;
+            let motmPlayer = db_players.find(p => p.id === id || (p.name && p.name.toLowerCase() === String(id).toLowerCase()));
+            if (motmPlayer) {
+                document.getElementById('erc-motm-photo').src = getPbImageUrl(motmPlayer, motmPlayer.photo);
+                document.getElementById('erc-motm-name').textContent = motmPlayer.name;
+                motmContainer.style.display = 'block';
+            } else { motmContainer.style.display = 'none'; }
+        } else { motmContainer.style.display = 'none'; }
+
+        const cardEl = document.getElementById('export-result-card');
+        cardEl.parentElement.style.top = "0";
+        cardEl.parentElement.style.zIndex = "-1";
+        
+        html2canvas(cardEl, { scale: 2, useCORS: true, backgroundColor: null }).then(canvas => {
+            const link = document.createElement('a');
+            link.download = `EFL_S4_Result_${t1.name}_vs_${t2.name}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+            cardEl.parentElement.style.top = "-10000px";
+        });
+    }
+
+    // Initialize 
+    initData();
+
+  </script>
+</body>
+</html>
