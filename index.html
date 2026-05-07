@@ -1230,6 +1230,18 @@ function observeElements() {
 // ==========================================
 // DATA PROCESSING HELPERS
 // ==========================================
+function extractPenaltyScorers(res, teamPrefix) {
+    let ids = [];
+    for (let i = 1; i <= 2; i++) {
+        let val = res[`${teamPrefix}_pen_goal_${i}`];
+        if (val) {
+            if (Array.isArray(val)) ids.push(...val);
+            else ids.push(val);
+        }
+    }
+    return ids;
+}
+
 function extractScorers(res, teamPrefix) {
     let ids = [];
     for (let i = 1; i <= 6; i++) {
@@ -1239,7 +1251,71 @@ function extractScorers(res, teamPrefix) {
             else ids.push(val);
         }
     }
+    for (let i = 1; i <= 2; i++) {
+        let val = res[`${teamPrefix}_pen_goal_${i}`];
+        if (val) {
+            if (Array.isArray(val)) ids.push(...val);
+            else ids.push(val);
+        }
+    }
     return ids;
+}
+
+function collectScorerSummary(res, teamPrefix) {
+    let counts = {};
+    extractScorers(res, teamPrefix).forEach(val => {
+        if (!val) return;
+        let playerRef = String(val).trim();
+        if (!playerRef || playerRef.toLowerCase() === 'n/a') return;
+        if (!counts[playerRef]) counts[playerRef] = { goals: 0, penaltyGoals: 0 };
+        counts[playerRef].goals += 1;
+    });
+    extractPenaltyScorers(res, teamPrefix).forEach(val => {
+        if (!val) return;
+        let playerRef = String(val).trim();
+        if (!playerRef || playerRef.toLowerCase() === 'n/a') return;
+        if (!counts[playerRef]) counts[playerRef] = { goals: 0, penaltyGoals: 0 };
+        counts[playerRef].penaltyGoals += 1;
+    });
+    return counts;
+}
+
+function processAggregatedStats(res, t1, t2, playerGoalsMap) {
+    const t1Counts = collectScorerSummary(res, 't1');
+    const t2Counts = collectScorerSummary(res, 't2');
+
+    Object.entries(t1Counts).forEach(([playerRef, info]) => {
+        const player = db_players.find(p => p.id === playerRef || (p.name && p.name.toLowerCase() === playerRef.toLowerCase()));
+        if (player && getPBLinkedTeamId(player) === t1.id) {
+            playerGoalsMap[player.id] = (playerGoalsMap[player.id] || 0) + info.goals;
+        }
+    });
+
+    Object.entries(t2Counts).forEach(([playerRef, info]) => {
+        const player = db_players.find(p => p.id === playerRef || (p.name && p.name.toLowerCase() === playerRef.toLowerCase()));
+        if (player && getPBLinkedTeamId(player) === t2.id) {
+            playerGoalsMap[player.id] = (playerGoalsMap[player.id] || 0) + info.goals;
+        }
+    });
+
+    return { t1Counts, t2Counts };
+}
+
+function getResultScoreText(res, score1, score2) {
+    const pen1 = parseInt(res.t1_pen_score) || 0;
+    const pen2 = parseInt(res.t2_pen_score) || 0;
+    if (pen1 > 0 || pen2 > 0) {
+        return `${score1} (${pen1}) - (${pen2}) ${score2}`;
+    }
+    return `${score1} - ${score2}`;
+}
+
+function getExportScoreText(res, score, teamPrefix) {
+    const pen = parseInt(res[`${teamPrefix}_pen_score`]) || 0;
+    if (pen > 0) {
+        return teamPrefix === 't1' ? `${score} (${pen})` : `(${pen}) ${score}`;
+    }
+    return `${score}`;
 }
 
 function extractAssists(res, teamPrefix) {
@@ -1612,67 +1688,46 @@ function renderResultsPage() {
 
       const score1 = parseInt(res.team1_score !== undefined ? res.team1_score : res.t1_score) || 0;
       const score2 = parseInt(res.team2_score !== undefined ? res.team2_score : res.t2_score) || 0;
+      const resultScoreText = getResultScoreText(res, score1, score2);
 
       // ----------------------------------------------------
       // GOALS PROCESSING
       // ----------------------------------------------------
-      let t1ScorersRaw = extractScorers(res, 't1');
-      let t1Counts = {};
-      t1ScorersRaw.forEach(val => { 
-          if(val) {
-              let strVal = String(val).trim();
-              if (strVal !== '' && strVal.toLowerCase() !== 'n/a') {
-                  t1Counts[strVal] = (t1Counts[strVal] || 0) + 1; 
-              }
-          }
-      });
+      const { t1Counts, t2Counts } = processAggregatedStats(res, t1, t2, playerGoalsMap);
 
       let t1ScorersUI = [];
-      Object.keys(t1Counts).forEach(playerRef => {
-          const player = db_players.find(p => p.id === playerRef || (p.name && p.name.toLowerCase() === String(playerRef).toLowerCase()));
-          let goalsScored = t1Counts[playerRef];
-          let suffix = goalsScored > 1 ? ` (${goalsScored})` : '';
+      Object.entries(t1Counts).forEach(([playerRef, info]) => {
+          const player = db_players.find(p => p.id === playerRef || (p.name && p.name.toLowerCase() === playerRef.toLowerCase()));
+          let suffix = info.goals > 1 ? ` (${info.goals})` : '';
+          let penaltyTag = info.penaltyGoals > 0 ? ' (p)' : '';
 
           if (player) {
               const playerRealTeam = getPBLinkedTeamId(player);
               if (playerRealTeam === t1.id) {
-                  playerGoalsMap[player.id] = (playerGoalsMap[player.id] || 0) + goalsScored;
-                  t1ScorersUI.push(`<span>⚽ ${player.name}${suffix}</span>`);
+                  t1ScorersUI.push(`<span>⚽ ${player.name}${penaltyTag}${suffix}</span>`);
               } else {
                   t1ScorersUI.push(`<span class="scorer-item-og">⚽ ${player.name} (og)${suffix}</span>`);
               }
           } else {
-              t1ScorersUI.push(`<span>⚽ ${playerRef}${suffix}</span>`);
-          }
-      });
-
-      let t2ScorersRaw = extractScorers(res, 't2');
-      let t2Counts = {};
-      t2ScorersRaw.forEach(val => { 
-          if(val) {
-              let strVal = String(val).trim();
-              if (strVal !== '' && strVal.toLowerCase() !== 'n/a') {
-                  t2Counts[strVal] = (t2Counts[strVal] || 0) + 1; 
-              }
+              t1ScorersUI.push(`<span>⚽ ${playerRef}${penaltyTag}${suffix}</span>`);
           }
       });
 
       let t2ScorersUI = [];
-      Object.keys(t2Counts).forEach(playerRef => {
-          const player = db_players.find(p => p.id === playerRef || (p.name && p.name.toLowerCase() === String(playerRef).toLowerCase()));
-          let goalsScored = t2Counts[playerRef];
-          let suffix = goalsScored > 1 ? ` (${goalsScored})` : '';
+      Object.entries(t2Counts).forEach(([playerRef, info]) => {
+          const player = db_players.find(p => p.id === playerRef || (p.name && p.name.toLowerCase() === playerRef.toLowerCase()));
+          let suffix = info.goals > 1 ? ` (${info.goals})` : '';
+          let penaltyTag = info.penaltyGoals > 0 ? ' (p)' : '';
 
           if (player) {
               const playerRealTeam = getPBLinkedTeamId(player);
               if (playerRealTeam === t2.id) {
-                  playerGoalsMap[player.id] = (playerGoalsMap[player.id] || 0) + goalsScored;
-                  t2ScorersUI.push(`<span>${player.name}${suffix} ⚽</span>`);
+                  t2ScorersUI.push(`<span>${player.name}${penaltyTag}${suffix} ⚽</span>`);
               } else {
                   t2ScorersUI.push(`<span class="scorer-item-og">${player.name} (og)${suffix} ⚽</span>`);
               }
           } else {
-              t2ScorersUI.push(`<span>${playerRef}${suffix} ⚽</span>`);
+              t2ScorersUI.push(`<span>${playerRef}${penaltyTag}${suffix} ⚽</span>`);
           }
       });
 
@@ -1824,7 +1879,7 @@ function renderResultsPage() {
                     </div>
               </div>
               <div class="fixture-center">
-                  <div class="fixture-score">${score1} - ${score2}</div>
+                  <div class="fixture-score">${resultScoreText}</div>
               </div>
               <div class="fixture-team away" style="flex-direction: column; align-items: flex-end;">
                   <div style="display: flex; align-items: center; gap: 12px; flex-direction: row-reverse;">
@@ -2169,7 +2224,9 @@ function downloadMatchCard(resultId) {
     document.getElementById('erc-t1-crest').innerHTML = t1CrestHtml;
     if(t1.banner) document.getElementById('erc-t1-crest').style.padding = '0';
     document.getElementById('erc-t1-name').textContent = t1Name;
-    document.getElementById('erc-t1-score').textContent = parseInt(res.team1_score !== undefined ? res.team1_score : res.t1_score) || 0;
+    const cardScore1 = parseInt(res.team1_score !== undefined ? res.team1_score : res.t1_score) || 0;
+    const cardScore2 = parseInt(res.team2_score !== undefined ? res.team2_score : res.t2_score) || 0;
+    document.getElementById('erc-t1-score').textContent = getExportScoreText(res, cardScore1, 't1');
 
     document.getElementById('erc-t2-crest').style.background = t2.crest_bg;
     document.getElementById('erc-t2-crest').style.color = getSafeCrestTextColor(t2.crest_bg);
@@ -2177,29 +2234,22 @@ function downloadMatchCard(resultId) {
     document.getElementById('erc-t2-crest').innerHTML = t2CrestHtml;
     if(t2.banner) document.getElementById('erc-t2-crest').style.padding = '0';
     document.getElementById('erc-t2-name').textContent = t2Name;
-    document.getElementById('erc-t2-score').textContent = parseInt(res.team2_score !== undefined ? res.team2_score : res.t2_score) || 0;
+    document.getElementById('erc-t2-score').textContent = getExportScoreText(res, cardScore2, 't2');
 
-    let t1ScorersRaw = extractScorers(res, 't1');
-    let t1Counts = {};
-    t1ScorersRaw.forEach(val => { 
-        if(val) {
-            let strVal = String(val).trim();
-            if (strVal !== '' && strVal.toLowerCase() !== 'n/a') t1Counts[strVal] = (t1Counts[strVal] || 0) + 1; 
-        }
-    });
+    const t1Counts = collectScorerSummary(res, 't1');
 
     let t1ScorersHtml = '';
-    Object.keys(t1Counts).forEach(playerRef => {
-        const player = db_players.find(p => p.id === playerRef || (p.name && p.name.toLowerCase() === String(playerRef).toLowerCase()));
-        let goalsScored = t1Counts[playerRef];
-        let suffix = goalsScored > 1 ? ` (${goalsScored})` : '';
+    Object.entries(t1Counts).forEach(([playerRef, info]) => {
+        const player = db_players.find(p => p.id === playerRef || (p.name && p.name.toLowerCase() === playerRef.toLowerCase()));
+        let suffix = info.goals > 1 ? ` (${info.goals})` : '';
+        let penaltyTag = info.penaltyGoals > 0 ? ' (p)' : '';
 
         if (player) {
             const playerRealTeam = getPBLinkedTeamId(player);
-            if (playerRealTeam === t1.id) t1ScorersHtml += `<div>⚽ ${player.name}${suffix}</div>`;
+            if (playerRealTeam === t1.id) t1ScorersHtml += `<div>⚽ ${player.name}${penaltyTag}${suffix}</div>`;
             else t1ScorersHtml += `<div style="color: #f87171; font-style:italic;">⚽ ${player.name} (og)${suffix}</div>`;
         } else {
-            t1ScorersHtml += `<div>⚽ ${playerRef}${suffix}</div>`;
+            t1ScorersHtml += `<div>⚽ ${playerRef}${penaltyTag}${suffix}</div>`;
         }
     });
 
@@ -2229,27 +2279,20 @@ function downloadMatchCard(resultId) {
     const t1CardsHtml = t1CardsArr.length ? `<div style="margin-top:12px;">${t1CardsArr.join('')}</div>` : '';
     document.getElementById('erc-t1-scorers').innerHTML = t1ScorersHtml + t1CardsHtml;
 
-    let t2ScorersRaw = extractScorers(res, 't2');
-    let t2Counts = {};
-    t2ScorersRaw.forEach(val => { 
-        if(val) {
-            let strVal = String(val).trim();
-            if (strVal !== '' && strVal.toLowerCase() !== 'n/a') t2Counts[strVal] = (t2Counts[strVal] || 0) + 1; 
-        }
-    });
+    const t2Counts = collectScorerSummary(res, 't2');
 
     let t2ScorersHtml = '';
-    Object.keys(t2Counts).forEach(playerRef => {
-        const player = db_players.find(p => p.id === playerRef || (p.name && p.name.toLowerCase() === String(playerRef).toLowerCase()));
-        let goalsScored = t2Counts[playerRef];
-        let suffix = goalsScored > 1 ? ` (${goalsScored})` : '';
+    Object.entries(t2Counts).forEach(([playerRef, info]) => {
+        const player = db_players.find(p => p.id === playerRef || (p.name && p.name.toLowerCase() === playerRef.toLowerCase()));
+        let suffix = info.goals > 1 ? ` (${info.goals})` : '';
+        let penaltyTag = info.penaltyGoals > 0 ? ' (p)' : '';
 
         if (player) {
             const playerRealTeam = getPBLinkedTeamId(player);
-            if (playerRealTeam === t2.id) t2ScorersHtml += `<div>${player.name}${suffix} ⚽</div>`;
+            if (playerRealTeam === t2.id) t2ScorersHtml += `<div>${player.name}${penaltyTag}${suffix} ⚽</div>`;
             else t2ScorersHtml += `<div style="color: #f87171; font-style:italic;">${player.name} (og)${suffix} ⚽</div>`;
         } else {
-            t2ScorersHtml += `<div>${playerRef}${suffix} ⚽</div>`;
+            t2ScorersHtml += `<div>${playerRef}${penaltyTag}${suffix} ⚽</div>`;
         }
     });
 
@@ -2772,7 +2815,9 @@ function downloadMatchCard(resultId) {
     document.getElementById('erc-t1-crest').innerHTML = t1CrestHtml;
     if(t1.banner) document.getElementById('erc-t1-crest').style.padding = '0';
     document.getElementById('erc-t1-name').textContent = t1Name;
-    document.getElementById('erc-t1-score').textContent = parseInt(res.team1_score !== undefined ? res.team1_score : res.t1_score) || 0;
+    const cardScore1 = parseInt(res.team1_score !== undefined ? res.team1_score : res.t1_score) || 0;
+    const cardScore2 = parseInt(res.team2_score !== undefined ? res.team2_score : res.t2_score) || 0;
+    document.getElementById('erc-t1-score').textContent = getExportScoreText(res, cardScore1, 't1');
 
     document.getElementById('erc-t2-crest').style.background = t2.crest_bg;
     document.getElementById('erc-t2-crest').style.color = getSafeCrestTextColor(t2.crest_bg);
@@ -2780,29 +2825,22 @@ function downloadMatchCard(resultId) {
     document.getElementById('erc-t2-crest').innerHTML = t2CrestHtml;
     if(t2.banner) document.getElementById('erc-t2-crest').style.padding = '0';
     document.getElementById('erc-t2-name').textContent = t2Name;
-    document.getElementById('erc-t2-score').textContent = parseInt(res.team2_score !== undefined ? res.team2_score : res.t2_score) || 0;
+    document.getElementById('erc-t2-score').textContent = getExportScoreText(res, cardScore2, 't2');
 
-    let t1ScorersRaw = extractScorers(res, 't1');
-    let t1Counts = {};
-    t1ScorersRaw.forEach(val => { 
-        if(val) {
-            let strVal = String(val).trim();
-            if (strVal !== '' && strVal.toLowerCase() !== 'n/a') t1Counts[strVal] = (t1Counts[strVal] || 0) + 1; 
-        }
-    });
+    const t1Counts = collectScorerSummary(res, 't1');
 
     let t1ScorersHtml = '';
-    Object.keys(t1Counts).forEach(playerRef => {
-        const player = db_players.find(p => p.id === playerRef || (p.name && p.name.toLowerCase() === String(playerRef).toLowerCase()));
-        let goalsScored = t1Counts[playerRef];
-        let suffix = goalsScored > 1 ? ` (${goalsScored})` : '';
+    Object.entries(t1Counts).forEach(([playerRef, info]) => {
+        const player = db_players.find(p => p.id === playerRef || (p.name && p.name.toLowerCase() === playerRef.toLowerCase()));
+        let suffix = info.goals > 1 ? ` (${info.goals})` : '';
+        let penaltyTag = info.penaltyGoals > 0 ? ' (p)' : '';
 
         if (player) {
             const playerRealTeam = getPBLinkedTeamId(player);
-            if (playerRealTeam === t1.id) t1ScorersHtml += `<div>⚽ ${player.name}${suffix}</div>`;
+            if (playerRealTeam === t1.id) t1ScorersHtml += `<div>⚽ ${player.name}${penaltyTag}${suffix}</div>`;
             else t1ScorersHtml += `<div style="color: #f87171; font-style:italic;">⚽ ${player.name} (og)${suffix}</div>`;
         } else {
-            t1ScorersHtml += `<div>⚽ ${playerRef}${suffix}</div>`;
+            t1ScorersHtml += `<div>⚽ ${playerRef}${penaltyTag}${suffix}</div>`;
         }
     });
     // -----------------------------
@@ -2831,27 +2869,20 @@ function downloadMatchCard(resultId) {
     const t1CardsHtml = t1CardsArr.length ? `<div style="margin-top:12px;">${t1CardsArr.join('')}</div>` : '';
     document.getElementById('erc-t1-scorers').innerHTML = t1ScorersHtml + t1CardsHtml;
 
-    let t2ScorersRaw = extractScorers(res, 't2');
-    let t2Counts = {};
-    t2ScorersRaw.forEach(val => { 
-        if(val) {
-            let strVal = String(val).trim();
-            if (strVal !== '' && strVal.toLowerCase() !== 'n/a') t2Counts[strVal] = (t2Counts[strVal] || 0) + 1; 
-        }
-    });
+    const t2Counts = collectScorerSummary(res, 't2');
 
     let t2ScorersHtml = '';
-    Object.keys(t2Counts).forEach(playerRef => {
-        const player = db_players.find(p => p.id === playerRef || (p.name && p.name.toLowerCase() === String(playerRef).toLowerCase()));
-        let goalsScored = t2Counts[playerRef];
-        let suffix = goalsScored > 1 ? ` (${goalsScored})` : '';
+    Object.entries(t2Counts).forEach(([playerRef, info]) => {
+        const player = db_players.find(p => p.id === playerRef || (p.name && p.name.toLowerCase() === playerRef.toLowerCase()));
+        let suffix = info.goals > 1 ? ` (${info.goals})` : '';
+        let penaltyTag = info.penaltyGoals > 0 ? ' (p)' : '';
 
         if (player) {
             const playerRealTeam = getPBLinkedTeamId(player);
-            if (playerRealTeam === t2.id) t2ScorersHtml += `<div>${player.name}${suffix} ⚽</div>`;
+            if (playerRealTeam === t2.id) t2ScorersHtml += `<div>${player.name}${penaltyTag}${suffix} ⚽</div>`;
             else t2ScorersHtml += `<div style="color: #f87171; font-style:italic;">${player.name} (og)${suffix} ⚽</div>`;
         } else {
-            t2ScorersHtml += `<div>${playerRef}${suffix} ⚽</div>`;
+            t2ScorersHtml += `<div>${playerRef}${penaltyTag}${suffix} ⚽</div>`;
         }
     });
     // -----------------------------
