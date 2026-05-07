@@ -777,8 +777,15 @@
         showToast('All Data Synchronized Successfully! 🎉', 'success');
         setTimeout(() => location.reload(), 1500);
     } catch(err) { 
-        showToast('Error: Both "results" and "fpl_match_data" must be Public for Create/Update.', 'error');
-        console.error(err);
+        console.error("Sync Error:", err);
+        let msg = "Network error or server timeout. Please try again.";
+        // Show permission error ONLY if it's genuinely a 400 or 403 error from server
+        if (err.status === 403 || err.status === 400) {
+            msg = 'Error: Check if "results" and "fpl_match_data" API Rules are Public.';
+        } else if (err.message && err.message !== "Failed to fetch") {
+            msg = "Sync Failed: " + err.message;
+        }
+        showToast(msg, 'error');
     } finally { 
         btn.disabled = false; 
         document.getElementById('submitLabel').textContent = "Submit & Sync All Data"; 
