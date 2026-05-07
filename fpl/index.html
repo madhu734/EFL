@@ -404,11 +404,13 @@
         <button class="modal-close-btn" onclick="document.getElementById('viewSquadModal').classList.remove('open')">✕</button>
       </div>
       <div class="modal-body" style="background: var(--bg-main); padding: 16px;">
+         <div id="vs-tabs-container"></div>
          <div class="pitch-wrapper" style="transform: scale(0.9); transform-origin: top center; margin-bottom: -60px;">
           <div class="pitch" id="vs-pitch">
             <div class="pitch-bottom-lines"></div>
           </div>
         </div>
+        <div id="vs-breakdown-container"></div>
       </div>
     </div>
   </div>
@@ -549,6 +551,12 @@
   let forceLock = false;
   let enableCountdown = true; // New variable for boolean toggle
 
+  // --- NEW: Auto Snapshot Variables ---
+  let activeMatchday = 'MD 4';
+  let snapshotTaken = false;
+  let systemSettingId = ''; 
+  let isSnapshotting = false; 
+
   function isDeadlinePassed() { 
     if (forceLock) return true; 
     return new Date().getTime() >= DEADLINE_DATE; 
@@ -559,6 +567,11 @@
     const bannerText = document.getElementById('countdownTimer');
     
     const isLocked = forceLock || distance < 0;
+
+    // --- NEW: Trigger Auto-Snapshot if deadline passed ---
+    if (isLocked && !snapshotTaken && !isSnapshotting && activeMatchday) {
+        executeAutoSnapshot();
+    }
 
     // Lock/Unlock buttons based on state
     const saveBtn = document.getElementById('saveBtn');
@@ -624,15 +637,14 @@
       try {
           const settings = await pb.collection('system_settings').getFullList({ requestKey: null });
           if (settings && settings.length > 0) {
-              // Check force_lock
-              forceLock = settings.some(s => {
-                  let v = String(s.force_lock).toLowerCase().trim();
-                  return v === 'true' || v === 'yes' || v === '1' || s.force_lock === true;
-              });
-
-              // Check deadline and the new enable_countdown field
+              
+              // NEW: Fetch snapshot details first
               let validSetting = settings.find(s => s.deadline);
               if (validSetting) {
+                  systemSettingId = validSetting.id;
+                  activeMatchday = validSetting.active_matchday || 'MD 4';
+                  snapshotTaken = validSetting.snapshot_taken === true;
+
                   let dStr = validSetting.deadline.replace(' ', 'T'); 
                   DEADLINE_DATE = new Date(dStr).getTime();
 
@@ -641,6 +653,13 @@
                       enableCountdown = (ec === 'true' || ec === 'yes' || ec === '1' || validSetting.enable_countdown === true);
                   }
               }
+
+              // Check force_lock
+              forceLock = settings.some(s => {
+                  let v = String(s.force_lock).toLowerCase().trim();
+                  return v === 'true' || v === 'yes' || v === '1' || s.force_lock === true;
+              });
+
               updateCountdown(); 
           }
       } catch (e) {
@@ -918,6 +937,61 @@
       { name: 'KOF',  condition: f => { let d = f.match_date || ""; return d.includes('-05-15') || d.includes('-05-16'); } }
   ];
 
+  // Map Matchdays to the user's specific JSON snapshot field in the database
+  const MD_FIELDS = {
+      'MD 4': 'squad_md4',
+      'MD 5': 'squad_md5',
+      'KO 1': 'squad_ko1',
+      'KOF': 'squad_kof'
+  };
+
+  // --- NEW: Auto Snapshot Logic Engine ---
+  async function executeAutoSnapshot() {
+      isSnapshotting = true;
+      console.log(`Starting auto-snapshot for ${activeMatchday}...`);
+
+      try {
+          // 1. Instantly lock the global flag so other online visitors don't trigger it simultaneously
+          if(systemSettingId) {
+              await pb.collection('system_settings').update(systemSettingId, { snapshot_taken: true });
+              snapshotTaken = true;
+          }
+
+          // 2. Fetch all users
+          const allUsers = await pb.collection('fpl_users').getFullList({ requestKey: null });
+          const fieldName = MD_FIELDS[activeMatchday];
+
+          if (!fieldName) {
+              console.warn("Invalid active_matchday for snapshot. Check spelling.");
+              return;
+          }
+
+          // 3. Update everyone who has a squad but hasn't been snapshotted yet
+          let updatePromises = [];
+          for (let u of allUsers) {
+              // If they have a squad, and the destination field is currently empty
+              if (u.squad && u.squad !== '{}' && (!u[fieldName] || u[fieldName] === '{}')) {
+                  let data = {};
+                  data[fieldName] = u.squad;
+                  // Push to promise array for bulk simultaneous updating
+                  updatePromises.push(pb.collection('fpl_users').update(u.id, data));
+              }
+          }
+
+          if (updatePromises.length > 0) {
+              await Promise.all(updatePromises);
+              showToast(`✅ Auto-Snapshot completed for ${activeMatchday}!`, 'success');
+          } else {
+              console.log(`All squads were already snapshotted for ${activeMatchday}.`);
+          }
+
+      } catch (err) {
+          console.error("Snapshot error:", err);
+          showToast("Auto-Snapshot failed! Please check PocketBase API rules.", "error");
+          isSnapshotting = false; // Reset to allow retry later
+      }
+  }
+
   function getPlayerMins(id, under15Arr, dnpArr) {
       if (!id) return 0;
       if (dnpArr.includes(id)) return 0;
@@ -944,13 +1018,11 @@
           mdBreakdown[key] = [];
       }
 
-      // --- Helper Functions for Penalty Checking ---
       const checkPenMatch = (val, id) => {
           if (!val) return false;
           return val === id || (Array.isArray(val) && val.includes(id));
       };
       const isPenMissed = (takerVal, scoredVal) => {
-          // If a taker exists and scored is false, it's a miss
           return takerVal && takerVal.length > 0 && scoredVal === false;
       };
 
@@ -1012,12 +1084,9 @@
               else if (mins > 0) { pts += 1; pBreakdown.push('Played <15 mins (+1)'); }
 
               let regularGoals = countEvents(pId, res, teamPrefix + '_goal_');
-              
-              // Count successful penalties as goals
               let penGoals = 0;
               if (checkPenMatch(log[teamPrefix + '_pen_taker_1'], pId) && log[teamPrefix + '_pen_scored_1'] === true) penGoals++;
               if (checkPenMatch(log[teamPrefix + '_pen_taker_2'], pId) && log[teamPrefix + '_pen_scored_2'] === true) penGoals++;
-              
               let goals = regularGoals + penGoals;
 
               if (goals > 0) {
@@ -1050,39 +1119,22 @@
                   pBreakdown.push(`Conceded ${oppScore} (-${minusPts})`);
               }
 
-              // ---- Penalty Logic Start ----
-              // 1. Penalty Earned (+3)
               let pensEarned = 0;
               if (checkPenMatch(log[teamPrefix + '_pen_earned_1'], pId)) pensEarned++;
               if (checkPenMatch(log[teamPrefix + '_pen_earned_2'], pId)) pensEarned++;
-              if (pensEarned > 0) { 
-                  pts += pensEarned * 3; 
-                  pBreakdown.push(`${pensEarned} Pen Earned (+${pensEarned * 3})`); 
-              }
+              if (pensEarned > 0) { pts += pensEarned * 3; pBreakdown.push(`${pensEarned} Pen Earned (+${pensEarned * 3})`); }
 
-              // 2. Penalty Missed (-2) for the taker
               let pensMissed = 0;
               if (checkPenMatch(log[teamPrefix + '_pen_taker_1'], pId) && log[teamPrefix + '_pen_scored_1'] === false) pensMissed++;
               if (checkPenMatch(log[teamPrefix + '_pen_taker_2'], pId) && log[teamPrefix + '_pen_scored_2'] === false) pensMissed++;
-              if (pensMissed > 0) { 
-                  pts -= pensMissed * 2; 
-                  pBreakdown.push(`${pensMissed} Pen Missed (-${pensMissed * 2})`); 
-              }
+              if (pensMissed > 0) { pts -= pensMissed * 2; pBreakdown.push(`${pensMissed} Pen Missed (-${pensMissed * 2})`); }
 
-              // 3. Penalty Saved (+5) for the Goalkeeper
               if (pos === 'GK') {
                   let pensSaved = 0;
-                  // If opposing team took a pen and missed (scored === false), GK gets a save
                   if (isPenMissed(log[oppPrefix + '_pen_taker_1'], log[oppPrefix + '_pen_scored_1'])) pensSaved++;
                   if (isPenMissed(log[oppPrefix + '_pen_taker_2'], log[oppPrefix + '_pen_scored_2'])) pensSaved++;
-                  if (pensSaved > 0) { 
-                      pts += pensSaved * 5; 
-                      pBreakdown.push(`${pensSaved} Pen Saved (+${pensSaved * 5})`); 
-                  }
-              }
-              // ---- Penalty Logic End ----
-
-              if (pos === 'GK') {
+                  if (pensSaved > 0) { pts += pensSaved * 5; pBreakdown.push(`${pensSaved} Pen Saved (+${pensSaved * 5})`); }
+                  
                   let saves = isT1 ? (log.t1_saves || 0) : (log.t2_saves || 0);
                   if (saves >= 3) {
                       let savePts = Math.floor(saves / 3);
@@ -1116,45 +1168,35 @@
       return { mdTotal, mdPlayerPts, mdBreakdown };
   }
 
-  function calculateSquadPoints(squadDataStr, tabName) {
-      if (!squadDataStr) return { total: 0, playerPoints: {}, playerBreakdowns: {} };
-      let sq; try { sq = typeof squadDataStr === 'string' ? JSON.parse(squadDataStr) : squadDataStr; } catch(e) { return { total: 0, playerPoints: {}, playerBreakdowns: {} }; }
-      if (!sq.players) return { total: 0, playerPoints: {}, playerBreakdowns: {} };
-
-      let totalPoints = 0; 
-      let playerPointsMap = {}; 
-      let playerBreakdownsMap = {}; 
-      let starting11Map = {}; 
+  // --- NEW: Gets Points and Squad for ONE specific Matchday ---
+  function getMDPoints(user, mdName) {
+      let squadField = MD_FIELDS[mdName];
+      let squadStr = user[squadField] || user.squad; // Fallback to current squad if specific snapshot is missing
       
-      for(let key in sq.players) { 
-          if(sq.players[key]) { 
-              starting11Map[key] = sq.players[key]; 
-              playerPointsMap[key] = 0; 
-              playerBreakdownsMap[key] = [];
-          } 
+      if (!squadStr) return { mdTotal: 0, mdPlayerPts: {}, mdBreakdown: {} };
+      let sq; try { sq = typeof squadStr === 'string' ? JSON.parse(squadStr) : squadStr; } catch(e) { return { mdTotal: 0, mdPlayerPts: {}, mdBreakdown: {} }; }
+      if (!sq.players) return { mdTotal: 0, mdPlayerPts: {}, mdBreakdown: {} };
+
+      let starting11Map = {};
+      for(let key in sq.players) { if(sq.players[key]) starting11Map[key] = sq.players[key]; }
+
+      let mdDef = MATCHDAYS.find(m => m.name === mdName);
+      let mdFixtures = db_fixtures.filter(mdDef.condition);
+
+      return calculateMatchdayPoints(starting11Map, sq.captain, sq.viceCaptain, mdFixtures);
+  }
+
+  // --- NEW: Computes Leaderboard Points depending on Tab ---
+  function getUserPointsForTab(user, tabName) {
+      if (tabName !== 'Overall') {
+          return getMDPoints(user, tabName).mdTotal;
+      } else {
+          let total = 0;
+          MATCHDAYS.forEach(md => {
+              total += getMDPoints(user, md.name).mdTotal;
+          });
+          return total;
       }
-
-      let mdsToCalculate = tabName === 'Overall' ? MATCHDAYS : MATCHDAYS.filter(m => m.name === tabName);
-
-      mdsToCalculate.forEach(md => {
-          let mdFixtures = db_fixtures.filter(md.condition);
-          let result = calculateMatchdayPoints(starting11Map, sq.captain, sq.viceCaptain, mdFixtures);
-          
-          totalPoints += result.mdTotal;
-          for(let key in starting11Map) {
-              playerPointsMap[key] += result.mdPlayerPts[key];
-              if (result.mdBreakdown[key].length > 0) {
-                 let bdStr = result.mdBreakdown[key].join(' | ');
-                 if (tabName === 'Overall') {
-                     playerBreakdownsMap[key].push(`<span style="color:var(--gold); font-weight:700;">${md.name}:</span> ${bdStr}`);
-                 } else {
-                     playerBreakdownsMap[key].push(bdStr);
-                 }
-              }
-          }
-      });
-
-      return { total: totalPoints, playerPoints: playerPointsMap, playerBreakdowns: playerBreakdownsMap };
   }
 
   document.querySelectorAll('.formation-btn').forEach(btn => {
@@ -1177,7 +1219,8 @@
     
     pb.collection('fpl_users').getFullList().then(users => {
        allUsersList = users;
-       let usersWithPts = users.map(u => { return { ...u, calculatedPoints: calculateSquadPoints(u.squad, tab).total }; });
+       // Updated calculation to fetch dynamically based on Matchday
+       let usersWithPts = users.map(u => { return { ...u, calculatedPoints: getUserPointsForTab(u, tab) }; });
        usersWithPts.sort((a, b) => b.calculatedPoints - a.calculatedPoints);
 
        let html = '';
@@ -1199,71 +1242,88 @@
     }).catch(err => { listEl.innerHTML = `<div style="text-align:center; padding: 40px; color: var(--red-accent);">Error loading leaderboard.</div>`; });
   }
 
-  function viewUserSquad(userId, currentTab) {
-     if(!isDeadlinePassed()) { showToast("Squads are hidden until the deadline passes!", "error"); return; }
-     const user = allUsersList.find(u => u.id === userId); if(!user) return;
-     document.getElementById('vs-title').textContent = `${user.name}'s Squad`;
+  function viewUserSquad(userId, sourceTab, explicitTab = null) {
+      if(!isDeadlinePassed()) { showToast("Squads are hidden until the deadline passes!", "error"); return; }
+      
+      const user = allUsersList.find(u => u.id === userId); 
+      if(!user) return;
+      document.getElementById('vs-title').textContent = `${user.name}'s Squad`;
 
-     let vsFormation = '4-4-2', vsSlots = {}, vsCap = null, vsVC = null;
-     
-     let ptsData = calculateSquadPoints(user.squad, currentTab);
+      let isOverallView = (sourceTab === 'Overall');
+      let activeVSTab = explicitTab || (isOverallView ? 'MD 4' : sourceTab); // Default to MD 4 if viewing from Overall
 
-     if(user.squad) {
-         try {
-             let sq = typeof user.squad === 'string' ? JSON.parse(user.squad) : user.squad;
-             vsFormation = sq.formation || '4-4-2'; vsCap = sq.captain || null; vsVC = sq.viceCaptain || null;
-             if(sq.players) { for(let key in sq.players) { const pId = sq.players[key]; vsSlots[key] = pId ? allPlayers.find(p => p.id === pId) : null; } }
-         } catch(e) {}
-     }
+      // 1. Render Tabs inside Modal
+      let tabsContainer = document.getElementById('vs-tabs-container');
+      if (isOverallView) {
+          tabsContainer.innerHTML = `
+          <div class="auth-tabs" style="margin-bottom: 10px; border-bottom: 1px solid var(--border-subtle);">
+              ${MATCHDAYS.map(md => `<div class="auth-tab ${activeVSTab === md.name ? 'active' : ''}" style="padding: 8px 4px; font-size: 0.85rem;" onclick="viewUserSquad('${userId}', 'Overall', '${md.name}')">${md.name}</div>`).join('')}
+          </div>`;
+      } else {
+          tabsContainer.innerHTML = `<div style="text-align:center; padding-bottom: 15px; color: var(--gold); font-weight: bold; font-family: var(--font-display); font-size: 1.2rem; text-transform: uppercase;">${activeVSTab} Squad</div>`;
+      }
 
-     const vsPitch = document.getElementById('vs-pitch'); vsPitch.innerHTML = '<div class="pitch-bottom-lines"></div>';
-     const backupState = { ...state }; state.formation = vsFormation; state.captain = null; state.viceCaptain = null;
-     
-     for(let key in vsSlots) { if(vsSlots[key] && vsSlots[key].id === vsCap) state.captain = key; if(vsSlots[key] && vsSlots[key].id === vsVC) state.viceCaptain = key; }
+      // 2. Fetch specific Matchday Squad
+      let squadField = MD_FIELDS[activeVSTab];
+      let squadDataStr = user[squadField] || user.squad;
 
-     let breakdownHtml = `<div style="margin-top: 24px; background: var(--navy-800); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 16px;">
-                            <h4 style="color: var(--gold); font-family: var(--font-display); font-size: 1.2rem; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--border-subtle); padding-bottom: 8px;">📊 Points Breakdown</h4>
+      let vsFormation = '4-4-2', vsSlots = {}, vsCap = null, vsVC = null;
+      if(squadDataStr) {
+          try {
+              let sq = typeof squadDataStr === 'string' ? JSON.parse(squadDataStr) : squadDataStr;
+              vsFormation = sq.formation || '4-4-2'; vsCap = sq.captain || null; vsVC = sq.viceCaptain || null;
+              if(sq.players) { for(let key in sq.players) { const pId = sq.players[key]; vsSlots[key] = pId ? allPlayers.find(p => p.id === pId) : null; } }
+          } catch(e) {}
+      }
+
+      let ptsData = getMDPoints(user, activeVSTab);
+
+      // 3. Render Pitch
+      const vsPitch = document.getElementById('vs-pitch'); vsPitch.innerHTML = '<div class="pitch-bottom-lines"></div>';
+      const backupState = { ...state }; state.formation = vsFormation; state.captain = null; state.viceCaptain = null;
+
+      for(let key in vsSlots) { if(vsSlots[key] && vsSlots[key].id === vsCap) state.captain = key; if(vsSlots[key] && vsSlots[key].id === vsVC) state.viceCaptain = key; }
+
+      let breakdownHtml = `<div style="margin-top: 24px; background: var(--navy-800); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 16px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 8px;">
+                                <h4 style="color: var(--gold); font-family: var(--font-display); font-size: 1.2rem; text-transform: uppercase; letter-spacing: 0.05em; margin:0;">📊 Points Breakdown</h4>
+                                <span style="font-family: var(--font-display); font-size: 1.3rem; font-weight: 800; color: var(--green-neon);">${ptsData.mdTotal} pts</span>
+                            </div>
                             <div style="display: flex; flex-direction: column; gap: 10px;">`;
 
-     ROW_ORDER.forEach(pos => {
-      const row = document.createElement('div'); row.className = 'pitch-row';
-      const slotsWrap = document.createElement('div'); slotsWrap.className = 'row-slots';
-      for (let i = 0; i < FORMATIONS[vsFormation][pos]; i++) {
-        const key = `${pos}-${i}`; let slotPoints = ptsData.playerPoints[key] !== undefined ? ptsData.playerPoints[key] : null;
-        slotsWrap.appendChild(buildSlotEl(key, pos, vsSlots[key], true, true, slotPoints));
-        
-        if (vsSlots[key]) {
-            let pName = vsSlots[key].name;
-            let bdowns = ptsData.playerBreakdowns[key] || [];
-            let detailText = bdowns.length > 0 ? bdowns.join('<br>') : '<i style="color: var(--text-muted);">No points registered yet</i>';
-            let ptColor = slotPoints > 0 ? 'var(--green-neon)' : (slotPoints < 0 ? 'var(--red-accent)' : 'var(--text-primary)');
-            
-            breakdownHtml += `
-               <div style="display: flex; flex-direction: column; background: var(--bg-main); padding: 10px 12px; border-radius: 8px; border: 1px solid var(--surface-glass);">
-                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                     <span style="font-weight: 700; font-size: 0.95rem; color: var(--text-primary);">${pName} <span style="color:var(--text-muted); font-size:0.75rem;">(${pos})</span></span>
-                     <span style="font-family: var(--font-display); font-weight: 800; font-size: 1.1rem; color: ${ptColor};">${slotPoints} pts</span>
-                  </div>
-                  <div style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.4;">${detailText}</div>
-               </div>`;
-        }
-      }
-      row.appendChild(slotsWrap); vsPitch.appendChild(row);
-    });
+      ROW_ORDER.forEach(pos => {
+          const row = document.createElement('div'); row.className = 'pitch-row';
+          const slotsWrap = document.createElement('div'); slotsWrap.className = 'row-slots';
+          for (let i = 0; i < FORMATIONS[vsFormation][pos]; i++) {
+              const key = `${pos}-${i}`; let slotPoints = ptsData.mdPlayerPts[key] !== undefined ? ptsData.mdPlayerPts[key] : null;
+              slotsWrap.appendChild(buildSlotEl(key, pos, vsSlots[key], true, true, slotPoints));
 
-    breakdownHtml += `</div></div>`;
-    
-    let modalBody = document.querySelector('#viewSquadModal .modal-body');
-    let oldBreakdown = document.getElementById('dynamic-breakdown');
-    if(oldBreakdown) oldBreakdown.remove();
-    
-    let bdContainer = document.createElement('div');
-    bdContainer.id = 'dynamic-breakdown';
-    bdContainer.innerHTML = breakdownHtml;
-    modalBody.appendChild(bdContainer);
+              if (vsSlots[key]) {
+                  let pName = vsSlots[key].name;
+                  let bdowns = ptsData.mdBreakdown[key] || [];
+                  let detailText = bdowns.length > 0 ? bdowns.join('<br>') : '<i style="color: var(--text-muted);">No points registered yet</i>';
+                  let ptColor = slotPoints > 0 ? 'var(--green-neon)' : (slotPoints < 0 ? 'var(--red-accent)' : 'var(--text-primary)');
 
-    state.formation = backupState.formation; state.captain = backupState.captain; state.viceCaptain = backupState.viceCaptain;
-    document.getElementById('viewSquadModal').classList.add('open');
+                  breakdownHtml += `
+                     <div style="display: flex; flex-direction: column; background: var(--bg-main); padding: 10px 12px; border-radius: 8px; border: 1px solid var(--surface-glass);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                           <span style="font-weight: 700; font-size: 0.95rem; color: var(--text-primary);">${pName} <span style="color:var(--text-muted); font-size:0.75rem;">(${pos})</span></span>
+                           <span style="font-family: var(--font-display); font-weight: 800; font-size: 1.1rem; color: ${ptColor};">${slotPoints !== null ? slotPoints : 0} pts</span>
+                        </div>
+                        <div style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.4;">${detailText}</div>
+                     </div>`;
+              }
+          }
+          row.appendChild(slotsWrap); vsPitch.appendChild(row);
+      });
+
+      breakdownHtml += `</div></div>`;
+
+      let bdContainer = document.getElementById('vs-breakdown-container');
+      bdContainer.innerHTML = breakdownHtml;
+
+      state.formation = backupState.formation; state.captain = backupState.captain; state.viceCaptain = backupState.viceCaptain;
+      document.getElementById('viewSquadModal').classList.add('open');
   }
 
   /* =========================================================
