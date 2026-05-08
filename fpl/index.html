@@ -1378,7 +1378,6 @@
     const playersInPos = allPlayers.filter(p => {
       const isWinger = p.rawPosition.toLowerCase().includes('wing');
       if (position === 'MID') return p.position === 'MID' || isWinger;
-      // FWD হিসেবে এখন MID দেরও সিলেক্ট করা যাবে
       if (position === 'FWD') return p.position === 'FWD' || p.position === 'MID' || isWinger;
       return p.position === position; 
     });
@@ -1412,7 +1411,6 @@
     const filtered = allPlayers.filter(p => {
       const isWinger = p.rawPosition.toLowerCase().includes('wing'); let matchPos = false;
       if (pos === 'MID') matchPos = (p.position === 'MID' || isWinger); 
-      // সার্চ ফিল্টারেও FWD পজিশনের জন্য MID দের অ্যালাউ করা হলো
       else if (pos === 'FWD') matchPos = (p.position === 'FWD' || p.position === 'MID' || isWinger); 
       else matchPos = (p.position === pos);
       return matchPos && (p.name.toLowerCase().includes(term) || p.team.toLowerCase().includes(term)); 
