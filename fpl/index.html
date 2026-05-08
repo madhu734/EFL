@@ -545,6 +545,12 @@
   });
 
   /* =========================================================
+     POCKETBASE SETUP & GLOBALS
+     ========================================================= */
+  const pb = new PocketBase('https://efljudb.duckdns.org');
+  let isDataLoaded = false; // এটি নিশ্চিত করবে যে ডাটাবেস লোড হওয়ার আগে স্ন্যাপশট হবে না
+
+  /* =========================================================
      DYNAMIC DEADLINE LOGIC (From Database)
      ========================================================= */
   let DEADLINE_DATE = new Date('2026-05-08T12:00:00').getTime(); 
@@ -568,8 +574,8 @@
     
     const isLocked = forceLock || distance < 0;
 
-    // --- NEW: Trigger Auto-Snapshot if deadline passed ---
-    if (isLocked && !snapshotTaken && !isSnapshotting && activeMatchday) {
+    // --- NEW: Trigger Auto-Snapshot if deadline passed AND data is fully loaded ---
+    if (isLocked && !snapshotTaken && !isSnapshotting && activeMatchday && isDataLoaded) {
         executeAutoSnapshot();
     }
 
@@ -619,7 +625,6 @@
   /* =========================================================
      POCKETBASE & DATA FETCHING
      ========================================================= */
-  const pb = new PocketBase('https://efljudb.duckdns.org');
   let allPlayers = [], currentUser = null, allUsersList = []; 
   let db_fixtures = [], db_results = [], db_match_data = [];
 
@@ -690,6 +695,9 @@
       try { db_fixtures = await pb.collection('fixtures').getFullList({ requestKey: null }); } catch (e) { console.warn("Fixtures error:", e); }
       try { db_results = await pb.collection('results').getFullList({ requestKey: null }); } catch (e) { console.warn("Results error:", e); }
       try { db_match_data = await pb.collection('fpl_match_data').getFullList({ requestKey: null }); } catch (e) { console.error("Match data fetch error", e); }
+      
+      // ডাটাবেস থেকে সব সেটিং এবং প্লেয়ার লোড হওয়ার পর সিগন্যাল দিবে
+      isDataLoaded = true; 
       
     } catch (err) { console.error("Critical error fetching data:", err); }
   }
