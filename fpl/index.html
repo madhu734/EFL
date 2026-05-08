@@ -967,18 +967,27 @@
 
           // 2. Fetch all users
           const allUsers = await pb.collection('fpl_users').getFullList({ requestKey: null });
-          const fieldName = MD_FIELDS[activeMatchday];
+          
+          // Smart Matchday Detection (handles "md4", "MD 4", "md 4" etc.)
+          const normalizedActive = String(activeMatchday).toUpperCase().replace(/\s/g, ''); 
+          let fieldName = null;
+          for (let key in MD_FIELDS) {
+              if (key.toUpperCase().replace(/\s/g, '') === normalizedActive) {
+                  fieldName = MD_FIELDS[key];
+                  break;
+              }
+          }
 
           if (!fieldName) {
-              console.warn("Invalid active_matchday for snapshot. Check spelling.");
+              console.warn(`Invalid active_matchday (${activeMatchday}) for snapshot. Check spelling.`);
               return;
           }
 
-          // 3. Update everyone who has a squad but hasn't been snapshotted yet
+          // 3. Update everyone who has a squad
           let updatePromises = [];
           for (let u of allUsers) {
-              // If they have a squad, and the destination field is currently empty
-              if (u.squad && u.squad !== '{}' && (!u[fieldName] || u[fieldName] === '{}')) {
+              // Now it will always overwrite if you manually reset snapshot_taken to False
+              if (u.squad && u.squad !== '{}') {
                   let data = {};
                   data[fieldName] = u.squad;
                   // Push to promise array for bulk simultaneous updating
@@ -990,7 +999,7 @@
               await Promise.all(updatePromises);
               showToast(`✅ Auto-Snapshot completed for ${activeMatchday}!`, 'success');
           } else {
-              console.log(`All squads were already snapshotted for ${activeMatchday}.`);
+              console.log(`No squads found to snapshot for ${activeMatchday}.`);
           }
 
       } catch (err) {
