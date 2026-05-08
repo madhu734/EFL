@@ -1244,7 +1244,7 @@ function extractPenaltyScorers(res, teamPrefix) {
 
 function extractScorers(res, teamPrefix) {
     let ids = [];
-    for (let i = 1; i <= 6; i++) {
+    for (let i = 1; i <= 7; i++) {
         let val = res[`${teamPrefix}_goal_${i}`];
         if (val) {
             if (Array.isArray(val)) ids.push(...val);
@@ -1320,7 +1320,7 @@ function getExportScoreText(res, score, teamPrefix) {
 
 function extractAssists(res, teamPrefix) {
     let ids = [];
-    for (let i = 1; i <= 6; i++) {
+    for (let i = 1; i <= 7; i++) {
         let val = res[`${teamPrefix}_assist_${i}`];
         if (val) {
             if (Array.isArray(val)) ids.push(...val);
