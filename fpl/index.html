@@ -1188,9 +1188,17 @@
   // --- NEW: Gets Points and Squad for ONE specific Matchday ---
   function getMDPoints(user, mdName) {
       let squadField = MD_FIELDS[mdName];
-      let squadStr = user[squadField] || user.squad; // Fallback to current squad if specific snapshot is missing
+      let squadStr = user[squadField]; 
       
-      if (!squadStr) return { mdTotal: 0, mdPlayerPts: {}, mdBreakdown: {} };
+      let normalizedActive = String(activeMatchday).toUpperCase().replace(/\s/g, '');
+      let normalizedRequest = String(mdName).toUpperCase().replace(/\s/g, '');
+
+      // Strictly use snapshot field. Fallback to current squad ONLY IF active matchday deadline just passed but auto-snapshot hasn't fired yet
+      if ((!squadStr || squadStr === '{}') && normalizedRequest === normalizedActive && isDeadlinePassed() && !snapshotTaken) {
+          squadStr = user.squad; 
+      }
+      
+      if (!squadStr || squadStr === '{}') return { mdTotal: 0, mdPlayerPts: {}, mdBreakdown: {} };
       let sq; try { sq = typeof squadStr === 'string' ? JSON.parse(squadStr) : squadStr; } catch(e) { return { mdTotal: 0, mdPlayerPts: {}, mdBreakdown: {} }; }
       if (!sq.players) return { mdTotal: 0, mdPlayerPts: {}, mdBreakdown: {} };
 
@@ -1260,14 +1268,23 @@
   }
 
   function viewUserSquad(userId, sourceTab, explicitTab = null) {
-      if(!isDeadlinePassed()) { showToast("Squads are hidden until the deadline passes!", "error"); return; }
-      
       const user = allUsersList.find(u => u.id === userId); 
       if(!user) return;
-      document.getElementById('vs-title').textContent = `${user.name}'s Squad`;
 
       let isOverallView = (sourceTab === 'Overall');
       let activeVSTab = explicitTab || (isOverallView ? 'MD 4' : sourceTab); // Default to MD 4 if viewing from Overall
+
+      // --- SMART ACCESS LOGIC ---
+      let normalizedActive = String(activeMatchday).toUpperCase().replace(/\s/g, '');
+      let normalizedRequest = String(activeVSTab).toUpperCase().replace(/\s/g, '');
+
+      // Only block if they are trying to view the CURRENT matchday BEFORE the deadline passes
+      if (normalizedRequest === normalizedActive && !isDeadlinePassed()) {
+          showToast(`${activeVSTab} squads are hidden until the deadline passes!`, "error");
+          return;
+      }
+
+      document.getElementById('vs-title').textContent = `${user.name}'s Squad`;
 
       // 1. Render Tabs inside Modal
       let tabsContainer = document.getElementById('vs-tabs-container');
@@ -1282,10 +1299,15 @@
 
       // 2. Fetch specific Matchday Squad
       let squadField = MD_FIELDS[activeVSTab];
-      let squadDataStr = user[squadField] || user.squad;
+      let squadDataStr = user[squadField];
+
+      // Strictly use snapshot field. Safe Fallback logic only if snapshot hasn't completed yet
+      if ((!squadDataStr || squadDataStr === '{}') && normalizedRequest === normalizedActive && isDeadlinePassed() && !snapshotTaken) {
+          squadDataStr = user.squad;
+      }
 
       let vsFormation = '4-4-2', vsSlots = {}, vsCap = null, vsVC = null;
-      if(squadDataStr) {
+      if(squadDataStr && squadDataStr !== '{}') {
           try {
               let sq = typeof squadDataStr === 'string' ? JSON.parse(squadDataStr) : squadDataStr;
               vsFormation = sq.formation || '4-4-2'; vsCap = sq.captain || null; vsVC = sq.viceCaptain || null;
