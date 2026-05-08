@@ -698,6 +698,9 @@
       try { db_results = await pb.collection('results').getFullList({ requestKey: null }); } catch (e) { console.warn("Results error:", e); }
       try { db_match_data = await pb.collection('fpl_match_data').getFullList({ requestKey: null }); } catch (e) { console.error("Match data fetch error", e); }
       
+      // NEW: Calculate Total Base Points for all players after data is loaded
+      updateAllPlayersPoints();
+
       // ডাটাবেস থেকে সব সেটিং এবং প্লেয়ার লোড হওয়ার পর সিগন্যাল দিবে
       isDataLoaded = true; 
       
@@ -1027,6 +1030,15 @@
       return count;
   }
 
+  // --- Utility Functions for Penalties ---
+  function checkPenMatch(val, id) {
+      if (!val) return false;
+      return val === id || (Array.isArray(val) && val.includes(id));
+  }
+  function isPenMissed(takerVal, scoredVal) {
+      return takerVal && takerVal.length > 0 && scoredVal === false;
+  }
+
   function calculateMatchdayPoints(starting11Map, cId, vcId, mdFixtures) {
       let mdTotal = 0;
       let mdPlayerPts = {};
@@ -1036,14 +1048,6 @@
           mdPlayerPts[key] = 0;
           mdBreakdown[key] = [];
       }
-
-      const checkPenMatch = (val, id) => {
-          if (!val) return false;
-          return val === id || (Array.isArray(val) && val.includes(id));
-      };
-      const isPenMissed = (takerVal, scoredVal) => {
-          return takerVal && takerVal.length > 0 && scoredVal === false;
-      };
 
       let captainTotalMins = 0;
       mdFixtures.forEach(fix => {
@@ -1185,6 +1189,105 @@
       });
 
       return { mdTotal, mdPlayerPts, mdBreakdown };
+  }
+
+  // --- NEW: Calculate Base Points for All Players ---
+  function updateAllPlayersPoints() {
+      allPlayers.forEach(p => {
+          p.totalPoints = 0;
+          db_fixtures.forEach(fix => {
+              let log = db_match_data.find(l => (Array.isArray(l.fixture) && l.fixture.includes(fix.id)) || l.fixture === fix.id);
+              if (!log) return;
+              let res = db_results.find(r => (Array.isArray(r.fixture) && r.fixture.includes(fix.id)) || r.fixture === fix.id);
+              if (!res) return;
+
+              let t1Id = Array.isArray(fix.team1) ? fix.team1[0] : fix.team1;
+              let t2Id = Array.isArray(fix.team2) ? fix.team2[0] : fix.team2;
+              if (p.rawTeamId !== t1Id && p.rawTeamId !== t2Id) return;
+
+              let isT1 = (p.rawTeamId === t1Id);
+              let teamPrefix = isT1 ? 't1' : 't2';
+              let oppPrefix = isT1 ? 't2' : 't1';
+              let oppScore = isT1 ? (parseInt(res.team2_score ?? res.t2_score) || 0) : (parseInt(res.team1_score ?? res.t1_score) || 0);
+
+              let under15 = log.players_under_15_mins ? (Array.isArray(log.players_under_15_mins) ? log.players_under_15_mins : [log.players_under_15_mins]) : [];
+              let dnp = log.did_not_play ? (Array.isArray(log.did_not_play) ? log.did_not_play : [log.did_not_play]) : [];
+
+              let mins = getPlayerMins(p.id, under15, dnp);
+              let yellow = countEvents(p.id, res, teamPrefix + '_yellow_', 4);
+              let red = countEvents(p.id, res, teamPrefix + '_red_', 2);
+
+              if (mins === 0 && yellow === 0 && red === 0) return;
+
+              let pts = 0;
+              let pos = p.position; // Base position calculation (no swap)
+
+              if (mins >= 15) pts += 2;
+              else if (mins > 0) pts += 1;
+
+              let regularGoals = countEvents(p.id, res, teamPrefix + '_goal_');
+              let penGoals = 0;
+              if (checkPenMatch(log[teamPrefix + '_pen_taker_1'], p.id) && log[teamPrefix + '_pen_scored_1'] === true) penGoals++;
+              if (checkPenMatch(log[teamPrefix + '_pen_taker_2'], p.id) && log[teamPrefix + '_pen_scored_2'] === true) penGoals++;
+              let goals = regularGoals + penGoals;
+
+              if (goals > 0) {
+                  if (pos === 'FWD') pts += goals * 4;
+                  else if (pos === 'MID') pts += goals * 5;
+                  else pts += goals * 6;
+              }
+
+              let assists = countEvents(p.id, res, teamPrefix + '_assist_');
+              if (assists > 0) pts += assists * 3;
+
+              let ownGoals = countEvents(p.id, res, oppPrefix + '_goal_');
+              if (ownGoals > 0) pts -= ownGoals * 2;
+
+              if (yellow > 0) pts -= yellow * 1;
+              if (red > 0) pts -= red * 3;
+
+              if (mins >= 15 && oppScore === 0) {
+                  if (pos === 'GK') pts += 4;
+                  else if (pos === 'DEF') pts += 3;
+                  else if (pos === 'MID') pts += 1;
+              }
+
+              if (mins >= 15 && (pos === 'DEF' || pos === 'GK') && oppScore >= 2) {
+                  pts -= Math.floor(oppScore / 2);
+              }
+
+              let pensEarned = 0;
+              if (checkPenMatch(log[teamPrefix + '_pen_earned_1'], p.id)) pensEarned++;
+              if (checkPenMatch(log[teamPrefix + '_pen_earned_2'], p.id)) pensEarned++;
+              if (pensEarned > 0) pts += pensEarned * 3;
+
+              let pensMissed = 0;
+              if (checkPenMatch(log[teamPrefix + '_pen_taker_1'], p.id) && log[teamPrefix + '_pen_scored_1'] === false) pensMissed++;
+              if (checkPenMatch(log[teamPrefix + '_pen_taker_2'], p.id) && log[teamPrefix + '_pen_scored_2'] === false) pensMissed++;
+              if (pensMissed > 0) pts -= pensMissed * 2;
+
+              if (pos === 'GK') {
+                  let pensSaved = 0;
+                  if (isPenMissed(log[oppPrefix + '_pen_taker_1'], log[oppPrefix + '_pen_scored_1'])) pensSaved++;
+                  if (isPenMissed(log[oppPrefix + '_pen_taker_2'], log[oppPrefix + '_pen_scored_2'])) pensSaved++;
+                  if (pensSaved > 0) pts += pensSaved * 5;
+                  
+                  let saves = isT1 ? (log.t1_saves || 0) : (log.t2_saves || 0);
+                  if (saves >= 3) pts += Math.floor(saves / 3);
+              }
+
+              let motm = res.motm || res.potm;
+              if (motm && (motm === p.id || (Array.isArray(motm) && motm.includes(p.id)))) pts += 3;
+
+              let secondBest = log.second_best;
+              if (secondBest && (secondBest === p.id || (Array.isArray(secondBest) && secondBest.includes(p.id)))) pts += 2;
+
+              let thirdBest = log.third_best;
+              if (thirdBest && (thirdBest === p.id || (Array.isArray(thirdBest) && thirdBest.includes(p.id)))) pts += 1;
+
+              p.totalPoints += pts; // Store base points
+          });
+      });
   }
 
   // --- NEW: Gets Points and Squad for ONE specific Matchday ---
@@ -1387,15 +1490,34 @@
   function renderPlayerList(players) {
     const listEl = document.getElementById('playerList'); listEl.innerHTML = '';
     if(players.length === 0) { listEl.innerHTML = '<div style="text-align:center; padding: 20px; color: var(--text-muted);">No players found</div>'; return; }
+    
+    // NEW: Sort by Points Descending, then Price Descending
+    players.sort((a, b) => {
+      const ptsA = a.totalPoints || 0;
+      const ptsB = b.totalPoints || 0;
+      
+      // প্রথমে পয়েন্টের ভিত্তিতে সিরিয়াল করবে (বেশি পয়েন্ট উপরে)
+      if (ptsB !== ptsA) return ptsB - ptsA; 
+      
+      // পয়েন্ট সমান হলে দামের ভিত্তিতে সিরিয়াল করবে
+      return b.price - a.price;
+    });
+
     const currentSquad = Object.entries(state.slots).filter(([key, val]) => val !== null && key !== activeModalSlot).map(([key, val]) => val);
     const selectedIds = currentSquad.map(p => p.id);
 
     players.forEach(p => {
       const isSelected = selectedIds.includes(p.id); const item = document.createElement('div');
       item.className = `player-item ${isSelected ? 'already-selected' : ''}`;
+      
+      // NEW: Added Total Points Display
       item.innerHTML = `<div class="player-avatar">${p.photoHtml || p.teamBadgeHtml}</div>
         <div class="player-info"><div class="player-item-name">${p.name} <span style="color:var(--text-muted); font-size:12px; margin-left:6px;">${p.position}</span></div><div class="player-item-meta">${p.teamBadgeHtml} <span style="margin-left:5px;">${p.team}</span></div></div>
-        <div style="font-family: var(--font-display); font-size: 18px; font-weight: 800; color: #39d353;">${p.price}M</div>`;
+        <div style="text-align: right; display: flex; flex-direction: column; justify-content: center;">
+            <div style="font-family: var(--font-display); font-size: 18px; font-weight: 800; color: #39d353;">${p.price}M</div>
+            <div style="font-size: 0.7rem; font-weight: 700; color: var(--text-secondary); margin-top: 2px;">${p.totalPoints || 0} PTS</div>
+        </div>`;
+        
       if(!isSelected) {
         item.onclick = () => {
           if (p.team && p.team !== 'Undrafted') { const sameTeamCount = currentSquad.filter(sp => sp.team === p.team).length; if (sameTeamCount >= 5) { showToast(`Max 5 players allowed from ${p.team}!`, 'error'); return; } }
