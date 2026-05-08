@@ -1021,7 +1021,8 @@
       return 90; 
   }
 
-  function countEvents(id, resObj, fieldPrefix, maxCount = 6) {
+  // maxCount = 6 থেকে বাড়িয়ে 7 করা হলো
+  function countEvents(id, resObj, fieldPrefix, maxCount = 7) {
       let count = 0;
       for (let i = 1; i <= maxCount; i++) {
           let val = resObj[fieldPrefix + i];
