@@ -1323,14 +1323,20 @@
       return calculateMatchdayPoints(starting11Map, sq.captain, sq.viceCaptain, mdFixtures);
   }
 
-  // --- NEW: Computes Leaderboard Points depending on Tab ---
+  // --- UPDATED: Computes Leaderboard Points depending on Tab (Special Exception for MD 4) ---
   function getUserPointsForTab(user, tabName) {
-      if (tabName !== 'Overall') {
+      if (tabName === 'MD 4') {
+          // MD 4 এর জন্য ডেটাবেস ফিল্ড থেকে সরাসরি পয়েন্ট নেবে
+          return user.md4_pts || 0;
+      } else if (tabName !== 'Overall') {
           return getMDPoints(user, tabName).mdTotal;
       } else {
-          let total = 0;
+          // Overall এর ক্ষেত্রে MD 4 এর ডিরেক্ট পয়েন্টের সাথে বাকিগুলোর হিসাব যোগ করবে
+          let total = user.md4_pts || 0;
           MATCHDAYS.forEach(md => {
-              total += getMDPoints(user, md.name).mdTotal;
+              if (md.name !== 'MD 4') { // MD 4 বাদে বাকিগুলো নরমালি ক্যালকুলেট করবে
+                  total += getMDPoints(user, md.name).mdTotal;
+              }
           });
           return total;
       }
@@ -1409,7 +1415,43 @@
           tabsContainer.innerHTML = `<div style="text-align:center; padding-bottom: 15px; color: var(--gold); font-weight: bold; font-family: var(--font-display); font-size: 1.2rem; text-transform: uppercase;">${activeVSTab} Squad</div>`;
       }
 
-      // 2. Fetch specific Matchday Squad
+      // --- EXCEPTION FOR MD 4: Show custom message instead of pitch ---
+      if (activeVSTab === 'MD 4') {
+          const vsPitch = document.getElementById('vs-pitch'); 
+          vsPitch.innerHTML = ''; // পিচ হাইড করে দিবে
+          
+          let md4Pts = user.md4_pts || 0;
+          
+          let breakdownHtml = `
+            <div style="margin-top: 10px; background: var(--navy-800); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 24px; text-align: center;">
+               <h3 style="color: var(--red-accent); margin-bottom: 12px; font-family: var(--font-display); letter-spacing: 0.05em; text-transform: uppercase;">⚠️ ডেটা লস অ্যালার্ট</h3>
+               <p style="color: var(--text-primary); font-size: 1rem; line-height: 1.6; margin-bottom: 15px;">
+                  ম্যাচ ডে ৪ এর ডেটা দুর্ভাগ্যবশত ডিলেট হয়ে যাওয়ায় স্কোয়াড ব্রেকডাউন দেখানো সম্ভব হচ্ছেনা, দুঃখিত।
+               </p>
+               <div style="font-family: var(--font-display); font-size: 2.5rem; font-weight: 800; color: var(--green-neon); margin: 20px 0;">
+                  ${md4Pts} pts
+               </div>
+          `;
+
+          // যদি পয়েন্ট 0 বা খালি থাকে, তবে যোগাযোগ করার মেসেজটি দেখাবে
+          if (md4Pts === 0) {
+              breakdownHtml += `
+                 <div style="background: rgba(240, 180, 41, 0.1); border: 1px solid var(--gold); padding: 14px; border-radius: 8px; margin-top: 20px;">
+                     <p style="color: var(--gold); font-size: 0.95rem; font-weight: 600; margin: 0;">
+                         তোমার পয়েন্ট ডেটাবেস থেকে ডিলেট হয়ে গেছে, যদি মনে থাকে, দয়া করে কমিটির সঙ্গে যোগাযোগ করো।
+                     </p>
+                 </div>
+              `;
+          }
+
+          breakdownHtml += `</div>`;
+          document.getElementById('vs-breakdown-container').innerHTML = breakdownHtml;
+          document.getElementById('viewSquadModal').classList.add('open');
+          
+          return; // এখানেই থেমে যাবে, আর পিচ রেন্ডার করবে না।
+      }
+
+      // 2. Fetch specific Matchday Squad (For MD 5, KO 1, KOF)
       let squadField = MD_FIELDS[activeVSTab];
       let squadDataStr = user[squadField];
 
