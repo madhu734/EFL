@@ -1540,6 +1540,10 @@
     const listEl = document.getElementById('playerList'); listEl.innerHTML = '';
     if(players.length === 0) { listEl.innerHTML = '<div style="text-align:center; padding: 20px; color: var(--text-muted);">No players found</div>'; return; }
     
+    // NEW: Dynamic team limit based on active matchday
+    const normalizedActiveForLimit = String(activeMatchday).toUpperCase().replace(/\s/g, '');
+    const maxSameTeam = (normalizedActiveForLimit === 'Q2' || normalizedActiveForLimit === 'FINAL') ? 8 : 5;
+
     // NEW: Sort by Points Descending, then Price Descending
     players.sort((a, b) => {
       const ptsA = a.totalPoints || 0;
@@ -1569,7 +1573,13 @@
         
       if(!isSelected) {
         item.onclick = () => {
-          if (p.team && p.team !== 'Undrafted') { const sameTeamCount = currentSquad.filter(sp => sp.team === p.team).length; if (sameTeamCount >= 5) { showToast(`Max 5 players allowed from ${p.team}!`, 'error'); return; } }
+          if (p.team && p.team !== 'Undrafted') { 
+              const sameTeamCount = currentSquad.filter(sp => sp.team === p.team).length; 
+              if (sameTeamCount >= maxSameTeam) { 
+                  showToast(`Max ${maxSameTeam} players allowed from ${p.team}!`, 'error'); 
+                  return; 
+              } 
+          }
           state.slots[activeModalSlot] = p; playerModal.classList.remove('open'); renderPitch();
         };
       }
