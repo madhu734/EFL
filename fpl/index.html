@@ -991,8 +991,14 @@
           // 3. Update everyone who has a squad
           let updatePromises = [];
           for (let u of allUsers) {
-              // Now it will always overwrite if you manually reset snapshot_taken to False
-              if (u.squad && u.squad !== '{}') {
+              
+              // --- NEW: STRICT SAFETY LOCK ---
+              // Check if the destination field is completely empty
+              let isDestEmpty = !u[fieldName] || u[fieldName] === '{}' || u[fieldName] === 'null';
+
+              // Only copy if user has a squad AND the destination is empty
+              // This prevents accidental overwriting if you forget to change 'active_matchday'
+              if (u.squad && u.squad !== '{}' && isDestEmpty) {
                   let data = {};
                   data[fieldName] = u.squad;
                   // Push to promise array for bulk simultaneous updating
@@ -1004,7 +1010,7 @@
               await Promise.all(updatePromises);
               showToast(`✅ Auto-Snapshot completed for ${activeMatchday}!`, 'success');
           } else {
-              console.log(`No squads found to snapshot for ${activeMatchday}.`);
+              console.log(`No completely new squads found to snapshot for ${activeMatchday}. (Data might already exist)`);
           }
 
       } catch (err) {
