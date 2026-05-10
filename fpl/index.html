@@ -7,7 +7,6 @@
   <link rel="icon" type="image/png" href="https://i.postimg.cc/j5DTGgSg/EFL.png">
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,300;0,400;0,600;0,700;0,800;0,900;1,700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
-  <!-- PocketBase SDK -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pocketbase/0.21.1/pocketbase.umd.min.js"></script>
 
   <style>
@@ -217,14 +216,12 @@
 </head>
 
 <body>
-  <!-- ── Deadline Banner ── -->
   <div class="deadline-banner" id="deadlineBanner">
     ⏳ Matchday Deadline: <span id="countdownTimer">Loading...</span>
   </div>
 
   <div class="app-container">
     
-    <!-- ── Header ── -->
     <header class="app-header">
       <div class="brand">
         <div class="brand-icon">⚽</div>
@@ -241,9 +238,7 @@
       </div>
     </header>
 
-    <!-- ── Main Grid ── -->
     <div class="main-grid">
-      <!-- Left: Pitch Area -->
       <div>
         <div class="formation-bar">
           <span class="formation-label">Select Formation:</span>
@@ -266,7 +261,6 @@
         </div>
       </div>
 
-      <!-- Right: Sidebar -->
       <aside class="sidebar">
         <div class="panel">
           <p class="panel-title">Squad Status</p>
@@ -290,7 +284,6 @@
           </div>
         </div>
 
-        <!-- Actions -->
         <div class="panel" style="gap:12px; display:flex; flex-direction:column;">
           <p class="panel-title">Manage Team</p>
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
@@ -304,7 +297,6 @@
     </div>
   </div>
 
-  <!-- ── Modal: Rules ── -->
   <div class="modal-overlay" id="rulesModal">
     <div class="modal" style="width: min(700px, 94vw);">
       <div class="modal-header">
@@ -316,7 +308,7 @@
           <h3>Squad Budget & Restrictions</h3>
           <div class="rules-grid">
             <div class="rule-item" style="border-color: var(--gold);"><span class="rule-desc" style="font-weight: 700;">Total Team Budget Maximum</span><span class="pts-badge" style="background: rgba(245,158,11,0.1); color: var(--gold);">100M</span></div>
-            <div class="rule-item" style="border-color: var(--red-accent);"><span class="rule-desc" style="font-weight: 700;">Max players from the same team</span><span class="pts-badge" style="background: rgba(229,62,62,0.1); color: var(--red-accent);">5</span></div>
+            <div class="rule-item" style="border-color: var(--red-accent);"><span class="rule-desc" style="font-weight: 700;">Max players from the same team</span><span class="pts-badge" style="background: rgba(229,62,62,0.1); color: var(--red-accent);">5 (8 for Q2 & FINAL)</span></div>
             <div class="rule-item"><span class="rule-desc">Player Prices</span><span class="pts-badge" style="background: var(--bg-input); color: var(--text-muted);">Custom (Check Player List)</span></div>
           </div>
         </div>
@@ -373,7 +365,6 @@
     </div>
   </div>
 
-  <!-- ── Modal: Leaderboard ── -->
   <div class="modal-overlay" id="leaderboardModal">
     <div class="modal" style="width: min(600px, 94vw); max-height: 90vh;">
       <div class="modal-header">
@@ -386,7 +377,8 @@
           <div class="auth-tab" onclick="switchLBTab('MD 4')">MD 4</div>
           <div class="auth-tab" onclick="switchLBTab('MD 5')">MD 5</div>
           <div class="auth-tab" onclick="switchLBTab('KO 1')">KO 1</div>
-          <div class="auth-tab" onclick="switchLBTab('KOF')">KOF</div>
+          <div class="auth-tab" onclick="switchLBTab('Q2')">Q2</div>
+          <div class="auth-tab" onclick="switchLBTab('FINAL')">FINAL</div>
         </div>
         <div style="padding: 16px; background: var(--bg-input); font-size: 12px; color: var(--text-muted); text-align: center; border-bottom: 1px solid var(--border-subtle);">
           Points are calculated per Matchday. Captains must play >0 mins in the Matchday to receive x2 points.<br>Click on a manager to view their squad.
@@ -398,7 +390,6 @@
     </div>
   </div>
 
-  <!-- ── Modal: View Squad (Read Only) ── -->
   <div class="modal-overlay" id="viewSquadModal">
     <div class="modal" style="width: min(800px, 94vw); max-height: 95vh;">
       <div class="modal-header">
@@ -417,7 +408,6 @@
     </div>
   </div>
 
-  <!-- ── Modal: Player Selection ── -->
   <div class="modal-overlay" id="playerModal">
     <div class="modal" style="width: min(620px, 94vw);">
       <div class="modal-header">
@@ -433,7 +423,6 @@
     </div>
   </div>
 
-  <!-- ── Modal: AI Analysis ── -->
   <div class="modal-overlay" id="aiModal">
     <div class="modal" style="width: min(600px, 94vw); max-height: 85vh;">
       <div class="modal-header">
@@ -451,7 +440,6 @@
     </div>
   </div>
 
-  <!-- ── Modal: AI Press Conference ── -->
   <div class="modal-overlay" id="pressModal">
     <div class="modal" style="width: min(700px, 94vw); max-height: 85vh;">
       <div class="modal-header">
@@ -465,7 +453,6 @@
     </div>
   </div>
 
-  <!-- ── Modal: Auth & Profile ── -->
   <div class="modal-overlay" id="authModal">
     <div class="modal">
       <div class="modal-header">
@@ -550,20 +537,18 @@
      POCKETBASE SETUP & GLOBALS
      ========================================================= */
   const pb = new PocketBase('https://efljudb.duckdns.org');
-  let isDataLoaded = false; // এটি নিশ্চিত করবে যে ডাটাবেস লোড হওয়ার আগে স্ন্যাপশট হবে না
+  let isDataLoaded = false; 
 
   /* =========================================================
-     DYNAMIC DEADLINE LOGIC (From Database)
+     DYNAMIC DEADLINE & AUTO-SNAPSHOT LOGIC
      ========================================================= */
   let DEADLINE_DATE = new Date('2026-05-08T12:00:00').getTime(); 
   let forceLock = false;
-  let enableCountdown = true; // New variable for boolean toggle
-
-  // --- NEW: Auto Snapshot Variables ---
+  let enableCountdown = true;
   let activeMatchday = 'MD 4';
   let snapshotTaken = false;
   let systemSettingId = ''; 
-  let isSnapshotting = false; 
+  let isSnapshotting = false;
 
   function isDeadlinePassed() { 
     if (forceLock) return true; 
@@ -576,12 +561,12 @@
     
     const isLocked = forceLock || distance < 0;
 
-    // --- NEW: Trigger Auto-Snapshot if deadline passed AND data is fully loaded ---
+    // --- Auto-Snapshot Trigger ---
     if (isLocked && !snapshotTaken && !isSnapshotting && activeMatchday && isDataLoaded) {
         executeAutoSnapshot();
     }
 
-    // Lock/Unlock buttons based on state
+    // Lock/Unlock buttons
     const saveBtn = document.getElementById('saveBtn');
     if(saveBtn) saveBtn.disabled = isLocked;
     
@@ -602,7 +587,6 @@
             bannerText.style.color = "var(--red-accent)";
         }
     } else {
-        // App is unlocked (future deadline)
         if (enableCountdown) {
             const d = Math.floor(distance / (1000 * 60 * 60 * 24));
             const h = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
@@ -622,10 +606,9 @@
     }
   }
   setInterval(updateCountdown, 1000); 
-  updateCountdown();
 
   /* =========================================================
-     POCKETBASE & DATA FETCHING
+     POCKETBASE DATA FETCHING
      ========================================================= */
   let allPlayers = [], currentUser = null, allUsersList = []; 
   let db_fixtures = [], db_results = [], db_match_data = [];
@@ -645,7 +628,6 @@
           const settings = await pb.collection('system_settings').getFullList({ requestKey: null });
           if (settings && settings.length > 0) {
               
-              // NEW: Fetch snapshot details first
               let validSetting = settings.find(s => s.deadline);
               if (validSetting) {
                   systemSettingId = validSetting.id;
@@ -661,7 +643,6 @@
                   }
               }
 
-              // Check force_lock
               forceLock = settings.some(s => {
                   let v = String(s.force_lock).toLowerCase().trim();
                   return v === 'true' || v === 'yes' || v === '1' || s.force_lock === true;
@@ -671,9 +652,6 @@
           }
       } catch (e) {
           console.error("Settings fetch error:", e);
-          if (e.status === 403 || e.status === 400) {
-              showToast("System Settings API Rules locked! Please make it Public.", "error");
-          }
       }
 
       try {
@@ -698,13 +676,83 @@
       try { db_results = await pb.collection('results').getFullList({ requestKey: null }); } catch (e) { console.warn("Results error:", e); }
       try { db_match_data = await pb.collection('fpl_match_data').getFullList({ requestKey: null }); } catch (e) { console.error("Match data fetch error", e); }
       
-      // NEW: Calculate Total Base Points for all players after data is loaded
       updateAllPlayersPoints();
-
-      // ডাটাবেস থেকে সব সেটিং এবং প্লেয়ার লোড হওয়ার পর সিগন্যাল দিবে
       isDataLoaded = true; 
       
     } catch (err) { console.error("Critical error fetching data:", err); }
+  }
+
+  /* =========================================================
+     MATCHDAY & SNAPSHOT ENGINE
+     ========================================================= */
+  const MATCHDAYS = [
+      { name: 'MD 4', condition: f => { let d = f.match_date || ""; return d.includes('-05-08'); } },
+      { name: 'MD 5', condition: f => { let d = f.match_date || ""; return d.includes('-05-09'); } },
+      { name: 'KO 1', condition: f => { let d = f.match_date || ""; return d.includes('-05-14'); } },
+      { name: 'Q2',   condition: f => { let d = f.match_date || ""; return d.includes('-05-15'); } },
+      { name: 'FINAL',condition: f => { let d = f.match_date || ""; return d.includes('-05-16'); } }
+  ];
+
+  const MD_FIELDS = {
+      'MD 4': 'squad_md4',
+      'MD 5': 'squad_md5',
+      'KO 1': 'squad_ko1',
+      'Q2': 'squad_q2',
+      'FINAL': 'squad_final'
+  };
+
+  async function executeAutoSnapshot() {
+      isSnapshotting = true;
+      console.log(`Starting auto-snapshot for ${activeMatchday}...`);
+
+      try {
+          // Lock global flag immediately
+          if(systemSettingId) {
+              await pb.collection('system_settings').update(systemSettingId, { snapshot_taken: true });
+              snapshotTaken = true;
+          }
+
+          const allUsers = await pb.collection('fpl_users').getFullList({ requestKey: null });
+          
+          // Smart Matchday Detection
+          const normalizedActive = String(activeMatchday).toUpperCase().replace(/\s/g, ''); 
+          let fieldName = null;
+          for (let key in MD_FIELDS) {
+              if (key.toUpperCase().replace(/\s/g, '') === normalizedActive) {
+                  fieldName = MD_FIELDS[key];
+                  break;
+              }
+          }
+
+          if (!fieldName) {
+              console.warn(`Invalid active_matchday (${activeMatchday}) for snapshot. Check spelling.`);
+              return;
+          }
+
+          let updatePromises = [];
+          for (let u of allUsers) {
+              // Safety Lock: Only copy if destination is empty or 'null'
+              let isDestEmpty = !u[fieldName] || u[fieldName] === '{}' || u[fieldName] === 'null';
+
+              if (u.squad && u.squad !== '{}' && isDestEmpty) {
+                  let data = {};
+                  data[fieldName] = u.squad;
+                  updatePromises.push(pb.collection('fpl_users').update(u.id, data));
+              }
+          }
+
+          if (updatePromises.length > 0) {
+              await Promise.all(updatePromises);
+              showToast(`✅ Auto-Snapshot completed for ${activeMatchday}!`, 'success');
+          } else {
+              console.log(`No completely new squads found to snapshot for ${activeMatchday}.`);
+          }
+
+      } catch (err) {
+          console.error("Snapshot error:", err);
+          showToast("Auto-Snapshot failed! Please check PocketBase API rules.", "error");
+          isSnapshotting = false; 
+      }
   }
 
   /* =========================================================
@@ -940,86 +988,9 @@
   }
 
   /* =========================================================
-     TRUE MATCHDAY CALCULATION ENGINE (Gameweek Logic)
+     POINTS CALCULATION ENGINE
      ========================================================= */
   
-  const MATCHDAYS = [
-      { name: 'MD 4', condition: f => { let d = f.match_date || ""; return d.includes('-05-08'); } },
-      { name: 'MD 5', condition: f => { let d = f.match_date || ""; return d.includes('-05-09'); } },
-      { name: 'KO 1', condition: f => { let d = f.match_date || ""; return d.includes('-05-14'); } },
-      { name: 'KOF',  condition: f => { let d = f.match_date || ""; return d.includes('-05-15') || d.includes('-05-16'); } }
-  ];
-
-  // Map Matchdays to the user's specific JSON snapshot field in the database
-  const MD_FIELDS = {
-      'MD 4': 'squad_md4',
-      'MD 5': 'squad_md5',
-      'KO 1': 'squad_ko1',
-      'KOF': 'squad_kof'
-  };
-
-  // --- NEW: Auto Snapshot Logic Engine ---
-  async function executeAutoSnapshot() {
-      isSnapshotting = true;
-      console.log(`Starting auto-snapshot for ${activeMatchday}...`);
-
-      try {
-          // 1. Instantly lock the global flag so other online visitors don't trigger it simultaneously
-          if(systemSettingId) {
-              await pb.collection('system_settings').update(systemSettingId, { snapshot_taken: true });
-              snapshotTaken = true;
-          }
-
-          // 2. Fetch all users
-          const allUsers = await pb.collection('fpl_users').getFullList({ requestKey: null });
-          
-          // Smart Matchday Detection (handles "md4", "MD 4", "md 4" etc.)
-          const normalizedActive = String(activeMatchday).toUpperCase().replace(/\s/g, ''); 
-          let fieldName = null;
-          for (let key in MD_FIELDS) {
-              if (key.toUpperCase().replace(/\s/g, '') === normalizedActive) {
-                  fieldName = MD_FIELDS[key];
-                  break;
-              }
-          }
-
-          if (!fieldName) {
-              console.warn(`Invalid active_matchday (${activeMatchday}) for snapshot. Check spelling.`);
-              return;
-          }
-
-          // 3. Update everyone who has a squad
-          let updatePromises = [];
-          for (let u of allUsers) {
-              
-              // --- NEW: STRICT SAFETY LOCK ---
-              // Check if the destination field is completely empty
-              let isDestEmpty = !u[fieldName] || u[fieldName] === '{}' || u[fieldName] === 'null';
-
-              // Only copy if user has a squad AND the destination is empty
-              // This prevents accidental overwriting if you forget to change 'active_matchday'
-              if (u.squad && u.squad !== '{}' && isDestEmpty) {
-                  let data = {};
-                  data[fieldName] = u.squad;
-                  // Push to promise array for bulk simultaneous updating
-                  updatePromises.push(pb.collection('fpl_users').update(u.id, data));
-              }
-          }
-
-          if (updatePromises.length > 0) {
-              await Promise.all(updatePromises);
-              showToast(`✅ Auto-Snapshot completed for ${activeMatchday}!`, 'success');
-          } else {
-              console.log(`No completely new squads found to snapshot for ${activeMatchday}. (Data might already exist)`);
-          }
-
-      } catch (err) {
-          console.error("Snapshot error:", err);
-          showToast("Auto-Snapshot failed! Please check PocketBase API rules.", "error");
-          isSnapshotting = false; // Reset to allow retry later
-      }
-  }
-
   function getPlayerMins(id, under15Arr, dnpArr) {
       if (!id) return 0;
       if (dnpArr.includes(id)) return 0;
@@ -1027,7 +998,6 @@
       return 90; 
   }
 
-  // maxCount = 6 থেকে বাড়িয়ে 7 করা হলো
   function countEvents(id, resObj, fieldPrefix, maxCount = 7) {
       let count = 0;
       for (let i = 1; i <= maxCount; i++) {
@@ -1037,13 +1007,111 @@
       return count;
   }
 
-  // --- Utility Functions for Penalties ---
   function checkPenMatch(val, id) {
       if (!val) return false;
       return val === id || (Array.isArray(val) && val.includes(id));
   }
+  
   function isPenMissed(takerVal, scoredVal) {
       return takerVal && takerVal.length > 0 && scoredVal === false;
+  }
+
+  function updateAllPlayersPoints() {
+      allPlayers.forEach(p => {
+          p.totalPoints = 0;
+          db_fixtures.forEach(fix => {
+              let log = db_match_data.find(l => (Array.isArray(l.fixture) && l.fixture.includes(fix.id)) || l.fixture === fix.id);
+              if (!log) return;
+              let res = db_results.find(r => (Array.isArray(r.fixture) && r.fixture.includes(fix.id)) || r.fixture === fix.id);
+              if (!res) return;
+
+              let t1Id = Array.isArray(fix.team1) ? fix.team1[0] : fix.team1;
+              let t2Id = Array.isArray(fix.team2) ? fix.team2[0] : fix.team2;
+              if (p.rawTeamId !== t1Id && p.rawTeamId !== t2Id) return;
+
+              let isT1 = (p.rawTeamId === t1Id);
+              let teamPrefix = isT1 ? 't1' : 't2';
+              let oppPrefix = isT1 ? 't2' : 't1';
+              let oppScore = isT1 ? (parseInt(res.team2_score ?? res.t2_score) || 0) : (parseInt(res.team1_score ?? res.t1_score) || 0);
+
+              let under15 = log.players_under_15_mins ? (Array.isArray(log.players_under_15_mins) ? log.players_under_15_mins : [log.players_under_15_mins]) : [];
+              let dnp = log.did_not_play ? (Array.isArray(log.did_not_play) ? log.did_not_play : [log.did_not_play]) : [];
+
+              let mins = getPlayerMins(p.id, under15, dnp);
+              let yellow = countEvents(p.id, res, teamPrefix + '_yellow_', 4);
+              let red = countEvents(p.id, res, teamPrefix + '_red_', 2);
+
+              if (mins === 0 && yellow === 0 && red === 0) return;
+
+              let pts = 0;
+              let pos = p.position;
+
+              if (mins >= 15) pts += 2;
+              else if (mins > 0) pts += 1;
+
+              let regularGoals = countEvents(p.id, res, teamPrefix + '_goal_');
+              let penGoals = 0;
+              if (checkPenMatch(log[teamPrefix + '_pen_taker_1'], p.id) && log[teamPrefix + '_pen_scored_1'] === true) penGoals++;
+              if (checkPenMatch(log[teamPrefix + '_pen_taker_2'], p.id) && log[teamPrefix + '_pen_scored_2'] === true) penGoals++;
+              let goals = regularGoals + penGoals;
+
+              if (goals > 0) {
+                  if (pos === 'FWD') pts += goals * 4;
+                  else if (pos === 'MID') pts += goals * 5;
+                  else pts += goals * 6;
+              }
+
+              let assists = countEvents(p.id, res, teamPrefix + '_assist_');
+              if (assists > 0) pts += assists * 3;
+
+              let ownGoals = countEvents(p.id, res, oppPrefix + '_goal_');
+              if (ownGoals > 0) pts -= ownGoals * 2;
+
+              if (yellow > 0) pts -= yellow * 1;
+              if (red > 0) pts -= red * 3;
+
+              if (mins >= 15 && oppScore === 0) {
+                  if (pos === 'GK') pts += 4;
+                  else if (pos === 'DEF') pts += 3;
+                  else if (pos === 'MID') pts += 1;
+              }
+
+              if (mins >= 15 && (pos === 'DEF' || pos === 'GK') && oppScore >= 2) {
+                  pts -= Math.floor(oppScore / 2);
+              }
+
+              let pensEarned = 0;
+              if (checkPenMatch(log[teamPrefix + '_pen_earned_1'], p.id)) pensEarned++;
+              if (checkPenMatch(log[teamPrefix + '_pen_earned_2'], p.id)) pensEarned++;
+              if (pensEarned > 0) pts += pensEarned * 3;
+
+              let pensMissed = 0;
+              if (checkPenMatch(log[teamPrefix + '_pen_taker_1'], p.id) && log[teamPrefix + '_pen_scored_1'] === false) pensMissed++;
+              if (checkPenMatch(log[teamPrefix + '_pen_taker_2'], p.id) && log[teamPrefix + '_pen_scored_2'] === false) pensMissed++;
+              if (pensMissed > 0) pts -= pensMissed * 2;
+
+              if (pos === 'GK') {
+                  let pensSaved = 0;
+                  if (isPenMissed(log[oppPrefix + '_pen_taker_1'], log[oppPrefix + '_pen_scored_1'])) pensSaved++;
+                  if (isPenMissed(log[oppPrefix + '_pen_taker_2'], log[oppPrefix + '_pen_scored_2'])) pensSaved++;
+                  if (pensSaved > 0) pts += pensSaved * 5;
+                  
+                  let saves = isT1 ? (log.t1_saves || 0) : (log.t2_saves || 0);
+                  if (saves >= 3) pts += Math.floor(saves / 3);
+              }
+
+              let motm = res.motm || res.potm;
+              if (motm && (motm === p.id || (Array.isArray(motm) && motm.includes(p.id)))) pts += 3;
+
+              let secondBest = log.second_best;
+              if (secondBest && (secondBest === p.id || (Array.isArray(secondBest) && secondBest.includes(p.id)))) pts += 2;
+
+              let thirdBest = log.third_best;
+              if (thirdBest && (thirdBest === p.id || (Array.isArray(thirdBest) && thirdBest.includes(p.id)))) pts += 1;
+
+              p.totalPoints += pts;
+          });
+      });
   }
 
   function calculateMatchdayPoints(starting11Map, cId, vcId, mdFixtures) {
@@ -1198,106 +1266,6 @@
       return { mdTotal, mdPlayerPts, mdBreakdown };
   }
 
-  // --- NEW: Calculate Base Points for All Players ---
-  function updateAllPlayersPoints() {
-      allPlayers.forEach(p => {
-          p.totalPoints = 0;
-          db_fixtures.forEach(fix => {
-              let log = db_match_data.find(l => (Array.isArray(l.fixture) && l.fixture.includes(fix.id)) || l.fixture === fix.id);
-              if (!log) return;
-              let res = db_results.find(r => (Array.isArray(r.fixture) && r.fixture.includes(fix.id)) || r.fixture === fix.id);
-              if (!res) return;
-
-              let t1Id = Array.isArray(fix.team1) ? fix.team1[0] : fix.team1;
-              let t2Id = Array.isArray(fix.team2) ? fix.team2[0] : fix.team2;
-              if (p.rawTeamId !== t1Id && p.rawTeamId !== t2Id) return;
-
-              let isT1 = (p.rawTeamId === t1Id);
-              let teamPrefix = isT1 ? 't1' : 't2';
-              let oppPrefix = isT1 ? 't2' : 't1';
-              let oppScore = isT1 ? (parseInt(res.team2_score ?? res.t2_score) || 0) : (parseInt(res.team1_score ?? res.t1_score) || 0);
-
-              let under15 = log.players_under_15_mins ? (Array.isArray(log.players_under_15_mins) ? log.players_under_15_mins : [log.players_under_15_mins]) : [];
-              let dnp = log.did_not_play ? (Array.isArray(log.did_not_play) ? log.did_not_play : [log.did_not_play]) : [];
-
-              let mins = getPlayerMins(p.id, under15, dnp);
-              let yellow = countEvents(p.id, res, teamPrefix + '_yellow_', 4);
-              let red = countEvents(p.id, res, teamPrefix + '_red_', 2);
-
-              if (mins === 0 && yellow === 0 && red === 0) return;
-
-              let pts = 0;
-              let pos = p.position; // Base position calculation (no swap)
-
-              if (mins >= 15) pts += 2;
-              else if (mins > 0) pts += 1;
-
-              let regularGoals = countEvents(p.id, res, teamPrefix + '_goal_');
-              let penGoals = 0;
-              if (checkPenMatch(log[teamPrefix + '_pen_taker_1'], p.id) && log[teamPrefix + '_pen_scored_1'] === true) penGoals++;
-              if (checkPenMatch(log[teamPrefix + '_pen_taker_2'], p.id) && log[teamPrefix + '_pen_scored_2'] === true) penGoals++;
-              let goals = regularGoals + penGoals;
-
-              if (goals > 0) {
-                  if (pos === 'FWD') pts += goals * 4;
-                  else if (pos === 'MID') pts += goals * 5;
-                  else pts += goals * 6;
-              }
-
-              let assists = countEvents(p.id, res, teamPrefix + '_assist_');
-              if (assists > 0) pts += assists * 3;
-
-              let ownGoals = countEvents(p.id, res, oppPrefix + '_goal_');
-              if (ownGoals > 0) pts -= ownGoals * 2;
-
-              if (yellow > 0) pts -= yellow * 1;
-              if (red > 0) pts -= red * 3;
-
-              if (mins >= 15 && oppScore === 0) {
-                  if (pos === 'GK') pts += 4;
-                  else if (pos === 'DEF') pts += 3;
-                  else if (pos === 'MID') pts += 1;
-              }
-
-              if (mins >= 15 && (pos === 'DEF' || pos === 'GK') && oppScore >= 2) {
-                  pts -= Math.floor(oppScore / 2);
-              }
-
-              let pensEarned = 0;
-              if (checkPenMatch(log[teamPrefix + '_pen_earned_1'], p.id)) pensEarned++;
-              if (checkPenMatch(log[teamPrefix + '_pen_earned_2'], p.id)) pensEarned++;
-              if (pensEarned > 0) pts += pensEarned * 3;
-
-              let pensMissed = 0;
-              if (checkPenMatch(log[teamPrefix + '_pen_taker_1'], p.id) && log[teamPrefix + '_pen_scored_1'] === false) pensMissed++;
-              if (checkPenMatch(log[teamPrefix + '_pen_taker_2'], p.id) && log[teamPrefix + '_pen_scored_2'] === false) pensMissed++;
-              if (pensMissed > 0) pts -= pensMissed * 2;
-
-              if (pos === 'GK') {
-                  let pensSaved = 0;
-                  if (isPenMissed(log[oppPrefix + '_pen_taker_1'], log[oppPrefix + '_pen_scored_1'])) pensSaved++;
-                  if (isPenMissed(log[oppPrefix + '_pen_taker_2'], log[oppPrefix + '_pen_scored_2'])) pensSaved++;
-                  if (pensSaved > 0) pts += pensSaved * 5;
-                  
-                  let saves = isT1 ? (log.t1_saves || 0) : (log.t2_saves || 0);
-                  if (saves >= 3) pts += Math.floor(saves / 3);
-              }
-
-              let motm = res.motm || res.potm;
-              if (motm && (motm === p.id || (Array.isArray(motm) && motm.includes(p.id)))) pts += 3;
-
-              let secondBest = log.second_best;
-              if (secondBest && (secondBest === p.id || (Array.isArray(secondBest) && secondBest.includes(p.id)))) pts += 2;
-
-              let thirdBest = log.third_best;
-              if (thirdBest && (thirdBest === p.id || (Array.isArray(thirdBest) && thirdBest.includes(p.id)))) pts += 1;
-
-              p.totalPoints += pts; // Store base points
-          });
-      });
-  }
-
-  // --- NEW: Gets Points and Squad for ONE specific Matchday ---
   function getMDPoints(user, mdName) {
       let squadField = MD_FIELDS[mdName];
       let squadStr = user[squadField]; 
@@ -1305,7 +1273,7 @@
       let normalizedActive = String(activeMatchday).toUpperCase().replace(/\s/g, '');
       let normalizedRequest = String(mdName).toUpperCase().replace(/\s/g, '');
 
-      // Strictly use snapshot field. Fallback to current squad ONLY IF active matchday deadline just passed but auto-snapshot hasn't fired yet
+      // Strict fallback logic to avoid data leaks
       if ((!squadStr || squadStr === '{}') && normalizedRequest === normalizedActive && isDeadlinePassed() && !snapshotTaken) {
           squadStr = user.squad; 
       }
@@ -1323,18 +1291,15 @@
       return calculateMatchdayPoints(starting11Map, sq.captain, sq.viceCaptain, mdFixtures);
   }
 
-  // --- UPDATED: Computes Leaderboard Points depending on Tab (Special Exception for MD 4) ---
   function getUserPointsForTab(user, tabName) {
       if (tabName === 'MD 4') {
-          // MD 4 এর জন্য ডেটাবেস ফিল্ড থেকে সরাসরি পয়েন্ট নেবে
           return user.md4_pts || 0;
       } else if (tabName !== 'Overall') {
           return getMDPoints(user, tabName).mdTotal;
       } else {
-          // Overall এর ক্ষেত্রে MD 4 এর ডিরেক্ট পয়েন্টের সাথে বাকিগুলোর হিসাব যোগ করবে
           let total = user.md4_pts || 0;
           MATCHDAYS.forEach(md => {
-              if (md.name !== 'MD 4') { // MD 4 বাদে বাকিগুলো নরমালি ক্যালকুলেট করবে
+              if (md.name !== 'MD 4') { 
                   total += getMDPoints(user, md.name).mdTotal;
               }
           });
@@ -1362,7 +1327,6 @@
     
     pb.collection('fpl_users').getFullList().then(users => {
        allUsersList = users;
-       // Updated calculation to fetch dynamically based on Matchday
        let usersWithPts = users.map(u => { return { ...u, calculatedPoints: getUserPointsForTab(u, tab) }; });
        usersWithPts.sort((a, b) => b.calculatedPoints - a.calculatedPoints);
 
@@ -1390,13 +1354,11 @@
       if(!user) return;
 
       let isOverallView = (sourceTab === 'Overall');
-      let activeVSTab = explicitTab || (isOverallView ? 'MD 4' : sourceTab); // Default to MD 4 if viewing from Overall
+      let activeVSTab = explicitTab || (isOverallView ? 'MD 4' : sourceTab);
 
-      // --- SMART ACCESS LOGIC ---
       let normalizedActive = String(activeMatchday).toUpperCase().replace(/\s/g, '');
       let normalizedRequest = String(activeVSTab).toUpperCase().replace(/\s/g, '');
 
-      // Only block if they are trying to view the CURRENT matchday BEFORE the deadline passes
       if (normalizedRequest === normalizedActive && !isDeadlinePassed()) {
           showToast(`${activeVSTab} squads are hidden until the deadline passes!`, "error");
           return;
@@ -1404,7 +1366,6 @@
 
       document.getElementById('vs-title').textContent = `${user.name}'s Squad`;
 
-      // 1. Render Tabs inside Modal
       let tabsContainer = document.getElementById('vs-tabs-container');
       if (isOverallView) {
           tabsContainer.innerHTML = `
@@ -1415,10 +1376,10 @@
           tabsContainer.innerHTML = `<div style="text-align:center; padding-bottom: 15px; color: var(--gold); font-weight: bold; font-family: var(--font-display); font-size: 1.2rem; text-transform: uppercase;">${activeVSTab} Squad</div>`;
       }
 
-      // --- EXCEPTION FOR MD 4: Show custom message instead of pitch ---
+      // EXCEPTION FOR MD 4
       if (activeVSTab === 'MD 4') {
           const vsPitch = document.getElementById('vs-pitch'); 
-          vsPitch.innerHTML = ''; // পিচ হাইড করে দিবে
+          vsPitch.innerHTML = ''; 
           
           let md4Pts = user.md4_pts || 0;
           
@@ -1433,7 +1394,6 @@
                </div>
           `;
 
-          // যদি পয়েন্ট 0 বা খালি থাকে, তবে যোগাযোগ করার মেসেজটি দেখাবে
           if (md4Pts === 0) {
               breakdownHtml += `
                  <div style="background: rgba(240, 180, 41, 0.1); border: 1px solid var(--gold); padding: 14px; border-radius: 8px; margin-top: 20px;">
@@ -1448,14 +1408,12 @@
           document.getElementById('vs-breakdown-container').innerHTML = breakdownHtml;
           document.getElementById('viewSquadModal').classList.add('open');
           
-          return; // এখানেই থেমে যাবে, আর পিচ রেন্ডার করবে না।
+          return; 
       }
 
-      // 2. Fetch specific Matchday Squad (For MD 5, KO 1, KOF)
       let squadField = MD_FIELDS[activeVSTab];
       let squadDataStr = user[squadField];
 
-      // Strictly use snapshot field. Safe Fallback logic only if snapshot hasn't completed yet
       if ((!squadDataStr || squadDataStr === '{}') && normalizedRequest === normalizedActive && isDeadlinePassed() && !snapshotTaken) {
           squadDataStr = user.squad;
       }
@@ -1471,7 +1429,6 @@
 
       let ptsData = getMDPoints(user, activeVSTab);
 
-      // 3. Render Pitch
       const vsPitch = document.getElementById('vs-pitch'); vsPitch.innerHTML = '<div class="pitch-bottom-lines"></div>';
       const backupState = { ...state }; state.formation = vsFormation; state.captain = null; state.viceCaptain = null;
 
@@ -1540,19 +1497,13 @@
     const listEl = document.getElementById('playerList'); listEl.innerHTML = '';
     if(players.length === 0) { listEl.innerHTML = '<div style="text-align:center; padding: 20px; color: var(--text-muted);">No players found</div>'; return; }
     
-    // NEW: Dynamic team limit based on active matchday
     const normalizedActiveForLimit = String(activeMatchday).toUpperCase().replace(/\s/g, '');
     const maxSameTeam = (normalizedActiveForLimit === 'Q2' || normalizedActiveForLimit === 'FINAL') ? 8 : 5;
 
-    // NEW: Sort by Points Descending, then Price Descending
     players.sort((a, b) => {
       const ptsA = a.totalPoints || 0;
       const ptsB = b.totalPoints || 0;
-      
-      // প্রথমে পয়েন্টের ভিত্তিতে সিরিয়াল করবে (বেশি পয়েন্ট উপরে)
       if (ptsB !== ptsA) return ptsB - ptsA; 
-      
-      // পয়েন্ট সমান হলে দামের ভিত্তিতে সিরিয়াল করবে
       return b.price - a.price;
     });
 
@@ -1563,7 +1514,6 @@
       const isSelected = selectedIds.includes(p.id); const item = document.createElement('div');
       item.className = `player-item ${isSelected ? 'already-selected' : ''}`;
       
-      // NEW: Added Total Points Display
       item.innerHTML = `<div class="player-avatar">${p.photoHtml || p.teamBadgeHtml}</div>
         <div class="player-info"><div class="player-item-name">${p.name} <span style="color:var(--text-muted); font-size:12px; margin-left:6px;">${p.position}</span></div><div class="player-item-meta">${p.teamBadgeHtml} <span style="margin-left:5px;">${p.team}</span></div></div>
         <div style="text-align: right; display: flex; flex-direction: column; justify-content: center;">
@@ -1752,7 +1702,7 @@
       let text = await fetchGroqAI(prompt, sysInstruct);
       setAICooldown('press');
       
-      text = text.replace(/```html/g, '').replace(/ কলকাতায়/g, 'ঢাকায়').replace(/```/g, ''); // Small adjustment just in case
+      text = text.replace(/```html/g, '').replace(/```/g, '');
       pressContent.innerHTML = `<div style="padding: 10px;">${text}</div>`;
     } catch (error) {
       pressContent.innerHTML = `<div style="text-align:center; color: var(--red-accent); padding: 20px;"><strong>Server is currently busy.</strong><br><br>Too many managers in the press room! Please try again later.</div>`;
