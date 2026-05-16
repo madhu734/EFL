@@ -294,7 +294,9 @@
   .st-team-cell { display: flex; align-items: center; gap: 12px; text-align: left; }
   .st-rank { font-family: 'Montserrat', sans-serif; font-weight: 800; color: var(--text-muted); width: 24px; }
   .st-crest { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 8px; color: #fff; font-weight: 800; font-family: 'Montserrat'; flex-shrink: 0; overflow: hidden; text-align: center; line-height: 1.1;}
-  .st-name { font-family: 'Montserrat', sans-serif; font-weight: 700; text-transform: uppercase; font-size: 13px; }
+  .st-name { font-family: 'Montserrat', sans-serif; font-weight: 700; text-transform: uppercase; font-size: 13px; display: inline-flex; align-items: center; gap: 8px; }
+  .q-badge { display: inline-flex; align-items: center; justify-content: center; padding: 2px 8px; border-radius: 999px; background: #10B981; color: #ffffff; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; min-width: 32px; height: 20px; transition: transform 0.2s ease, box-shadow 0.2s ease; cursor: default; }
+  .q-badge:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(16, 185, 129, 0.24); }
   .st-pts { font-family: 'Montserrat', sans-serif; font-weight: 900; color: var(--brand); font-size: 16px; background: rgba(17,24,39,0.05); padding: 4px 12px; border-radius: 6px; }
 
   /* FORM ICONS STYLES */
@@ -2030,6 +2032,7 @@ function renderStandingsPage() {
             id: team.id,
             team: team,
             P: 0, W: 0, D: 0, L: 0, GF: 0, GA: 0, GD: 0, Pts: 0,
+            groupMatchesPlayed: 0,
             formMatches: []
         };
     });
@@ -2039,16 +2042,23 @@ function renderStandingsPage() {
         const fixture = db_fixtures.find(f => f.id === fixtureId);
         if (!fixture) return;
 
+        const matchType = (fixture.match_type || '').toString().toLowerCase();
+        const skipKeywords = ['qualifier', 'eliminator', 'semi', 'final'];
+        if (skipKeywords.some(keyword => matchType.includes(keyword))) return;
+
         const t1Id = Array.isArray(fixture.team1) ? fixture.team1[0] : fixture.team1;
         const t2Id = Array.isArray(fixture.team2) ? fixture.team2[0] : fixture.team2;
         
         if (!standings[t1Id] || !standings[t2Id]) return;
+        if (standings[t1Id].groupMatchesPlayed >= 5 || standings[t2Id].groupMatchesPlayed >= 5) return;
 
         const score1 = parseInt(res.team1_score !== undefined ? res.team1_score : res.t1_score) || 0;
         const score2 = parseInt(res.team2_score !== undefined ? res.team2_score : res.t2_score) || 0;
 
         standings[t1Id].P += 1;
+        standings[t1Id].groupMatchesPlayed += 1;
         standings[t2Id].P += 1;
+        standings[t2Id].groupMatchesPlayed += 1;
 
         standings[t1Id].GF += score1;
         standings[t1Id].GA += score2;
@@ -2087,12 +2097,14 @@ function renderStandingsPage() {
     });
 
     let html = '';
+    const qualificationLabels = ['Q1', 'Q2', 'Q3', 'Q4'];
     standingsArr.forEach((stats, index) => {
         const team = stats.team;
         const crestBg = team.crest_bg || '#1d4ed8';
         const crestTextCol = getSafeCrestTextColor(crestBg);
         const rankClass = index === 0 ? 'top-team' : '';
         const teamName = team.name || team.crest_text || 'Unnamed Team';
+        const qualificationBadge = index < 4 ? `<span class="q-badge" title="Qualified for knockout stage">${qualificationLabels[index]}</span>` : '';
 
         const gdDisplay = stats.GD > 0 ? `+${stats.GD}` : stats.GD;
         let crestHtml = team.banner ? `<img src="${getPbImageUrl(team, team.banner)}" class="crest-img" crossorigin="anonymous">` : (team.crest_text || 'FC');
@@ -2113,7 +2125,7 @@ function renderStandingsPage() {
             <td><div class="st-rank">${index + 1}</div></td>
             <td class="st-team-cell">
                 <div class="st-crest" style="background:${crestBg}; color:${crestTextCol}; ${team.banner ? 'padding:0; border:1px solid transparent;' : ''}">${crestHtml}</div>
-                <div class="st-name">${teamName}</div>
+                <div class="st-name">${teamName}${qualificationBadge}</div>
             </td>
             <td>${stats.P}</td>
             <td>${stats.W}</td>
