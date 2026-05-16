@@ -669,6 +669,16 @@
 
   async function executeAutoSnapshot() {
       isSnapshotting = true;
+
+      // --- 🔒 HARDCODED SAFETY LOCK: PREVENT PREVIOUS MATCHDAY OVERWRITES ---
+      const normalizedActive = String(activeMatchday).toUpperCase().replace(/\s/g, ''); 
+      if (normalizedActive !== 'FINAL') {
+          console.warn(`🔒 SYSTEM LOCKED: Snapshots are permanently disabled for ${activeMatchday}. Only 'FINAL' can be snapshotted now.`);
+          isSnapshotting = false;
+          return;
+      }
+      // -----------------------------------------------------------------------
+
       console.log(`Starting auto-snapshot for ${activeMatchday}...`);
 
       try {
