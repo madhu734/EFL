@@ -234,6 +234,7 @@
         <button class="theme-toggle-btn" onclick="toggleTheme()" id="themeToggleBtn" title="Toggle Dark/Light Mode">☀️</button>
         <button class="auth-btn" onclick="openLeaderboard()">🏆 Leaderboard</button>
         <button class="auth-btn" onclick="document.getElementById('rulesModal').classList.add('open')">📜 Rules</button>
+        <button class="auth-btn" onclick="showBestXIModal()" style="color: var(--gold); border-color: var(--gold); background: rgba(240, 180, 41, 0.1);">🌟 Tournament Best XI</button>
         <button id="authHeaderBtn" class="auth-btn" onclick="openAuthModal()">Login / Register</button>
       </div>
     </header>
@@ -400,6 +401,26 @@
           </div>
         </div>
         <div id="vs-breakdown-container"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="bestXIModal">
+    <div class="modal" style="width: min(800px, 94vw); max-height: 95vh;">
+      <div class="modal-header">
+        <span class="modal-title" style="color: var(--gold);">🌟 Tournament Best XI</span>
+        <button class="modal-close-btn" onclick="document.getElementById('bestXIModal').classList.remove('open')">✕</button>
+      </div>
+      <div class="modal-body" style="background: var(--bg-main); padding: 16px;">
+         <div style="text-align:center; padding-bottom: 15px; color: var(--text-secondary); font-weight: bold; font-family: var(--font-display); font-size: 1.1rem; text-transform: uppercase;">
+            Highest Points Scorers Overall (4-3-3)
+            <br><span style="font-size: 2.2rem; color: var(--green-neon);" id="best-xi-total">0 PTS</span>
+         </div>
+         <div class="pitch-wrapper" style="transform: scale(0.9); transform-origin: top center; margin-bottom: -60px;">
+          <div class="pitch" id="best-xi-pitch">
+            <div class="pitch-bottom-lines"></div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -945,6 +966,95 @@
   function setCaptain(slotKey, e) { e.stopPropagation(); if(state.viceCaptain === slotKey) state.viceCaptain = null; state.captain = state.captain === slotKey ? null : slotKey; renderPitch(); }
   function setViceCaptain(slotKey, e) { e.stopPropagation(); if(state.captain === slotKey) state.captain = null; state.viceCaptain = state.viceCaptain === slotKey ? null : slotKey; renderPitch(); }
   function resetSquad() { if(isDeadlinePassed()) return; Object.keys(state.slots).forEach(k => state.slots[k] = null); state.captain = null; state.viceCaptain = null; renderPitch(); showToast('Squad cleared!', 'warn'); }
+
+  // --- NEW: Display Tournament Best XI Modal ---
+  function showBestXIModal() {
+      // 1. Sort all players by total points (Descending)
+      let sortedPlayers = [...allPlayers].sort((a, b) => (b.totalPoints || 0) - (a.totalPoints || 0));
+
+      let picked = { 'GK':[], 'DEF':[], 'MID':[], 'FWD':[] };
+      let limits = { 'GK':1, 'DEF':4, 'MID':3, 'FWD':3 }; // Fixed 4-3-3 Formation
+      let teamCounts = {};
+      let allPicked = [];
+      const maxSameTeam = 5; // Standard global limit
+
+      // 2. Fill slots with highest scoring valid players
+      for (let p of sortedPlayers) {
+          if (allPicked.length >= 11) break; // Squad is full
+          if (p.team !== 'Undrafted' && (teamCounts[p.team] || 0) >= maxSameTeam) continue;
+
+          const isWinger = p.rawPosition.toLowerCase().includes('wing');
+          let placed = false;
+
+          if (p.position === 'GK' && picked['GK'].length < limits['GK']) { picked['GK'].push(p); placed = true; }
+          else if (p.position === 'DEF' && picked['DEF'].length < limits['DEF']) { picked['DEF'].push(p); placed = true; }
+          else if ((p.position === 'MID' || isWinger) && picked['MID'].length < limits['MID']) { picked['MID'].push(p); placed = true; }
+          else if ((p.position === 'FWD' || p.position === 'MID' || isWinger) && picked['FWD'].length < limits['FWD'] && !placed) {
+              picked['FWD'].push(p); placed = true;
+          }
+
+          if (placed) {
+              teamCounts[p.team] = (teamCounts[p.team] || 0) + 1;
+              allPicked.push(p);
+          }
+      }
+
+      // 3. Assign C and VC to the top 2 points scorers
+      let capId = allPicked.length > 0 ? allPicked[0].id : null;
+      let vcId = allPicked.length > 1 ? allPicked[1].id : null;
+
+      // 4. Render on Best XI Pitch
+      const pitchEl = document.getElementById('best-xi-pitch');
+      pitchEl.innerHTML = '<div class="pitch-bottom-lines"></div>';
+      
+      let totalXIpoints = 0;
+      const backupCap = state.captain;
+      const backupVC = state.viceCaptain;
+      
+      let tempCapKey = null;
+      let tempVCKey = null;
+
+      const ROW_ORDER = ['FWD', 'MID', 'DEF', 'GK'];
+      
+      // Determine slot keys for Cap/VC styling
+      let slotMapping = {};
+      ROW_ORDER.forEach(pos => {
+          for (let i = 0; i < limits[pos]; i++) {
+              let player = picked[pos][i] || null;
+              let slotKey = `bxi-${pos}-${i}`;
+              slotMapping[slotKey] = player;
+              if (player && player.id === capId) tempCapKey = slotKey;
+              if (player && player.id === vcId) tempVCKey = slotKey;
+          }
+      });
+
+      state.captain = tempCapKey;
+      state.viceCaptain = tempVCKey;
+
+      ROW_ORDER.forEach(pos => {
+          const row = document.createElement('div'); row.className = 'pitch-row';
+          const slotsWrap = document.createElement('div'); slotsWrap.className = 'row-slots';
+          for (let i = 0; i < limits[pos]; i++) {
+              let slotKey = `bxi-${pos}-${i}`;
+              let player = slotMapping[slotKey];
+              
+              let pts = player ? player.totalPoints : 0;
+              if (player && player.id === capId) pts *= 2; // Double points for Captain
+              totalXIpoints += pts;
+
+              let slotEl = buildSlotEl(slotKey, pos, player, true, true, player ? player.totalPoints : null);
+              slotsWrap.appendChild(slotEl);
+          }
+          row.appendChild(slotsWrap); pitchEl.appendChild(row);
+      });
+
+      // Restore user state
+      state.captain = backupCap;
+      state.viceCaptain = backupVC;
+
+      document.getElementById('best-xi-total').textContent = `${totalXIpoints} PTS`;
+      document.getElementById('bestXIModal').classList.add('open');
+  }
 
   function updateDashboard() {
     const filled = Object.values(state.slots).filter(Boolean);
