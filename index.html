@@ -1595,9 +1595,42 @@ function getSafeCrestTextColor(bgColor) {
 }
 
 function getPbImageUrl(record, fileName) {
-  if (!fileName) return 'https://via.placeholder.com/200?text=No+Photo';
-  return `${PB_CONFIG.baseURL}/api/files/${record.collectionId}/${record.id}/${fileName}`;
+  // Inline SVG placeholder to avoid external network calls when no file is available
+  const noPhotoSVG = `<svg xmlns='http://www.w3.org/2000/svg' width='400' height='300'><rect width='100%' height='100%' fill='%23202736'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='%2394a3b8' font-family='Inter, sans-serif' font-size='18'>No Photo</text></svg>`;
+  const NO_PHOTO_DATAURL = 'data:image/svg+xml;utf8,' + encodeURIComponent(noPhotoSVG);
+
+  if (!fileName) return NO_PHOTO_DATAURL;
+
+  // Construct PocketBase file URL. If PB_CONFIG.baseURL is not available or using file: protocol,
+  // fall back to inline placeholder to avoid unsafe cross-origin/frame issues when opened via file://
+  try {
+    const base = PB_CONFIG && PB_CONFIG.baseURL ? PB_CONFIG.baseURL : null;
+    if (!base || location.protocol === 'file:') return NO_PHOTO_DATAURL;
+    return `${base}/api/files/${record.collectionId}/${record.id}/${fileName}`;
+  } catch (e) {
+    return NO_PHOTO_DATAURL;
+  }
 }
+
+// Global handler: replace any failed image loads with the inline placeholder to avoid console noise
+(function attachGlobalImgErrorHandler() {
+  const noPhotoSVG = `<svg xmlns='http://www.w3.org/2000/svg' width='400' height='300'><rect width='100%' height='100%' fill='%23202736'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='%2394a3b8' font-family='Inter, sans-serif' font-size='18'>No Photo</text></svg>`;
+  const NO_PHOTO_DATAURL = 'data:image/svg+xml;utf8,' + encodeURIComponent(noPhotoSVG);
+
+  window.addEventListener('error', function(e) {
+    try {
+      const t = e.target || e.srcElement;
+      if (t && t.tagName === 'IMG') {
+        if (!t.dataset.__noPhotoHandled) {
+          t.dataset.__noPhotoHandled = '1';
+          t.src = NO_PHOTO_DATAURL;
+        }
+      }
+    } catch (err) {
+      // swallow
+    }
+  }, true);
+})();
 function getPBLinkedTeamId(player) {
   const t = player.team;
   if (!t) return null;
@@ -2753,7 +2786,7 @@ function startAuctionMode() {
     showModal('auctionModal');
 }
 
-function presentSinglePlayer(playerId, event) {
+async function presentSinglePlayer(playerId, event) {
   // Defensive: event may be undefined when handlers are injected via innerHTML
   try {
     if (event && typeof event.stopPropagation === 'function') event.stopPropagation();
@@ -2772,7 +2805,20 @@ function presentSinglePlayer(playerId, event) {
 
   // If not found in filtered list, try to find in global players
   if (idx === -1) {
-     const found = db_players.find(p => p && p.id === playerId);
+     let found = db_players.find(p => p && p.id === playerId);
+     if (!found && typeof pb !== 'undefined') {
+       try {
+         // Fetch single player record on-demand from PocketBase
+         const rec = await pb.collection('players').getOne(playerId);
+         if (rec) {
+           db_players.push(rec);
+           found = rec;
+         }
+       } catch (fetchErr) {
+         console.warn('presentSinglePlayer: remote fetch failed for', playerId, fetchErr);
+       }
+     }
+
      if (!found) {
      console.warn('presentSinglePlayer: player not found', playerId);
      alert('Player details are not available right now.');
@@ -2903,16 +2949,27 @@ function openTeamModal(teamId) {
   showModal('teamModal');
 }
 
-function openPlayerModal(playerId) {
-  const player = db_players.find(p => p.id === playerId);
-  if (!player) return;
+async function openPlayerModal(playerId) {
+  let player = db_players.find(p => p && p.id === playerId);
+  if (!player && typeof pb !== 'undefined') {
+    try {
+      player = await pb.collection('players').getOne(playerId);
+      if (player) db_players.push(player);
+    } catch (err) {
+      console.warn('openPlayerModal: failed to fetch player', playerId, err);
+    }
+  }
+  if (!player) {
+    alert('Player details are not available right now.');
+    return;
+  }
 
   let photoUrl = getPbImageUrl(player, player.photo);
 
   document.getElementById('pm-photo').src = photoUrl;
-  document.getElementById('pm-name').textContent = player.name;
-  document.getElementById('pm-pos').textContent = player.position;
-  document.getElementById('pm-batch').textContent = player.batch;
+  document.getElementById('pm-name').textContent = player.name || 'Unnamed';
+  document.getElementById('pm-pos').textContent = player.position || '';
+  document.getElementById('pm-batch').textContent = player.batch || '';
   document.getElementById('pm-exp').textContent = player.experience || "No experience details provided.";
 
   const catBadge = document.getElementById('pm-cat-badge');
