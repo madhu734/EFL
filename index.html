@@ -226,6 +226,16 @@
       border-radius: 2px;
       transition: 0.3s;
     }
+    
+    .hamburger-btn.active span:nth-child(1) {
+      transform: translateY(7px) rotate(45deg);
+    }
+    .hamburger-btn.active span:nth-child(2) {
+      opacity: 0;
+    }
+    .hamburger-btn.active span:nth-child(3) {
+      transform: translateY(-7px) rotate(-45deg);
+    }
 
     .sidebar-overlay {
       position: fixed;
@@ -3783,14 +3793,20 @@
           PB_CONFIG.baseURL = 'https://pbdb2.duckdns.org';
           currentSeason = '4';
           CACHE_KEY = 'efl_cache_4';
+          if (document.getElementById('dynamic-season-badge')) document.getElementById('dynamic-season-badge').textContent = 'Season 4 Archive';
+          if (document.getElementById('dynamic-season-text')) document.getElementById('dynamic-season-text').textContent = 'Season 4 archive content only.';
+          if (document.getElementById('dynamic-standings-season')) document.getElementById('dynamic-standings-season').textContent = 'SEASON 4 ARCHIVE';
         } else {
           PB_CONFIG.baseURL = 'https://efljudb.duckdns.org';
           currentSeason = '5';
           CACHE_KEY = 'efl_cache_5';
           if (document.getElementById('dynamic-season-badge')) document.getElementById('dynamic-season-badge').textContent = 'Season 5';
-          updateSeasonUI(false);
+          if (document.getElementById('dynamic-season-text')) document.getElementById('dynamic-season-text').textContent = 'Season 5 begins soon.';
+          if (document.getElementById('dynamic-standings-season')) document.getElementById('dynamic-standings-season').textContent = 'SEASON 5';
         }
         localStorage.setItem('activeSeason', activeSeason);
+        const seasonLabel = document.getElementById('stat-season');
+        if (seasonLabel) seasonLabel.textContent = currentSeason;
         window.PB_CONFIG = PB_CONFIG;
       })();
 
@@ -3801,26 +3817,6 @@
         if (heroSupportBtn) heroSupportBtn.style.display = isArchive ? 'none' : '';
         if (archiveNotice) archiveNotice.style.display = isArchive ? 'block' : 'none';
         if (heroBadge && isArchive) heroBadge.textContent = 'Season 4 Archive';
-      }
-
-      function updateSeasonUI(isArchive) {
-        // Update season badge, text, and standings safely
-        const badge = document.getElementById('dynamic-season-badge');
-        const text = document.getElementById('dynamic-season-text');
-        const standings = document.getElementById('dynamic-standings-season');
-        if (isArchive) {
-          if (badge) badge.textContent = 'Season 4 Archive';
-          if (text) text.textContent = 'Season 4 archive content only.';
-          if (standings) standings.textContent = 'SEASON 4 ARCHIVE';
-        } else {
-          if (badge) badge.textContent = 'Season 5';
-          if (text) text.textContent = 'Season 5 begins soon.';
-          if (standings) standings.textContent = 'SEASON 5';
-        }
-        const seasonLabel = document.getElementById('stat-season');
-        if (seasonLabel) seasonLabel.textContent = currentSeason;
-        // Apply archive specific UI changes
-        applyArchiveMode(isArchive);
       }
 
       // --- Season Switcher UI ---
@@ -3867,12 +3863,15 @@
       function toggleSidebar() {
         const menu = document.getElementById('sidebarMenu');
         const overlay = document.getElementById('sidebarOverlay');
+        const btn = document.querySelector('.hamburger-btn');
         if (menu.classList.contains('active')) {
           menu.classList.remove('active');
           overlay.classList.remove('active');
+          if (btn) btn.classList.remove('active');
         } else {
           menu.classList.add('active');
           overlay.classList.add('active');
+          if (btn) btn.classList.add('active');
         }
       }
 
@@ -4197,6 +4196,8 @@
       }
 
       async function fetchPBData() {
+        const fetchSeason = currentSeason;
+        const fetchCacheKey = CACHE_KEY;
         try {
           const fetchOptions = { cache: 'no-store' };
 
@@ -4209,6 +4210,11 @@
             fetchWithRetry(`${PB_CONFIG.baseURL}/api/collections/supporters/records?sort=-created`, fetchOptions)
           ]);
 
+          if (fetchSeason !== currentSeason) {
+            console.warn("Season changed during fetch. Aborting stale data processing.");
+            return;
+          }
+
           db_teams = (await teamsRes.json()).items || [];
           db_players = (await playersRes.json()).items || [];
           db_fixtures = (await fixturesRes.json()).items || [];
@@ -4216,7 +4222,7 @@
           db_supporters = (await supportersRes.json()).items || [];
 
           try {
-            localStorage.setItem(CACHE_KEY, JSON.stringify({
+            localStorage.setItem(fetchCacheKey, JSON.stringify({
               teams: db_teams,
               players: db_players,
               fixtures: db_fixtures,
@@ -4232,7 +4238,7 @@
           renderResultsPage();
           renderStandingsPage();
           renderSupportersPage();
-          renderVotingTeamGrid();
+          if (typeof renderVotingTeamGrid === 'function') renderVotingTeamGrid();
 
           setTimeout(observeElements, 500);
 
