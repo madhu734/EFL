@@ -2754,26 +2754,57 @@ function startAuctionMode() {
 }
 
 function presentSinglePlayer(playerId, event) {
-    event.stopPropagation(); 
-    
-    let idx = currentFilteredPlayers.findIndex(p => p.id === playerId);
-    
-    if (idx === -1) {
-       currentFilteredPlayers = [db_players.find(p => p.id === playerId)];
-       idx = 0;
-    }
-    
-    auctionIndex = idx;
-    updateAuctionModal();
-    showModal('auctionModal');
+  // Defensive: event may be undefined when handlers are injected via innerHTML
+  try {
+    if (event && typeof event.stopPropagation === 'function') event.stopPropagation();
+    else if (window.event) window.event.cancelBubble = true;
+  } catch (e) {
+    console.warn('Could not stop propagation for presentSinglePlayer event', e);
+  }
+
+  // Locate the player in current filtered list or global db
+  let idx = -1;
+  if (Array.isArray(currentFilteredPlayers)) {
+    idx = currentFilteredPlayers.findIndex(p => p && p.id === playerId);
+  } else {
+    currentFilteredPlayers = [];
+  }
+
+  // If not found in filtered list, try to find in global players
+  if (idx === -1) {
+     const found = db_players.find(p => p && p.id === playerId);
+     if (!found) {
+     console.warn('presentSinglePlayer: player not found', playerId);
+     alert('Player details are not available right now.');
+     return;
+     }
+     currentFilteredPlayers = [found];
+     idx = 0;
+  }
+
+  auctionIndex = idx;
+  updateAuctionModal();
+  showModal('auctionModal');
 }
 
 function updateAuctionModal() {
-    const p = currentFilteredPlayers[auctionIndex];
-    document.getElementById('auc-photo').src = getPbImageUrl(p, p.photo);
-    document.getElementById('auc-name').textContent = p.name;
-    document.getElementById('auc-pos').textContent = p.position;
-    document.getElementById('auc-batch').textContent = "Batch: " + p.batch;
+  const p = Array.isArray(currentFilteredPlayers) ? currentFilteredPlayers[auctionIndex] : null;
+  if (!p) {
+    console.warn('updateAuctionModal: player is undefined at index', auctionIndex, currentFilteredPlayers);
+    document.getElementById('auc-photo').src = '';
+    document.getElementById('auc-name').textContent = 'Player data unavailable';
+    document.getElementById('auc-pos').textContent = '';
+    document.getElementById('auc-batch').textContent = '';
+    document.getElementById('auc-counter').textContent = `0 / ${Array.isArray(currentFilteredPlayers) ? currentFilteredPlayers.length : 0}`;
+    document.getElementById('auc-prev-btn').disabled = true;
+    document.getElementById('auc-next-btn').disabled = true;
+    return;
+  }
+
+  document.getElementById('auc-photo').src = getPbImageUrl(p, p.photo);
+  document.getElementById('auc-name').textContent = p.name || 'Unnamed';
+  document.getElementById('auc-pos').textContent = p.position || '';
+  document.getElementById('auc-batch').textContent = "Batch: " + (p.batch || '--');
     
     let rawCat = (p.Catagory || p.category || '').trim().toUpperCase();
     let displayCat = '';
