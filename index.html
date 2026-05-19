@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>EFL Season 4 — Jahangirnagar University · Dept. of English</title>
+<title>EFL Season 5 — Jahangirnagar University · Dept. of English</title>
 <link rel="icon" type="image/png" href="https://i.postimg.cc/j5DTGgSg/EFL.png">
 <!-- Modern, Premium Font Pairing: Montserrat for headings, Inter for body -->
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@600;700;800;900&display=swap" rel="stylesheet">
@@ -523,8 +523,11 @@
     .nav-cta, .nav-3d-btn { display: none; }
     .form-row { grid-template-columns: 1fr; }
     .stats-bar { grid-template-columns: repeat(2, 1fr); padding: 15px; gap: 10px; }
-    .hero { padding: 3rem 1rem; }
-    .hero-title { font-size: 32px; }
+    .hero { padding: 2.5rem 1rem 1.5rem; min-height: auto; }
+    .hero-title { font-size: 28px; line-height: 1.1; }
+    .hero-sub { max-width: 100%; margin: 0 auto 1.5rem; }
+    .hero-actions { flex-direction: column; gap: 12px; }
+    .archive-note { max-width: 100%; font-size: 13px; padding: 0 0.25rem; }
     .section { padding: 1.5rem 1rem; margin: 10px auto; border-radius: 12px; }
     .about-grid, .about-rules-grid { grid-template-columns: 1fr; } 
     .auction-btn { margin-left: 0; width: 100%; justify-content: center; }
@@ -542,7 +545,7 @@
 
 <nav>
   <div class="nav-logo" onclick="showPage('home')">
-    <img src="https://i.postimg.cc/nrgJD2Zm/EFL.png" alt="EFL Season 4 Logo" class="logo-img">
+    <img src="https://i.postimg.cc/nrgJD2Zm/EFL.png" alt="EFL Season 5 Logo" class="logo-img">
     <div>
       <div class="nav-title">English Football League</div>
       <div class="nav-sub">Jahangirnagar University · Dept. of English</div>
@@ -582,7 +585,7 @@
     <button class="sidebar-btn" onclick="showPage('supporters'); toggleSidebar()">🤝 Supporters</button>
     <button class="sidebar-btn" onclick="showPage('about'); toggleSidebar()">ℹ️ About</button>
     <button class="sidebar-btn" onclick="window.open('/fpl/', '_blank'); toggleSidebar()">🎮 Fantasy</button>
-    <a href="https://github.com/madhu734/EFL/releases/download/SP/EFL.apk" class="nav-btn" style="margin-top:1.5rem; text-decoration: none; border: 1.5px solid #10B981; color: #10B981; background: rgba(16, 185, 129, 0.05); display:block; text-align:center; border-radius:8px; padding:10px 0; font-weight:700;" title="Download EFL Season 4 Android App">📱 Download App</a>
+    <a href="https://github.com/madhu734/EFL/releases/download/SP/EFL.apk" class="nav-btn" style="margin-top:1.5rem; text-decoration: none; border: 1.5px solid #10B981; color: #10B981; background: rgba(16, 185, 129, 0.05); display:block; text-align:center; border-radius:8px; padding:10px 0; font-weight:700;" title="Download EFL Season 5 Android App">📱 Download App</a>
     <span style="font-size: 8px; color: var(--text-muted); text-align: center; max-width: 125px; line-height: 1.3; display:block; margin:0 auto 0.5rem auto;">*(Only Android, may show harmful warning, but can be ignored and continued anyway)</span>
   </div>
 </div>
@@ -595,13 +598,14 @@
     <div class="hero-title animate-on-scroll">English<br>Football<br>League</div>
     <div class="hero-sub animate-on-scroll">The most anticipated football tournament of the Department of English is back. Six elite squads. One champion. <span id="dynamic-season-text">Season 5</span> begins soon.</div>
     <div class="hero-actions animate-on-scroll">
-      <button class="btn-primary" onclick="window.open('https://eflsupport.duckdns.org', '_blank')" style="text-transform: none; min-width: 220px;">Register as a supporter of the tournament/any team (not player)</button>
+      <button class="btn-primary" id="heroSupportBtn" onclick="window.open('https://eflsupport.duckdns.org', '_blank')" style="text-transform: none; min-width: 220px;">Register as a supporter of the tournament/any team (not player)</button>
       <button class="btn-outline" onclick="showPage('teams')" style="min-width: 180px;">View All Teams</button>
     </div>
+    <div id="archiveNotice" class="archive-note" style="display:none; margin: 1.25rem auto 0; max-width: 560px; font-size: 14px; color: #f97316; line-height:1.6;">Viewing Season 4 archive content. Live Season 5 details and registration are available when Season 5 is selected.</div>
   </div>
   
   <div class="stats-bar">
-    <div class="stat-item"><div class="stat-num">4</div><div class="stat-label">Season</div></div>
+    <div class="stat-item"><div id="stat-season" class="stat-num">5</div><div class="stat-label">Season</div></div>
     <div class="stat-item"><div class="stat-num">6</div><div class="stat-label">Teams</div></div>
     <div class="stat-item"><div id="stat-players" class="stat-num">0</div><div class="stat-label">Players Registered</div></div>
     <div class="stat-item"><div class="stat-num">JU</div><div class="stat-label">Venue</div></div>
@@ -609,7 +613,7 @@
   
   <div class="section">
       <div class="section-header animate-on-scroll">
-        <span class="section-tag">Season 4</span>
+        <span class="section-tag">Season 5</span>
         <div class="section-title">How It Works</div>
         <div class="section-line"></div>
       </div>
@@ -637,7 +641,7 @@
 <div id="page-teams" class="page">
   <div class="section">
     <div class="section-header animate-on-scroll">
-      <span class="section-tag">Season 4</span>
+      <span class="section-tag">Season 5</span>
       <div class="section-title">The Six Teams</div> 
       <div class="section-line"></div>
     </div>
@@ -686,7 +690,7 @@
 <div id="page-fixtures" class="page">
   <div class="fixtures-wrap">
     <div class="section-header animate-on-scroll">
-      <span class="section-tag">EFL S4</span>
+      <span class="section-tag">EFL Season 5</span>
       <div class="section-title">Fixtures</div>
       <div class="section-line"></div>
     </div>
@@ -700,7 +704,7 @@
 <div id="page-results" class="page">
   <div class="results-wrap">
     <div class="section-header animate-on-scroll">
-      <span class="section-tag">EFL S4</span>
+      <span class="section-tag">EFL Season 5</span>
       <div class="section-title">Results & Stats</div>
       <div class="section-line"></div>
     </div>
@@ -749,7 +753,7 @@
 <div id="page-standings" class="page">
   <div class="standings-wrap">
     <div class="section-header animate-on-scroll">
-      <span class="section-tag">EFL S4</span>
+      <span class="section-tag">EFL Season 5</span>
       <div class="section-title">Points Table</div>
       <div class="section-line"></div>
     </div>
@@ -807,7 +811,7 @@
     
     <div class="animate-on-scroll" style="text-align: center; margin-bottom: 2rem;">
         <p style="font-size: 15px; color: var(--text-muted); line-height: 1.7; max-width: 600px; margin: 0 auto; font-weight: 500;">
-            We extend our deepest gratitude to the esteemed alumni and well-wishers who have generously contributed to making EFL Season 4 a grand success. Your support means everything to us.
+            We extend our deepest gratitude to the esteemed alumni and well-wishers who have generously contributed to making EFL Season 5 a grand success. Your support means everything to us.
         </p>
     </div>
 
@@ -821,15 +825,14 @@
 <div id="page-register" class="page">
   <div class="reg-wrap">
     <div class="reg-header animate-on-scroll">
-      <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(99,102,241,0.05);border:1px solid rgba(99,102,241,0.2);padding:6px 14px;border-radius:20px;font-size:11px;color:#6366f1;letter-spacing:1px;margin-bottom:1rem;font-weight:700">EFL SEASON 4</div>
+      <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(99,102,241,0.05);border:1px solid rgba(99,102,241,0.2);padding:6px 14px;border-radius:20px;font-size:11px;color:#6366f1;letter-spacing:1px;margin-bottom:1rem;font-weight:700">EFL SEASON 5</div>
       <div class="reg-title">Player Registration</div>
-      <div style="font-size:13px;color:var(--text-muted);font-weight:500;">Fill in your details below to register for EFL Season 4. All fields marked * are required.</div>
-    </div>
+      <div style="font-size:13px;color:var(--text-muted);font-weight:500;">Fill in your details below to register for EFL Season 5. All fields marked * are required.</div>
     
     <div class="reg-form animate-on-scroll" id="regFormClosed" style="text-align: center; padding: 4rem 2rem;">
       <div style="font-size: 48px; margin-bottom: 16px;">🔒</div>
       <div style="font-family: 'Montserrat', sans-serif; font-size: 24px; font-weight: 800; margin-bottom: 12px; color: var(--text-main);">Registration Closed</div>
-      <div style="color: var(--text-muted); font-size: 14px; margin-bottom: 24px; line-height: 1.6;">Player registration for EFL Season 4 has officially ended. Thank you for the overwhelming response!</div>
+      <div style="color: var(--text-muted); font-size: 14px; margin-bottom: 24px; line-height: 1.6;">Player registration for EFL Season 5 has officially ended. Thank you for the overwhelming response!</div>
       <button class="submit-btn" onclick="window.open('https://eflsupport.duckdns.org', '_blank')" style="width: auto; padding: 12px 32px; text-transform: none;">Register as a Supporter</button>
     </div>
 
@@ -987,7 +990,7 @@
         <div style="display:flex;align-items:flex-start;gap:10px">
           <input type="checkbox" id="f-agree" style="width:auto;margin-top:3px" onchange="removeCheckboxError()">
           <label for="f-agree" id="f-agree-label" style="font-size:12px;text-transform:none;letter-spacing:0;font-weight:500;color:var(--text-muted);line-height:1.5;cursor:pointer;transition:color 0.2s;">
-            I confirm that all information provided is accurate and I agree to abide by the rules and regulations of EFL Season 4 as set by the Department of English, Jahangirnagar University. *
+            I confirm that all information provided is accurate and I agree to abide by the rules and regulations of EFL Season 5 as set by the Department of English, Jahangirnagar University. *
           </label>
         </div>
       </div>
@@ -998,7 +1001,7 @@
     <div class="success-box" id="successBox">
       <span class="success-icon">✅</span>
       <div class="success-title">Registration Submitted!</div>
-      <div style="font-size:14px;color:var(--text-muted);line-height:1.7;margin-bottom:1.5rem;font-weight:500;">Thank you for registering for <strong style="color:var(--text-main);font-weight:700;">EFL Season 4</strong>. Your application has been saved to the database.</div>
+      <div style="font-size:14px;color:var(--text-muted);line-height:1.7;margin-bottom:1.5rem;font-weight:500;">Thank you for registering for <strong style="color:var(--text-main);font-weight:700;">EFL Season 5</strong>. Your application has been saved to the database.</div>
       <button class="btn-outline" onclick="resetForm()">Register Another</button>
     </div>
   </div>
@@ -1016,7 +1019,7 @@
     <div class="about-grid">
       <div class="about-card animate-on-scroll">
         <div style="font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 20px; margin-bottom: 16px; text-transform: uppercase;">The Tournament</div>
-        <p style="font-size: 14px; color: var(--text-muted); line-height: 1.7; font-weight: 500;">The English Football League (EFL) is the annual intra-departmental football tournament organized by students of the Department of English, Jahangirnagar University. Now entering its 4th season, EFL has grown into a celebrated tradition that brings together football enthusiasts from all batches.</p>
+        <p style="font-size: 14px; color: var(--text-muted); line-height: 1.7; font-weight: 500;">The English Football League (EFL) is the annual intra-departmental football tournament organized by students of the Department of English, Jahangirnagar University. Now entering its 5th season, EFL has grown into a celebrated tradition that brings together football enthusiasts from all batches.</p>
       </div>
       
       <div class="about-card animate-on-scroll">
@@ -1025,7 +1028,8 @@
           <div class="about-history-item"><div class="about-history-dot"></div><div><div class="rule-title">Season 1</div><div class="rule-text">Inaugural edition. The tradition begins by Batch 48.</div></div></div>
           <div class="about-history-item"><div class="about-history-dot"></div><div><div class="rule-title">Season 2</div><div class="rule-text">Expanded format with more teams and players.</div></div></div>
           <div class="about-history-item"><div class="about-history-dot"></div><div><div class="rule-title">Season 3</div><div class="rule-text">Record participation and memorable finals.</div></div></div>
-          <div class="about-history-item"><div class="about-history-dot current"></div><div><div class="rule-title">Season 4 — Current</div><div class="rule-text">Now with dedicated digital platform introduced by Batch 51.</div></div></div>
+              <div class="about-history-item"><div class="about-history-dot"></div><div><div class="rule-title">Season 4</div><div class="rule-text">Introduced the dedicated digital platform from Batch 51.</div></div></div>
+          <div class="about-history-item"><div class="about-history-dot current"></div><div><div class="rule-title">Season 5</div><div class="rule-text">The current season is focused on the biggest competition yet, with six elite squads battling for the title.</div></div></div>
         </div>
       </div>
     </div>
@@ -1045,7 +1049,7 @@
 
     <div class="about-card animate-on-scroll">
         <div style="font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 20px; margin-bottom: 12px; text-transform: uppercase;">Organizing Committee</div>
-        <p style="font-size: 14px; color: var(--text-muted); line-height: 1.7; font-weight: 500;">EFL Season 4 is organized by dedicated student volunteers from the Department of English, Jahangirnagar University. Committee member details will be published here soon.</p>
+        <p style="font-size: 14px; color: var(--text-muted); line-height: 1.7; font-weight: 500;">EFL Season 5 is organized by dedicated student volunteers from the Department of English, Jahangirnagar University. Committee member details will be published here soon.</p>
         <div class="committee-grid">
             <div class="committee-badge"><div class="committee-title">Tournament Director</div><div class="committee-name">UTAU -(The Watcher)</div></div>
             <div class="committee-badge"><div class="committee-title">Registration Lead & Logistics</div><div class="committee-name">Sayem</div></div>
@@ -1175,7 +1179,7 @@
 <div style="position: absolute; top: -10000px; left: -10000px; width: 0; height: 0; overflow: hidden;">
   <div id="player-card" style="width: 400px; background: #0f172a; border-radius: 20px; padding: 32px; font-family: 'Inter', sans-serif; color: #fff; text-align: center; border: 2px solid rgba(255,255,255,0.1); box-sizing: border-box; position: relative;">
       <div style="position: relative; z-index: 1;">
-          <div style="font-family: 'Montserrat', sans-serif; font-size: 30px; font-weight: 900; color: #fff; letter-spacing: 2px;">EFL SEASON 4</div>
+          <div style="font-family: 'Montserrat', sans-serif; font-size: 30px; font-weight: 900; color: #fff; letter-spacing: 2px;">EFL SEASON 5</div>
           <div style="font-size: 9px; color: #cbd5e1; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 28px; font-weight: 700;">Jahangirnagar University · Dept. of English</div>
           <div style="width: 160px; height: 160px; margin: 0 auto 24px; border-radius: 50%; overflow: hidden; border: 4px solid #fff; background: #1e293b; box-shadow: 0 10px 25px rgba(0,0,0,0.4); position: relative;">
               <img id="card-photo" src="" style="width: 100%; height: 100%; object-fit: cover; display: block;" crossorigin="anonymous">
@@ -1201,7 +1205,7 @@
 <div style="position: absolute; top: -10000px; left: -10000px; width: 0; height: 0; overflow: hidden;">
   <div id="export-result-card" style="width: 800px; background: linear-gradient(135deg, #0f172a, #1e1b4b); border-radius: 24px; padding: 48px; font-family: 'Inter', sans-serif; color: #fff; position: relative; border: 4px solid rgba(255,255,255,0.05); box-sizing: border-box;">
       <div style="text-align: center; margin-bottom: 40px;">
-          <div style="font-family: 'Montserrat', sans-serif; font-size: 36px; font-weight: 900; letter-spacing: 3px; color: #fff;">EFL SEASON 4</div>
+          <div style="font-family: 'Montserrat', sans-serif; font-size: 36px; font-weight: 900; letter-spacing: 3px; color: #fff;">EFL SEASON 5</div>
           <div style="font-size: 14px; color: #94a3b8; text-transform: uppercase; letter-spacing: 2px; font-weight: 700; margin-top: 8px;">Full Time Result</div>
       </div>
 
@@ -1270,19 +1274,31 @@ let CACHE_KEY = 'efl_cache_' + currentSeason;
     PB_CONFIG.baseURL = 'https://pbdb2.duckdns.org';
     currentSeason = '4';
     CACHE_KEY = 'efl_cache_4';
-    if(document.getElementById('dynamic-season-badge')) document.getElementById('dynamic-season-badge').textContent = 'Season 4';
-    if(document.getElementById('dynamic-season-text')) document.getElementById('dynamic-season-text').textContent = 'Season 4';
-    if(document.getElementById('dynamic-standings-season')) document.getElementById('dynamic-standings-season').textContent = 'SEASON 4';
+    if(document.getElementById('dynamic-season-badge')) document.getElementById('dynamic-season-badge').textContent = 'Season 4 Archive';
+    if(document.getElementById('dynamic-season-text')) document.getElementById('dynamic-season-text').textContent = 'Season 4 archive content only.';
+    if(document.getElementById('dynamic-standings-season')) document.getElementById('dynamic-standings-season').textContent = 'SEASON 4 ARCHIVE';
   } else {
     PB_CONFIG.baseURL = 'https://efljudb.duckdns.org';
     currentSeason = '5';
     CACHE_KEY = 'efl_cache_5';
     if(document.getElementById('dynamic-season-badge')) document.getElementById('dynamic-season-badge').textContent = 'Season 5';
-    if(document.getElementById('dynamic-season-text')) document.getElementById('dynamic-season-text').textContent = 'Season 5';
+    if(document.getElementById('dynamic-season-text')) document.getElementById('dynamic-season-text').textContent = 'Season 5 begins soon.';
     if(document.getElementById('dynamic-standings-season')) document.getElementById('dynamic-standings-season').textContent = 'SEASON 5';
   }
+  const seasonLabel = document.getElementById('stat-season');
+  if (seasonLabel) seasonLabel.textContent = currentSeason;
   window.PB_CONFIG = PB_CONFIG;
 })();
+
+function applyArchiveMode(isArchive) {
+  const heroSupportBtn = document.getElementById('heroSupportBtn');
+  const archiveNotice = document.getElementById('archiveNotice');
+  const heroBadge = document.getElementById('dynamic-season-badge');
+  if (heroSupportBtn) heroSupportBtn.style.display = isArchive ? 'none' : '';
+  if (archiveNotice) archiveNotice.style.display = isArchive ? 'block' : 'none';
+  if (heroBadge && isArchive) heroBadge.textContent = 'Season 4 Archive';
+}
+
 // --- Season Switcher UI ---
 document.addEventListener('DOMContentLoaded', function() {
   // Season Switcher
@@ -1296,6 +1312,7 @@ document.addEventListener('DOMContentLoaded', function() {
     s5Btn.classList.add('active');
     s4Btn.classList.remove('active');
   }
+  applyArchiveMode(activeSeason === 'S4');
   s5Btn.onclick = () => {
     if (localStorage.getItem('activeSeason') !== 'S5') {
       localStorage.setItem('activeSeason', 'S5');
@@ -1335,15 +1352,16 @@ function changeSeason(seasonValue) {
 
     if (seasonValue === '4') {
         PB_CONFIG.baseURL = 'https://pbdb2.duckdns.org';
-        if(document.getElementById('dynamic-season-badge')) document.getElementById('dynamic-season-badge').textContent = 'Season 4';
-        if(document.getElementById('dynamic-season-text')) document.getElementById('dynamic-season-text').textContent = 'Season 4';
-        if(document.getElementById('dynamic-standings-season')) document.getElementById('dynamic-standings-season').textContent = 'SEASON 4';
+        if(document.getElementById('dynamic-season-badge')) document.getElementById('dynamic-season-badge').textContent = 'Season 4 Archive';
+        if(document.getElementById('dynamic-season-text')) document.getElementById('dynamic-season-text').textContent = 'Season 4 archive content only.';
+        if(document.getElementById('dynamic-standings-season')) document.getElementById('dynamic-standings-season').textContent = 'SEASON 4 ARCHIVE';
     } else {
         PB_CONFIG.baseURL = 'https://efljudb.duckdns.org';
         if(document.getElementById('dynamic-season-badge')) document.getElementById('dynamic-season-badge').textContent = 'Season 5';
-        if(document.getElementById('dynamic-season-text')) document.getElementById('dynamic-season-text').textContent = 'Season 5';
+        if(document.getElementById('dynamic-season-text')) document.getElementById('dynamic-season-text').textContent = 'Season 5 begins soon.';
         if(document.getElementById('dynamic-standings-season')) document.getElementById('dynamic-standings-season').textContent = 'SEASON 5';
     }
+    applyArchiveMode(seasonValue === '4');
     
     if (typeof pb !== 'undefined') pb.baseUrl = PB_CONFIG.baseURL;
 
@@ -1744,7 +1762,7 @@ function renderTeamsPage() {
         <div class="team-info">
           <div class="team-name" style="color: var(--text-main)">${teamName}</div>
           <div class="team-meta"><span>Manager: <span class="tbd">${team.manager_name || 'TBD'}</span></span><span>Owner: <span class="tbd">${team.owner_name || 'TBD'}</span></span></div>
-          <div class="team-badge" style="background:${safeTextColor}15;color:${safeTextColor}">Season 4 Entry</div>
+          <div class="team-badge" style="background:${safeTextColor}15;color:${safeTextColor}">Season ${currentSeason} Entry</div>
         </div>
         <div class="team-roster">
           <span class="roster-tag">${teamPlayers.length > 0 ? teamPlayers.length + ' Players Drafted' : 'Squad to be announced'}</span>
