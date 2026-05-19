@@ -487,6 +487,14 @@
     <button class="nav-btn" onclick="window.open('/fpl/', '_blank')">🎮 Fantasy</button>
   </div>
   <div class="nav-actions">
+    <!-- Season Switcher -->
+    <div style="display: flex; flex-direction: column; align-items: center; gap: 2px; margin-right: 10px;">
+        <select id="seasonSwitcher" onchange="changeSeason(this.value)" style="padding: 6px 10px; border-radius: 8px; border: 1.5px solid var(--border); background: var(--glass-bg); color: var(--brand); font-weight: 700; font-size: 11px; cursor: pointer; outline: none; font-family: 'Inter', sans-serif;">
+            <option value="5" selected>Season 5 (Current)</option>
+            <option value="4">Season 4 (Archive)</option>
+        </select>
+        <span style="font-size: 9px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Season</span>
+    </div>
     <!-- App Download Button -->
     <div style="display: flex; flex-direction: column; align-items: center; gap: 2px; margin-right: 10px;">
       <a href="https://github.com/madhu734/EFL/releases/download/SP/EFL.apk" class="nav-btn" style="text-decoration: none; border: 1.5px solid #10B981; color: #10B981; background: rgba(16, 185, 129, 0.05);" title="Download EFL Season 4 Android App">
@@ -510,13 +518,11 @@
 <!-- HOME -->
 <div id="page-home" class="page active">
   <div class="hero">
-    <div class="hero-badge animate-on-scroll"><span class="pulse" style="background: #10B981;"></span> Season 4</div>
+    <div class="hero-badge animate-on-scroll"><span class="pulse" style="background: #10B981;"></span> <span id="dynamic-season-badge">Season 5</span></div>
     <div class="hero-season animate-on-scroll">Jahangirnagar University · Department of English</div>
     <div class="hero-title animate-on-scroll">English<br>Football<br>League</div>
-    <div class="hero-sub animate-on-scroll">The most anticipated football tournament of the Department of English is back. Six elite squads. One champion. Season 4 begins soon.</div>
+    <div class="hero-sub animate-on-scroll">The most anticipated football tournament of the Department of English is back. Six elite squads. One champion. <span id="dynamic-season-text">Season 5</span> begins soon.</div>
     <div class="hero-actions animate-on-scroll">
-      <button class="btn-primary vote-now" onclick="showVotingModal()" style="min-width: 220px;">Vote Now: Team of the Tournament</button>
-      <button class="btn-outline" onclick="showVotingResultsModal()" style="min-width: 180px;">View Voting Results</button>
       <button class="btn-primary" onclick="window.open('https://eflsupport.duckdns.org', '_blank')" style="text-transform: none; min-width: 220px;">Register as a supporter of the tournament/any team (not player)</button>
       <button class="btn-outline" onclick="showPage('teams')" style="min-width: 180px;">View All Teams</button>
     </div>
@@ -553,49 +559,6 @@
         </div>
       </div>
     </div>
-</div>
-
-<div class="modal-overlay" id="votingModal" onclick="closeModal('votingModal', event)">
-  <div class="modal-content sm" onclick="event.stopPropagation()">
-    <button class="modal-close" onclick="closeModal('votingModal')">×</button>
-    <div class="section-header" style="padding-top: 0;">
-      <span class="section-tag">Fan Voting</span>
-      <div class="section-title">Team of the Tournament</div>
-      <div class="section-line"></div>
-    </div>
-    <div id="votingFormPane" class="reg-form" style="padding: 1.25rem 1.5rem 1.5rem; gap: 16px;">
-      <div class="form-error-summary" id="votingError"></div>
-      <div class="form-row">
-        <div class="form-group"><label>Batch <span>*</span></label><input id="voteBatch" type="text" placeholder="e.g. 51" autocomplete="off"></div>
-        <div class="form-group"><label>Roll Number <span>*</span></label><input id="voteRoll" type="text" placeholder="" autocomplete="off"></div>
-      </div>
-      <div class="voting-card-grid" id="votingTeamGrid"></div>
-      <div class="modal-warning">Warning: Your vote can only be confirmed once and cannot be changed.</div>
-      <button class="submit-btn" id="confirmVoteBtn" type="button" onclick="submitTeamVote()">Confirm Vote</button>
-    </div>
-    <div class="success-box" id="votingSuccessBox">
-      <span class="success-icon">✅</span>
-      <div class="success-title">Thank you for voting!</div>
-      <div>Your vote has been recorded successfully.</div>
-    </div>
-  </div>
-</div>
-
-<div class="modal-overlay" id="votingResultsModal" onclick="closeModal('votingResultsModal', event)">
-  <div class="modal-content sm" onclick="event.stopPropagation()">
-    <button class="modal-close" onclick="closeModal('votingResultsModal')">×</button>
-    <div class="section-header" style="padding-top: 0;">
-      <span class="section-tag">Voting Results</span>
-      <div class="section-title">Team of the Tournament</div>
-      <div class="section-line"></div>
-    </div>
-    <div id="votingCountdownBox" style="padding: 0 0 1rem 0;">
-      <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 8px; letter-spacing: 0.8px; text-transform: uppercase;">Results will be revealed in:</div>
-      <div id="votingCountdown" style="font-family: 'Montserrat', sans-serif; font-size: 32px; font-weight: 800; color: var(--brand);"></div>
-    </div>
-    <div id="votingChartBox" style="display: none;"><canvas id="votingChart"></canvas></div>
-    <div id="votingResultsMessage" style="display:none; text-align:center; padding-top: 8px;"></div>
-  </div>
 </div>
 
 <!-- TEAMS (Dynamic) -->
@@ -721,7 +684,7 @@
     
     <div id="standings-export-area" class="standings-table-container animate-on-scroll">
        <div id="standings-export-header" style="display: none; text-align: center; padding: 24px 24px 0; background: var(--bg-card);">
-          <div style="font-family: 'Montserrat', sans-serif; font-size: 24px; font-weight: 900; letter-spacing: 2px; color: var(--brand);">EFL SEASON 4</div>
+          <div style="font-family: 'Montserrat', sans-serif; font-size: 24px; font-weight: 900; letter-spacing: 2px; color: var(--brand);">EFL <span id="dynamic-standings-season">SEASON 5</span></div>
           <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; font-weight: 700;">Official Points Table</div>
        </div>
 
@@ -1233,6 +1196,49 @@ let db_fixtures = [];
 let db_results = []; 
 let db_supporters = []; 
 
+function changeSeason(seasonValue) {
+    if (seasonValue === '4') {
+        PB_CONFIG.baseURL = 'https://pbdb2.duckdns.org';
+        if(document.getElementById('dynamic-season-badge')) document.getElementById('dynamic-season-badge').textContent = 'Season 4';
+        if(document.getElementById('dynamic-season-text')) document.getElementById('dynamic-season-text').textContent = 'Season 4';
+        if(document.getElementById('dynamic-standings-season')) document.getElementById('dynamic-standings-season').textContent = 'SEASON 4';
+    } else {
+        PB_CONFIG.baseURL = 'https://efljudb.duckdns.org';
+        if(document.getElementById('dynamic-season-badge')) document.getElementById('dynamic-season-badge').textContent = 'Season 5';
+        if(document.getElementById('dynamic-season-text')) document.getElementById('dynamic-season-text').textContent = 'Season 5';
+        if(document.getElementById('dynamic-standings-season')) document.getElementById('dynamic-standings-season').textContent = 'SEASON 5';
+    }
+    
+    if (typeof pb !== 'undefined') pb.baseUrl = PB_CONFIG.baseURL;
+
+    db_teams = [];
+    db_players = [];
+    db_fixtures = [];
+    db_results = [];
+    db_supporters = [];
+
+    ['teams-container', 'players-container', 'fixtures-container', 'supporters-container'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.innerHTML = '<div class="global-loader" style="grid-column: 1/-1;"><span class="ai-loader" style="border-color: var(--brand); border-bottom-color: transparent;"></span> Loading Data...</div>';
+    });
+
+    fetchPBData().then(() => {
+        const activePage = document.querySelector('.page.active');
+        if (activePage) {
+            const pageId = activePage.id.replace('page-', '');
+            if (pageId === 'home') {
+                const statP = document.getElementById('stat-players');
+                if (statP) statP.textContent = db_players.length;
+            } else if (pageId === 'teams' && typeof renderTeamsPage === 'function') renderTeamsPage();
+            else if (pageId === 'players' && typeof renderPlayersPage === 'function') renderPlayersPage();
+            else if (pageId === 'fixtures' && typeof renderFixturesPage === 'function') renderFixturesPage();
+            else if (pageId === 'results' && typeof renderResultsPage === 'function') renderResultsPage();
+            else if (pageId === 'standings' && typeof renderStandingsPage === 'function') renderStandingsPage();
+            else if (pageId === 'supporters' && typeof renderSupportersPage === 'function') renderSupportersPage();
+        }
+    });
+}
+
 let currentFilter = 'All';
 let searchQuery = '';
 let currentFilteredPlayers = [];
@@ -1438,7 +1444,6 @@ function getPbImageUrl(record, fileName) {
   if (!fileName) return 'https://via.placeholder.com/200?text=No+Photo';
   return `${PB_CONFIG.baseURL}/api/files/${record.collectionId}/${record.id}/${fileName}`;
 }
-
 function getPBLinkedTeamId(player) {
   const t = player.team;
   if (!t) return null;
@@ -1446,46 +1451,48 @@ function getPBLinkedTeamId(player) {
   return t;
 }
 
-// ==========================================
-// DATA FETCHING
-// ==========================================
 window.onload = () => {
+  updateSeasonText();
   fetchPBData();
 };
+
+async function fetchWithRetry(url, options = {}, retries = 3, backoff = 1000) {
+  for (let i = 0; i < retries; i++) {
+    try {
+      const response = await fetch(url, options);
+      if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+      return response;
+    } catch (e) {
+      if (i === retries - 1) throw e;
+      console.warn(`Fetch failed for ${url}. Retrying in ${backoff * (i + 1)}ms...`);
+      await new Promise(resolve => setTimeout(resolve, backoff * (i + 1))); 
+    }
+  }
+}
+
+function retryConnection() {
+  toggleLoader(true);
+  fetchPBData().finally(() => toggleLoader(false));
+}
 
 async function fetchPBData() {
   try {
     const fetchOptions = { cache: 'no-store' };
     
-    const teamsRes = await fetch(`${PB_CONFIG.baseURL}/api/collections/teams/records?perPage=100`, fetchOptions);
-    if(teamsRes.ok) {
-       const teamsData = await teamsRes.json();
-       db_teams = teamsData.items || [];
-    }
-
-    const playersRes = await fetch(`${PB_CONFIG.baseURL}/api/collections/players/records?perPage=500`, fetchOptions);
-    if(playersRes.ok) {
-       const playersData = await playersRes.json();
-       db_players = playersData.items || [];
-    }
-
-    const fixturesRes = await fetch(`${PB_CONFIG.baseURL}/api/collections/fixtures/records?sort=match_date`, fetchOptions);
-    if(fixturesRes.ok) {
-       const fixturesData = await fixturesRes.json();
-       db_fixtures = fixturesData.items || [];
-    }
-
-    const resultsRes = await fetch(`${PB_CONFIG.baseURL}/api/collections/results/records?perPage=100`, fetchOptions);
-    if(resultsRes.ok) {
-       const resultsData = await resultsRes.json();
-       db_results = resultsData.items || [];
-    }
-
-    const supportersRes = await fetch(`${PB_CONFIG.baseURL}/api/collections/supporters/records?sort=-created`, fetchOptions);
-    if(supportersRes.ok) {
-       const supportersData = await supportersRes.json();
-       db_supporters = supportersData.items || [];
-    }
+    // Concurrently fetch all collections with auto-retry
+    const [teamsRes, playersRes, fixturesRes, resultsRes, supportersRes] = await Promise.all([
+       fetchWithRetry(`${PB_CONFIG.baseURL}/api/collections/teams/records?perPage=100`, fetchOptions),
+       fetchWithRetry(`${PB_CONFIG.baseURL}/api/collections/players/records?perPage=500`, fetchOptions),
+       fetchWithRetry(`${PB_CONFIG.baseURL}/api/collections/fixtures/records?sort=match_date`, fetchOptions),
+       fetchWithRetry(`${PB_CONFIG.baseURL}/api/collections/results/records?perPage=100`, fetchOptions),
+       fetchWithRetry(`${PB_CONFIG.baseURL}/api/collections/supporters/records?sort=-created`, fetchOptions)
+    ]);
+    
+    db_teams = (await teamsRes.json()).items || [];
+    db_players = (await playersRes.json()).items || [];
+    db_fixtures = (await fixturesRes.json()).items || [];
+    db_results = (await resultsRes.json()).items || [];
+    db_supporters = (await supportersRes.json()).items || [];
 
     document.getElementById('stat-players').textContent = db_players.length;
     renderTeamsPage();
@@ -1500,214 +1507,30 @@ async function fetchPBData() {
 
   } catch (error) {
     console.error("PocketBase Fetch Error:", error);
-    document.getElementById('teams-container').innerHTML = `<div style="grid-column:1/-1; text-align:center; color:var(--accent);">ডেটাবেস কানেক্ট করতে সমস্যা হচ্ছে।</div>`;
-    document.getElementById('players-container').innerHTML = `<div style="grid-column:1/-1; text-align:center; color:var(--accent);">ডেটাবেস কানেক্ট করতে সমস্যা হচ্ছে।</div>`;
-    document.getElementById('fixtures-container').innerHTML = `<div style="text-align:center; color:var(--accent);">ডেটাবেস কানেক্ট করতে সমস্যা হচ্ছে।</div>`;
-    document.getElementById('results-container').innerHTML = `<div style="text-align:center; color:var(--accent);">ডেটাবেস কানেক্ট করতে সমস্যা হচ্ছে।</div>`;
-    document.getElementById('standings-body').innerHTML = `<tr><td colspan="11" style="text-align:center; color:var(--accent);">ডেটাবেস কানেক্ট করতে সমস্যা হচ্ছে।</td></tr>`;
-    document.getElementById('supporters-container').innerHTML = `<div style="grid-column:1/-1; text-align:center; color:var(--accent);">ডেটাবেস কানেক্ট করতে সমস্যা হচ্ছে।</div>`;
+    
+    const retryHTML = `
+      <div style="grid-column:1/-1; text-align:center; padding: 2rem;">
+        <div style="color:var(--accent); margin-bottom: 1rem; font-weight: bold;">Connection issue detected. Unable to load data from ${SEASON_CONFIGS[currentSeason].name} database.</div>
+        <button class="btn-primary" onclick="retryConnection()">Retry Connection</button>
+      </div>`;
+    
+    const singleColRetry = `
+      <div style="text-align:center; padding: 2rem;">
+        <div style="color:var(--accent); margin-bottom: 1rem; font-weight: bold;">Connection issue detected.</div>
+        <button class="btn-primary" onclick="retryConnection()">Retry Connection</button>
+      </div>`;
+
+    document.getElementById('teams-container').innerHTML = retryHTML;
+    document.getElementById('players-container').innerHTML = retryHTML;
+    document.getElementById('fixtures-container').innerHTML = singleColRetry;
+    document.getElementById('results-container').innerHTML = singleColRetry;
+    document.getElementById('standings-body').innerHTML = `<tr><td colspan="11">${retryHTML}</td></tr>`;
+    document.getElementById('supporters-container').innerHTML = retryHTML;
   }
 }
 
 const pb = new PocketBase(PB_CONFIG.baseURL);
 const votingDeadline = new Date(Date.now() + 48 * 60 * 60 * 1000);
-let selectedVotingTeamId = null;
-let votingCountdownInterval = null;
-let votingChart = null;
-
-function renderVotingTeamGrid() {
-  const grid = document.getElementById('votingTeamGrid');
-  if (!grid) return;
-  grid.innerHTML = '';
-  if (db_teams.length === 0) {
-    grid.innerHTML = '<div style="grid-column:1/-1; text-align:center; color:var(--text-muted);">Loading teams...</div>';
-    return;
-  }
-  db_teams.slice(0, 6).forEach(team => {
-    const teamName = team.name || team.crest_text || 'Team';
-    const teamColor = team.crest_bg || '#1d4ed8';
-    const textColor = getSafeCrestTextColor(teamColor);
-    const crestHtml = team.banner ? `<img src="${getPbImageUrl(team, team.banner)}" alt="${teamName} crest" crossorigin="anonymous">` : `<span>${team.crest_text || teamName.charAt(0)}</span>`;
-    const card = document.createElement('button');
-    card.type = 'button';
-    card.className = 'voting-card';
-    card.dataset.teamId = team.id;
-    card.innerHTML = `<div class="voting-card-logo" style="background:${teamColor}; color:${textColor};">${crestHtml}</div><div class="voting-card-name">${teamName}</div>`;
-    card.onclick = () => selectVotingTeam(team.id);
-    grid.appendChild(card);
-  });
-}
-
-function selectVotingTeam(teamId) {
-  selectedVotingTeamId = teamId;
-  document.querySelectorAll('.voting-card').forEach(card => {
-    card.classList.toggle('selected', card.dataset.teamId === teamId);
-  });
-  const errorBox = document.getElementById('votingError');
-  if (errorBox) errorBox.style.display = 'none';
-}
-
-function resetVotingForm() {
-  selectedVotingTeamId = null;
-  const batchField = document.getElementById('voteBatch');
-  const rollField = document.getElementById('voteRoll');
-  if (batchField) batchField.value = '';
-  if (rollField) rollField.value = '';
-  document.getElementById('votingFormPane').style.display = 'block';
-  document.getElementById('votingSuccessBox').style.display = 'none';
-  document.getElementById('votingError').style.display = 'none';
-  document.querySelectorAll('.voting-card').forEach(card => card.classList.remove('selected', 'input-error'));
-}
-
-function showVotingModal() {
-  resetVotingForm();
-  renderVotingTeamGrid();
-  showModal('votingModal');
-}
-
-async function submitTeamVote() {
-  const batchField = document.getElementById('voteBatch');
-  const rollField = document.getElementById('voteRoll');
-  const errorBox = document.getElementById('votingError');
-  const batch = batchField?.value.trim() || '';
-  const roll = rollField?.value.trim() || '';
-  if (!batch || !roll || !selectedVotingTeamId) {
-    if (!batch) batchField?.classList.add('input-error');
-    if (!roll) rollField?.classList.add('input-error');
-    if (!selectedVotingTeamId) document.querySelectorAll('.voting-card').forEach(card => card.classList.add('input-error'));
-    errorBox.textContent = 'Please enter batch, roll number, and choose a team before confirming your vote.';
-    errorBox.style.display = 'block';
-    return;
-  }
-  errorBox.style.display = 'none';
-  const safeBatch = batch.replace(/"/g, '\\"');
-  const safeRoll = roll.replace(/"/g, '\\"');
-  const query = `batch="${safeBatch}" && roll="${safeRoll}"`;
-  try {
-    await pb.collection('tot_votes').getFirstListItem(query);
-    errorBox.textContent = 'You have already cast your vote. If you believe someone else used your credentials, please contact the organizing committee.';
-    errorBox.style.display = 'block';
-  } catch (error) {
-    if (error && error.status === 404) {
-      try {
-        await pb.collection('tot_votes').create({ batch, roll, voted_team: [selectedVotingTeamId] });
-        document.getElementById('votingFormPane').style.display = 'none';
-        document.getElementById('votingSuccessBox').style.display = 'block';
-      } catch (createError) {
-        console.error('Vote Creation Error:', createError);
-        errorBox.textContent = 'Unable to submit your vote at this time. Please try again later.';
-        errorBox.style.display = 'block';
-      }
-      return;
-    }
-    console.error('Vote Check Error:', error);
-    errorBox.textContent = 'Unable to verify your vote at this time. Please try again later.';
-    errorBox.style.display = 'block';
-  }
-}
-
-function showVotingResultsModal() {
-  showModal('votingResultsModal');
-  startVotingCountdown();
-}
-
-function startVotingCountdown() {
-  updateVotingCountdown();
-  if (votingCountdownInterval) return;
-  votingCountdownInterval = setInterval(updateVotingCountdown, 1000);
-}
-
-function updateVotingCountdown() {
-  const now = new Date();
-  const diff = votingDeadline - now;
-  const countdownEl = document.getElementById('votingCountdown');
-  const countdownBox = document.getElementById('votingCountdownBox');
-  const chartBox = document.getElementById('votingChartBox');
-  const resultMessage = document.getElementById('votingResultsMessage');
-  if (diff > 0) {
-    const hours = Math.floor(diff / 3_600_000);
-    const minutes = Math.floor((diff % 3_600_000) / 60_000);
-    const seconds = Math.floor((diff % 60_000) / 1000);
-    countdownEl.textContent = `${hours}h ${minutes}m ${seconds}s`;
-    countdownBox.style.display = 'block';
-    chartBox.style.display = 'none';
-    resultMessage.style.display = 'none';
-    return;
-  }
-  countdownBox.style.display = 'none';
-  loadVotingResultsChart();
-  if (votingCountdownInterval) {
-    clearInterval(votingCountdownInterval);
-    votingCountdownInterval = null;
-  }
-}
-
-async function loadVotingResultsChart() {
-  const chartBox = document.getElementById('votingChartBox');
-  const resultMessage = document.getElementById('votingResultsMessage');
-  const canvas = document.getElementById('votingChart');
-  chartBox.style.display = 'none';
-  resultMessage.style.display = 'none';
-  try {
-    const votes = await pb.collection('tot_votes').getFullList(200);
-    const voteCounts = {};
-    db_teams.slice(0, 6).forEach(team => {
-      voteCounts[team.id] = 0;
-    });
-    votes.forEach(vote => {
-      const votedTeam = Array.isArray(vote.voted_team) ? vote.voted_team[0] : vote.voted_team;
-      if (votedTeam) voteCounts[votedTeam] = (voteCounts[votedTeam] || 0) + 1;
-    });
-    const chartLabels = [];
-    const chartValues = [];
-    const chartColors = [];
-    db_teams.slice(0, 6).forEach(team => {
-      if (voteCounts[team.id] !== undefined) {
-        chartLabels.push(team.name || team.crest_text || 'Team');
-        chartValues.push(voteCounts[team.id]);
-        chartColors.push(team.crest_bg || '#6366f1');
-      }
-    });
-    if (chartValues.reduce((sum, value) => sum + value, 0) === 0) {
-      resultMessage.textContent = 'Voting is complete, but no votes have been recorded yet.';
-      resultMessage.style.display = 'block';
-      return;
-    }
-    chartBox.style.display = 'block';
-    if (votingChart) {
-      votingChart.data.labels = chartLabels;
-      votingChart.data.datasets[0].data = chartValues;
-      votingChart.data.datasets[0].backgroundColor = chartColors;
-      votingChart.update();
-      return;
-    }
-    votingChart = new Chart(canvas, {
-      type: 'pie',
-      data: {
-        labels: chartLabels,
-        datasets: [{
-          data: chartValues,
-          backgroundColor: chartColors,
-          borderColor: '#ffffff',
-          borderWidth: 2,
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: { position: 'bottom', labels: { color: 'var(--text-main)', font: { family: 'Inter', size: 12 } } },
-          tooltip: { callbacks: { label: context => `${context.label}: ${context.parsed || 0} vote(s)` } }
-        }
-      }
-    });
-  } catch (chartError) {
-    console.error('Voting Results Error:', chartError);
-    resultMessage.textContent = 'Unable to load voting results at this time. Please try again later.';
-    resultMessage.style.display = 'block';
-  }
-}
-
 // ==========================================
 // RENDER LOGIC
 // ==========================================
