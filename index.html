@@ -68,9 +68,19 @@
   .nav-title { font-family: 'Montserrat', sans-serif; font-weight: 800; text-transform: uppercase; font-size: 20px; letter-spacing: 1px; color: var(--brand); line-height: 1.1; }
   .nav-sub { font-size: 10px; color: var(--text-muted); letter-spacing: 1px; text-transform: uppercase; margin-top: 2px; font-weight: 600; }
   
-  .nav-links { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; padding: 10px 0;}
-  .nav-btn { background: var(--bg-card); border: 1px solid var(--border); color: var(--text-muted); font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; padding: 6px 12px; border-radius: 6px; cursor: pointer; letter-spacing: 0.5px; transition: all .2s; white-space: nowrap; display: flex; align-items: center; gap: 6px; }
-  .nav-btn:hover, .nav-btn.active { color: var(--brand); background: var(--bg-body); border-color: var(--brand); }
+  /* Hamburger Sidebar CSS */
+  .hamburger-btn { display: flex; flex-direction: column; gap: 5px; cursor: pointer; padding: 8px; margin-left: 10px; z-index: 2600; position: relative; }
+  .hamburger-btn span { display: block; width: 24px; height: 2px; background: var(--text-main); border-radius: 2px; transition: 0.3s; }
+  
+  .sidebar-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 2500; display: none; opacity: 0; transition: 0.3s; }
+  .sidebar-overlay.active { display: block; opacity: 1; }
+  
+  .sidebar-menu { position: fixed; top: 0; right: -300px; width: 280px; height: 100vh; background: var(--glass-bg); backdrop-filter: blur(16px); z-index: 2600; box-shadow: -10px 0 30px rgba(0,0,0,0.1); padding: 5rem 1.5rem 2rem 1.5rem; transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; gap: 12px; border-left: 1px solid var(--border); overflow-y: auto; }
+  .sidebar-menu.active { right: 0; }
+  .sidebar-close { position: absolute; top: 20px; right: 24px; font-size: 32px; background: none; border: none; color: var(--text-main); cursor: pointer; line-height: 1; }
+  
+  .sidebar-btn { background: transparent; border: none; font-family: 'Inter', sans-serif; font-size: 16px; font-weight: 600; color: var(--text-muted); text-align: left; padding: 12px 16px; border-radius: 8px; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 12px; }
+  .sidebar-btn:hover, .sidebar-btn.active { background: var(--bg-input); color: var(--brand); }
   
   .nav-actions { display: flex; align-items: center; gap: 10px; padding: 10px 0;}
   .nav-cta { background: #E63946; color: #fff; font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 700; padding: 8px 16px; border-radius: 6px; cursor: pointer; border: none; letter-spacing: 1px; text-transform: uppercase; transition: all .2s; }
@@ -438,10 +448,9 @@
   .committee-name { color: var(--text-muted); font-style: italic; margin-top: 4px; font-size: 11px; }
 
   @media(max-width: 900px) {
-    nav { flex-direction: column; padding: 15px 1rem; height: auto; gap: 15px;}
-    .nav-logo { justify-content: center; padding: 0; }
-    .nav-links { width: 100%; justify-content: center; padding: 0; }
-    .nav-actions { justify-content: center; width: 100%; padding: 0; }
+    nav { padding: 10px 1rem; height: auto; gap: 10px; flex-wrap: nowrap; }
+    .nav-logo { padding: 0; flex: 1; }
+    .nav-actions { width: auto; padding: 0; }
   }
 
   @media(max-width: 800px) {
@@ -449,19 +458,21 @@
   }
 
   @media(max-width: 600px) {
-    .nav-cta { display: none; }
+    .nav-cta, .nav-3d-btn { display: none; }
     .form-row { grid-template-columns: 1fr; }
-    .stats-bar { grid-template-columns: repeat(2, 1fr); }
-    .hero-title { font-size: 42px; }
+    .stats-bar { grid-template-columns: repeat(2, 1fr); padding: 15px; gap: 10px; }
+    .hero { padding: 3rem 1rem; }
+    .hero-title { font-size: 32px; }
+    .section { padding: 1.5rem 1rem; margin: 10px auto; border-radius: 12px; }
     .about-grid, .about-rules-grid { grid-template-columns: 1fr; } 
     .auction-btn { margin-left: 0; width: 100%; justify-content: center; }
-    .fixture-body { flex-direction: column; gap: 16px; }
+    .fixture-body { flex-direction: column; gap: 16px; padding: 12px; }
     .fixture-team { width: 100%; justify-content: center; }
     .fixture-team.away { flex-direction: row; } 
     .result-scorer-list.right { text-align: center; }
-    .result-scorer-list { text-align: center; }
-    /* Zoom-out effect for compact view on small screens */
-    body { zoom: 0.9; }
+    .result-scorer-list { text-align: center; font-size: 11px; }
+    .team-card { padding: 12px; }
+    .player-card { padding: 12px; }
   }
 </style>
 </head>
@@ -475,17 +486,7 @@
       <div class="nav-sub">Jahangirnagar University · Dept. of English</div>
     </div>
   </div>
-  <div class="nav-links">
-    <button class="nav-btn active" onclick="showPage('home', this)">🏠 Home</button>
-    <button class="nav-btn" onclick="showPage('teams', this)">🛡️ Teams</button>
-    <button class="nav-btn" onclick="showPage('players', this)">🏃‍♂️ Players</button>
-    <button class="nav-btn" onclick="showPage('fixtures', this)">📅 Fixtures</button>
-    <button class="nav-btn" onclick="showPage('results', this)">📊 Results & Stats</button>
-    <button class="nav-btn" onclick="showPage('standings', this)">🏆 Points Table</button>
-    <button class="nav-btn" onclick="showPage('supporters', this)">🤝 Supporters</button>
-    <button class="nav-btn" onclick="showPage('about', this)">ℹ️ About</button>
-    <button class="nav-btn" onclick="window.open('/fpl/', '_blank')">🎮 Fantasy</button>
-  </div>
+
   <div class="nav-actions">
     <!-- Season Switcher -->
     <div style="display: flex; flex-direction: column; align-items: center; gap: 2px; margin-right: 10px;">
@@ -512,8 +513,30 @@
       <span>🌌 EFL Universe (3D)</span>
     </a>
     <button class="nav-cta" style="background: var(--text-muted); cursor: default; box-shadow: none;" disabled>Registration Closed</button>
+    
+    <!-- Hamburger Icon -->
+    <div class="hamburger-btn" onclick="toggleSidebar()">
+      <span></span><span></span><span></span>
+    </div>
   </div>
 </nav>
+
+<!-- Sidebar Overlay & Menu -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+<div class="sidebar-menu" id="sidebarMenu">
+  <button class="sidebar-close" onclick="toggleSidebar()">×</button>
+  <div style="font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 18px; color: var(--brand); margin-bottom: 20px; padding: 0 12px;">MENU</div>
+  <div class="sidebar-links">
+    <button class="sidebar-btn" onclick="showPage('teams'); toggleSidebar()">🛡️ Teams</button>
+    <button class="sidebar-btn" onclick="showPage('players'); toggleSidebar()">🏃‍♂️ Players</button>
+    <button class="sidebar-btn" onclick="showPage('fixtures'); toggleSidebar()">📅 Fixtures</button>
+    <button class="sidebar-btn" onclick="showPage('results'); toggleSidebar()">📊 Results & Stats</button>
+    <button class="sidebar-btn" onclick="showPage('standings'); toggleSidebar()">🏆 Points Table</button>
+    <button class="sidebar-btn" onclick="showPage('supporters'); toggleSidebar()">🤝 Supporters</button>
+    <button class="sidebar-btn" onclick="showPage('about'); toggleSidebar()">ℹ️ About</button>
+    <button class="sidebar-btn" onclick="window.open('/fpl/', '_blank'); toggleSidebar()">🎮 Fantasy</button>
+  </div>
+</div>
 
 <!-- HOME -->
 <div id="page-home" class="page active">
@@ -1190,13 +1213,32 @@ const PB_CONFIG = {
   baseURL: 'https://efljudb.duckdns.org', 
 };
 
+let currentSeason = '5';
+let CACHE_KEY = 'efl_cache_' + currentSeason;
+
 let db_teams = [];
 let db_players = [];
 let db_fixtures = [];
 let db_results = []; 
 let db_supporters = []; 
 
+function toggleSidebar() {
+  const menu = document.getElementById('sidebarMenu');
+  const overlay = document.getElementById('sidebarOverlay');
+  if(menu.classList.contains('active')) {
+      menu.classList.remove('active');
+      overlay.classList.remove('active');
+  } else {
+      menu.classList.add('active');
+      overlay.classList.add('active');
+  }
+}
+
 function changeSeason(seasonValue) {
+    if (seasonValue === currentSeason) return;
+    currentSeason = seasonValue;
+    CACHE_KEY = 'efl_cache_' + currentSeason;
+
     if (seasonValue === '4') {
         PB_CONFIG.baseURL = 'https://pbdb2.duckdns.org';
         if(document.getElementById('dynamic-season-badge')) document.getElementById('dynamic-season-badge').textContent = 'Season 4';
@@ -1222,7 +1264,7 @@ function changeSeason(seasonValue) {
         if (el) el.innerHTML = '<div class="global-loader" style="grid-column: 1/-1;"><span class="ai-loader" style="border-color: var(--brand); border-bottom-color: transparent;"></span> Loading Data...</div>';
     });
 
-    fetchPBData().then(() => {
+    initData().then(() => {
         const activePage = document.querySelector('.page.active');
         if (activePage) {
             const pageId = activePage.id.replace('page-', '');
@@ -1452,9 +1494,38 @@ function getPBLinkedTeamId(player) {
 }
 
 window.onload = () => {
-  updateSeasonText();
-  fetchPBData();
+  if(typeof updateSeasonText === 'function') updateSeasonText();
+  initData();
 };
+
+async function initData() {
+  const cachedData = localStorage.getItem(CACHE_KEY);
+  if (cachedData) {
+      try {
+          const parsed = JSON.parse(cachedData);
+          db_teams = parsed.teams || [];
+          db_players = parsed.players || [];
+          db_fixtures = parsed.fixtures || [];
+          db_results = parsed.results || [];
+          db_supporters = parsed.supporters || [];
+          
+          document.getElementById('stat-players').textContent = db_players.length;
+          renderTeamsPage();
+          setCategoryFilter('All', document.querySelector('.cat-btn.active')); 
+          renderFixturesPage(); 
+          renderResultsPage(); 
+          renderStandingsPage(); 
+          renderSupportersPage();
+          if (typeof renderVotingTeamGrid === 'function') renderVotingTeamGrid();
+          setTimeout(observeElements, 500);
+          return;
+      } catch (e) {
+          console.error("Cache parsing error", e);
+      }
+  }
+  
+  await fetchPBData();
+}
 
 async function fetchWithRetry(url, options = {}, retries = 3, backoff = 1000) {
   for (let i = 0; i < retries; i++) {
@@ -1493,6 +1564,16 @@ async function fetchPBData() {
     db_fixtures = (await fixturesRes.json()).items || [];
     db_results = (await resultsRes.json()).items || [];
     db_supporters = (await supportersRes.json()).items || [];
+
+    try {
+        localStorage.setItem(CACHE_KEY, JSON.stringify({
+            teams: db_teams,
+            players: db_players,
+            fixtures: db_fixtures,
+            results: db_results,
+            supporters: db_supporters
+        }));
+    } catch(e) { console.warn("Failed to cache data", e); }
 
     document.getElementById('stat-players').textContent = db_players.length;
     renderTeamsPage();
@@ -1539,7 +1620,7 @@ function renderTeamsPage() {
   container.innerHTML = '';
   
   if (db_teams.length === 0) {
-      container.innerHTML = '<div style="grid-column:1/-1; text-align:center; color:var(--text-muted);">No teams created in database yet.</div>';
+      container.innerHTML = '<div style="grid-column:1/-1; padding: 4rem 2rem; text-align:center; color:var(--text-muted); font-size:14px; border:1px dashed var(--border); border-radius:12px; background: var(--bg-card);">No records found for this season yet.</div>';
       return;
   }
 
@@ -1600,7 +1681,7 @@ function renderPlayersPage() {
   });
 
   if (currentFilteredPlayers.length === 0) {
-    container.innerHTML = '<div style="grid-column: 1/-1; padding: 2rem; text-align: center; color: var(--text-muted); font-size: 13px; border: 1px dashed var(--border); border-radius: 8px;">No players found matching your search.</div>';
+    container.innerHTML = '<div style="grid-column: 1/-1; padding: 4rem 2rem; text-align: center; color: var(--text-muted); font-size: 14px; border: 1px dashed var(--border); border-radius: 12px; background: var(--bg-card);">No records found for this season yet.</div>';
     return;
   }
 
@@ -1658,7 +1739,7 @@ function renderFixturesPage() {
       container.innerHTML = `
         <div class="coming-soon-box">
           <span class="cs-icon" style="font-size: 42px;">⚽</span>
-          <div class="cs-title" style="font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 20px; margin-top: 10px;">Fixtures Not Yet Scheduled</div>
+          <div class="cs-title" style="font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 20px; margin-top: 10px;">No records found for this season yet.</div>
         </div>`;
       return;
   }
