@@ -12,7 +12,7 @@
     rel="stylesheet">
   <!-- HTML2Canvas for Exporting Cards -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/pocketbase@0.13.0/dist/pocketbase.umd.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pocketbase/0.21.1/pocketbase.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
@@ -130,8 +130,13 @@
       .hero-title,
       .hero-sub,
       .hero-season {
-        color: var(--text-main) !important;
-        text-shadow: 0 1px 8px rgba(255, 255, 255, 0.12);
+        color: var(--brand) !important;
+        -webkit-text-fill-color: initial !important;
+        background: none !important;
+        text-shadow: none !important;
+      }
+      .hero {
+        padding: 2rem 1rem 1.5rem !important;
       }
     }
 
@@ -159,8 +164,13 @@
       .hero-title,
       .hero-sub,
       .hero-season {
-        color: var(--text-main) !important;
-        text-shadow: 0 1px 8px rgba(255, 255, 255, 0.12);
+        color: var(--brand) !important;
+        -webkit-text-fill-color: initial !important;
+        background: none !important;
+        text-shadow: none !important;
+      }
+      .hero {
+        padding: 2rem 1rem 1.5rem !important;
       }
     }
 
@@ -225,16 +235,6 @@
       background: var(--text-main);
       border-radius: 2px;
       transition: 0.3s;
-    }
-    
-    .hamburger-btn.active span:nth-child(1) {
-      transform: translateY(7px) rotate(45deg);
-    }
-    .hamburger-btn.active span:nth-child(2) {
-      opacity: 0;
-    }
-    .hamburger-btn.active span:nth-child(3) {
-      transform: translateY(-7px) rotate(-45deg);
     }
 
     .sidebar-overlay {
@@ -427,13 +427,13 @@
     }
 
     /* SCROLL ANIMATION CLASSES */
-    .animate-on-scroll {
+    .{
       opacity: 1;
       transform: none;
       transition: none;
     }
 
-    .animate-on-scroll.is-visible {
+    ..is-visible {
       opacity: 1;
       transform: none;
     }
@@ -2853,13 +2853,13 @@
   <!-- HOME -->
   <div id="page-home" class="page active">
     <div class="hero">
-      <div class="hero-badge animate-on-scroll"><span class="pulse" style="background: #10B981;"></span> <span
+      <div class="hero-badge"><span class="pulse" style="background: #10B981;"></span> <span
           id="dynamic-season-badge">Season 5</span></div>
-      <div class="hero-season animate-on-scroll">Jahangirnagar University · Department of English</div>
-      <div class="hero-title animate-on-scroll">English<br>Football<br>League</div>
-      <div class="hero-sub animate-on-scroll">The most anticipated football tournament of the Department of English is
+      <div class="hero-season">Jahangirnagar University · Department of English</div>
+      <div class="hero-title">English<br>Football<br>League</div>
+      <div class="hero-sub">The most anticipated football tournament of the Department of English is
         back. Six elite squads. One champion. <span id="dynamic-season-text">Season 5 begins soon.</span></div>
-      <div class="hero-actions animate-on-scroll">
+      <div class="hero-actions">
         <button class="btn-primary" id="heroSupportBtn"
           onclick="window.open('https://eflsupport.duckdns.org', '_blank')"
           style="text-transform: none; min-width: 220px;">Register as a supporter of the tournament/any team (not
@@ -2892,13 +2892,13 @@
     </div>
 
     <div class="section">
-      <div class="section-header animate-on-scroll">
+      <div class="section-header">
         <span class="section-tag">Season 5</span>
         <div class="section-title">How It Works</div>
         <div class="section-line"></div>
       </div>
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
-        <div class="animate-on-scroll"
+        <div class=""
           style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; transition: background 0.3s, border 0.3s;">
           <div
             style="font-family: 'Montserrat', sans-serif; font-size: 32px; font-weight: 800; color: var(--brand); margin-bottom: 8px;">
@@ -2907,7 +2907,7 @@
           <div style="font-size: 13px; color: var(--text-muted); line-height: 1.6; font-weight: 500;">Fill out the
             player registration form with your details, position, and batch information.</div>
         </div>
-        <div class="animate-on-scroll"
+        <div class=""
           style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; transition: background 0.3s, border 0.3s; transition-delay: 0.1s;">
           <div
             style="font-family: 'Montserrat', sans-serif; font-size: 32px; font-weight: 800; color: var(--brand); margin-bottom: 8px;">
@@ -2916,7 +2916,7 @@
           <div style="font-size: 13px; color: var(--text-muted); line-height: 1.6; font-weight: 500;">Team owners and
             managers select players for their squad through the team drafting process.</div>
         </div>
-        <div class="animate-on-scroll"
+        <div class=""
           style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; transition: background 0.3s, border 0.3s; transition-delay: 0.2s;">
           <div
             style="font-family: 'Montserrat', sans-serif; font-size: 32px; font-weight: 800; color: var(--brand); margin-bottom: 8px;">
@@ -2932,7 +2932,7 @@
   <!-- TEAMS (Dynamic) -->
   <div id="page-teams" class="page">
     <div class="section">
-      <div class="section-header animate-on-scroll">
+      <div class="section-header">
         <span class="section-tag">Season 5</span>
         <div class="section-title">The Six Teams</div>
         <div class="section-line"></div>
@@ -2947,13 +2947,13 @@
   <!-- PLAYERS DIRECTORY -->
   <div id="page-players" class="page">
     <div class="section">
-      <div class="section-header animate-on-scroll">
+      <div class="section-header">
         <span class="section-tag">Draft Pool</span>
         <div class="section-title">Player Directory</div>
         <div class="section-line"></div>
       </div>
 
-      <div class="player-filter-bar animate-on-scroll"
+      <div class="player-filter-bar"
         style="flex-direction: column; align-items: flex-start; gap: 16px;">
         <!-- Search Input -->
         <div style="width: 100%; position: relative;">
@@ -2986,7 +2986,7 @@
   <!-- FIXTURES PAGE -->
   <div id="page-fixtures" class="page">
     <div class="fixtures-wrap">
-      <div class="section-header animate-on-scroll">
+      <div class="section-header">
         <span class="section-tag">EFL Season 5</span>
         <div class="section-title">Fixtures</div>
         <div class="section-line"></div>
@@ -3001,13 +3001,13 @@
   <!-- RESULTS & STATS PAGE -->
   <div id="page-results" class="page">
     <div class="results-wrap">
-      <div class="section-header animate-on-scroll">
+      <div class="section-header">
         <span class="section-tag">EFL Season 5</span>
         <div class="section-title">Results & Stats</div>
         <div class="section-line"></div>
       </div>
 
-      <div class="results-layout animate-on-scroll" style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px;">
+      <div class="results-layout" style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px;">
         <!-- Left Side: Match Results -->
         <div>
           <div
@@ -3064,13 +3064,13 @@
   <!-- STANDINGS (POINTS TABLE) PAGE -->
   <div id="page-standings" class="page">
     <div class="standings-wrap">
-      <div class="section-header animate-on-scroll">
+      <div class="section-header">
         <span class="section-tag">EFL Season 5</span>
         <div class="section-title">Points Table</div>
         <div class="section-line"></div>
       </div>
 
-      <div id="standings-export-area" class="standings-table-container animate-on-scroll">
+      <div id="standings-export-area" class="standings-table-container">
         <div id="standings-export-header"
           style="display: none; text-align: center; padding: 24px 24px 0; background: var(--bg-card);">
           <div
@@ -3110,7 +3110,7 @@
         </div>
       </div>
 
-      <div class="animate-on-scroll" style="display: flex; justify-content: flex-end; margin-top: 16px;">
+      <div class="" style="display: flex; justify-content: flex-end; margin-top: 16px;">
         <button class="export-btn" onclick="downloadStandings()">
           ⬇️ Download Points Table
         </button>
@@ -3121,13 +3121,13 @@
   <!-- SUPPORTERS / DONORS PAGE -->
   <div id="page-supporters" class="page">
     <div class="supporters-wrap">
-      <div class="section-header animate-on-scroll">
+      <div class="section-header">
         <span class="section-tag">Hall of Fame</span>
         <div class="section-title">Supporters & Donors</div>
         <div class="section-line"></div>
       </div>
 
-      <div class="animate-on-scroll" style="text-align: center; margin-bottom: 2rem;">
+      <div class="" style="text-align: center; margin-bottom: 2rem;">
         <p
           style="font-size: 15px; color: var(--text-muted); line-height: 1.7; max-width: 600px; margin: 0 auto; font-weight: 500;">
           We extend our deepest gratitude to the esteemed alumni and well-wishers who have generously contributed to
@@ -3145,7 +3145,7 @@
   <!-- REGISTRATION (CLOSED) -->
   <div id="page-register" class="page">
     <div class="reg-wrap">
-      <div class="reg-header animate-on-scroll">
+      <div class="reg-header">
         <div
           style="display:inline-flex;align-items:center;gap:8px;background:rgba(99,102,241,0.05);border:1px solid rgba(99,102,241,0.2);padding:6px 14px;border-radius:20px;font-size:11px;color:#6366f1;letter-spacing:1px;margin-bottom:1rem;font-weight:700">
           EFL SEASON 5</div>
@@ -3153,7 +3153,7 @@
         <div style="font-size:13px;color:var(--text-muted);font-weight:500;">Fill in your details below to register for
           EFL Season 5. All fields marked * are required.</div>
 
-        <div class="reg-form animate-on-scroll" id="regFormClosed" style="text-align: center; padding: 4rem 2rem;">
+        <div class="reg-form" id="regFormClosed" style="text-align: center; padding: 4rem 2rem;">
           <div style="font-size: 48px; margin-bottom: 16px;">🔒</div>
           <div
             style="font-family: 'Montserrat', sans-serif; font-size: 24px; font-weight: 800; margin-bottom: 12px; color: var(--text-main);">
@@ -3164,7 +3164,7 @@
             style="width: auto; padding: 12px 32px; text-transform: none;">Register as a Supporter</button>
         </div>
 
-        <div class="reg-form animate-on-scroll" id="regForm" style="display: none;">
+        <div class="reg-form" id="regForm" style="display: none;">
           <div class="form-error-summary" id="formErrorSummary">Please check the highlighted fields and fill them
             correctly.</div>
 
@@ -3353,14 +3353,14 @@
     <!-- ABOUT PAGE -->
     <div id="page-about" class="page">
       <div class="about-wrap">
-        <div class="section-header animate-on-scroll">
+        <div class="section-header">
           <span class="section-tag">JU English Dept.</span>
           <div class="section-title">About EFL</div>
           <div class="section-line"></div>
         </div>
 
         <div class="about-grid">
-          <div class="about-card animate-on-scroll">
+          <div class="about-card">
             <div
               style="font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 20px; margin-bottom: 16px; text-transform: uppercase;">
               The Tournament</div>
@@ -3370,7 +3370,7 @@
               celebrated tradition that brings together football enthusiasts from all batches.</p>
           </div>
 
-          <div class="about-card animate-on-scroll">
+          <div class="about-card">
             <div
               style="font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 20px; margin-bottom: 16px; text-transform: uppercase;">
               Season History</div>
@@ -3416,7 +3416,7 @@
         </div>
 
         <!-- UPDATED RULES SECTION -->
-        <div class="about-card animate-on-scroll" style="margin-bottom: 20px;">
+        <div class="about-card" style="margin-bottom: 20px;">
           <div
             style="font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 20px; margin-bottom: 20px; text-transform: uppercase;">
             Tournament Rules</div>
@@ -3454,7 +3454,7 @@
           </div>
         </div>
 
-        <div class="about-card animate-on-scroll">
+        <div class="about-card">
           <div
             style="font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 20px; margin-bottom: 12px; text-transform: uppercase;">
             Organizing Committee</div>
@@ -3839,16 +3839,14 @@
         if (s5Btn && s4Btn) {
           s5Btn.onclick = () => {
             if (localStorage.getItem('activeSeason') !== 'S5') {
-              changeSeason('5');
-              s5Btn.classList.add('active');
-              s4Btn.classList.remove('active');
+              localStorage.setItem('activeSeason', 'S5');
+              window.location.reload();
             }
           };
           s4Btn.onclick = () => {
             if (localStorage.getItem('activeSeason') !== 'S4') {
-              changeSeason('4');
-              s4Btn.classList.add('active');
-              s5Btn.classList.remove('active');
+              localStorage.setItem('activeSeason', 'S4');
+              window.location.reload();
             }
           };
         }
@@ -3863,15 +3861,12 @@
       function toggleSidebar() {
         const menu = document.getElementById('sidebarMenu');
         const overlay = document.getElementById('sidebarOverlay');
-        const btn = document.querySelector('.hamburger-btn');
         if (menu.classList.contains('active')) {
           menu.classList.remove('active');
           overlay.classList.remove('active');
-          if (btn) btn.classList.remove('active');
         } else {
           menu.classList.add('active');
           overlay.classList.add('active');
-          if (btn) btn.classList.add('active');
         }
       }
 
@@ -3970,7 +3965,7 @@
       // SCROLL ANIMATION LOGIC (Intersection Observer)
       // ==========================================
       function observeElements() {
-        const elements = document.querySelectorAll('.animate-on-scroll, .team-card, .player-card, .fixture-card, .supporter-card, .about-card, .standings-table-container, .reg-form, .success-box, .player-filter-bar, .hero-badge, .hero-season, .hero-title, .hero-sub, .hero-actions, .top-scorer-card');
+        const elements = document.querySelectorAll('., .team-card, .player-card, .fixture-card, .supporter-card, .about-card, .standings-table-container, .reg-form, .success-box, .player-filter-bar, .hero-badge, .hero-season, .hero-title, .hero-sub, .hero-actions, .top-scorer-card');
 
         const observer = new IntersectionObserver((entries) => {
           entries.forEach(entry => {
@@ -3982,7 +3977,7 @@
 
         elements.forEach(el => {
           if (!el.hasAttribute('data-observed')) {
-            el.classList.add('animate-on-scroll');
+            el.classList.add('');
             observer.observe(el);
             el.setAttribute('data-observed', 'true');
           }
@@ -4196,8 +4191,6 @@
       }
 
       async function fetchPBData() {
-        const fetchSeason = currentSeason;
-        const fetchCacheKey = CACHE_KEY;
         try {
           const fetchOptions = { cache: 'no-store' };
 
@@ -4210,11 +4203,6 @@
             fetchWithRetry(`${PB_CONFIG.baseURL}/api/collections/supporters/records?sort=-created`, fetchOptions)
           ]);
 
-          if (fetchSeason !== currentSeason) {
-            console.warn("Season changed during fetch. Aborting stale data processing.");
-            return;
-          }
-
           db_teams = (await teamsRes.json()).items || [];
           db_players = (await playersRes.json()).items || [];
           db_fixtures = (await fixturesRes.json()).items || [];
@@ -4222,7 +4210,7 @@
           db_supporters = (await supportersRes.json()).items || [];
 
           try {
-            localStorage.setItem(fetchCacheKey, JSON.stringify({
+            localStorage.setItem(CACHE_KEY, JSON.stringify({
               teams: db_teams,
               players: db_players,
               fixtures: db_fixtures,
@@ -4238,7 +4226,7 @@
           renderResultsPage();
           renderStandingsPage();
           renderSupportersPage();
-          if (typeof renderVotingTeamGrid === 'function') renderVotingTeamGrid();
+          renderVotingTeamGrid();
 
           setTimeout(observeElements, 500);
 
@@ -4276,7 +4264,7 @@
         container.innerHTML = '';
 
         if (db_teams.length === 0) {
-          container.innerHTML = '<div class="empty-state">Data for this season will be updated soon.</div>';
+          container.innerHTML = '<div class="empty-state">No data available for this season yet.</div>';
           return;
         }
 
@@ -4296,7 +4284,7 @@
           }
 
           container.innerHTML += `
-      <div class="team-card animate-on-scroll" onclick="openTeamModal('${team.id}')">
+      <div class="team-card" onclick="openTeamModal('${team.id}')">
         <div class="team-banner" style="background:${bannerStyle}">
           ${team.cover_pic ? `<img src="${getPbImageUrl(team, team.cover_pic)}" class="team-cover-pic" alt="Team Cover" onclick="viewCoverImage(event, '${getPbImageUrl(team, team.cover_pic)}')">` : ''}
           <div class="team-crest" style="background:${crestBg}; color:${crestTextCol}; border: 4px solid var(--bg-card); ${team.banner ? 'padding:0;' : ''}">
@@ -4337,7 +4325,7 @@
         });
 
         if (currentFilteredPlayers.length === 0) {
-          container.innerHTML = '<div class="empty-state">Data for this season will be updated soon.</div>';
+          container.innerHTML = '<div class="empty-state">No data available for this season yet.</div>';
           return;
         }
 
@@ -4368,7 +4356,7 @@
           else if (/^GK$/i.test(rawCat)) { displayCat = 'GK'; catClass = 'cat-GK'; }
 
           container.innerHTML += `
-      <div class="player-card animate-on-scroll" style="position: relative;">
+      <div class="player-card" style="position: relative;">
         <!-- Instant Presentation Button -->
         <button onclick="presentSinglePlayer('${player.id}', event)" class="instant-present-btn" title="Present Player">🖥️</button>
         
@@ -4392,7 +4380,7 @@
         const container = document.getElementById('fixtures-container');
 
         if (db_fixtures.length === 0) {
-          container.innerHTML = `<div class="empty-state">Data for this season will be updated soon.</div>`;
+          container.innerHTML = `<div class="empty-state">No data available for this season yet.</div>`;
           return;
         }
 
@@ -4433,7 +4421,7 @@
 
 
           html += `
-      <div class="fixture-card animate-on-scroll">
+      <div class="fixture-card">
           <div class="fixture-body">
               <div class="fixture-team">
                   <div class="fixture-crest" style="background:${t1.crest_bg}; color:${t1CrestTextCol}; ${t1.banner ? 'padding:0; border:2px solid transparent;' : ''}">${t1CrestHtml}</div>
@@ -4467,10 +4455,10 @@
         const topCardsContainer = document.getElementById('top-cards-container'); // Kung-fu player
 
         if (db_results.length === 0) {
-          resultsContainer.innerHTML = `<div class="empty-state">Data for this season will be updated soon.</div>`;
-          topScorersContainer.innerHTML = '<div class="empty-state">Data for this season will be updated soon.</div>';
-          topAssistsContainer.innerHTML = '<div class="empty-state">Data for this season will be updated soon.</div>';
-          topCardsContainer.innerHTML = '<div class="empty-state">Data for this season will be updated soon.</div>';
+          resultsContainer.innerHTML = `<div class="empty-state">No data available for this season yet.</div>`;
+          topScorersContainer.innerHTML = '<div class="empty-state">No data available for this season yet.</div>';
+          topAssistsContainer.innerHTML = '<div class="empty-state">No data available for this season yet.</div>';
+          topCardsContainer.innerHTML = '<div class="empty-state">No data available for this season yet.</div>';
           return;
         }
 
@@ -4676,7 +4664,7 @@
           }
 
           resultsHtml += \`
-          <div class="result-card animate-on-scroll">
+          <div class="result-card">
               <div class="fixture-header">
                   <span>\${fixture.match_type || 'Match Result'}</span>
                   <span style="color:var(--brand);">Full Time</span>
@@ -4747,7 +4735,7 @@
           let photoUrl = getPbImageUrl(p, p.photo);
 
           topScorersHtml += `
-                  < div class="top-scorer-card animate-on-scroll" >
+                  < div class="top-scorer-card" >
              <div class="ts-rank">#${index + 1}</div>
              <img src="${photoUrl}" class="ts-photo" crossorigin="anonymous">
              <div class="ts-info">
@@ -4780,7 +4768,7 @@
           let photoUrl = getPbImageUrl(p, p.photo);
 
           topAssistsHtml += `
-                  < div class="top-scorer-card animate-on-scroll" >
+                  < div class="top-scorer-card" >
              <div class="ts-rank">#${index + 1}</div>
              <img src="${photoUrl}" class="ts-photo" crossorigin="anonymous">
              <div class="ts-info">
@@ -4813,7 +4801,7 @@
           let photoUrl = getPbImageUrl(p, p.photo);
 
           topCardsHtml += `
-                  < div class="top-scorer-card animate-on-scroll" >
+                  < div class="top-scorer-card" >
              <div class="ts-rank">#${index + 1}</div>
              <img src="${photoUrl}" class="ts-photo" crossorigin="anonymous">
              <div class="ts-info">
@@ -5223,7 +5211,7 @@ function renderSupportersPage() {
         }
 
         container.innerHTML += `
-                  < div class="supporter-card animate-on-scroll" >
+                  < div class="supporter-card" >
                     <img src="${photoUrl}" class="supporter-photo" alt="${sName}" crossorigin="anonymous">
                       <div class="supporter-name">${sName}</div>
                       <div class="supporter-batch">Batch: ${sBatch}</div>
