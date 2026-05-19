@@ -9,7 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@600;700;800;900&display=swap" rel="stylesheet">
 <!-- HTML2Canvas for Exporting Cards -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/pocketbase@0.13.0/dist/pocketbase.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pocketbase/0.21.1/pocketbase.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
@@ -598,7 +598,7 @@
     <div class="hero-title animate-on-scroll">English<br>Football<br>League</div>
     <div class="hero-sub animate-on-scroll">The most anticipated football tournament of the Department of English is back. Six elite squads. One champion. <span id="dynamic-season-text">Season 5</span> begins soon.</div>
     <div class="hero-actions animate-on-scroll">
-      <button class="btn-primary" id="heroSupportBtn" onclick="window.open('https://eflsupport.duckdns.org', '_blank')" style="text-transform: none; min-width: 220px;">Register as a supporter of the tournament/any team (not player)</button>
+      <button class="btn-primary" id="heroSupportBtn" onclick="window.open('https://eflju.duckdns.org/support', '_blank')" style="text-transform: none; min-width: 220px;">Register as a supporter of the tournament/any team (not player)</button>
       <button class="btn-outline" onclick="showPage('teams')" style="min-width: 180px;">View All Teams</button>
     </div>
     <div id="archiveNotice" class="archive-note" style="display:none; margin: 1.25rem auto 0; max-width: 560px; font-size: 14px; color: #f97316; line-height:1.6;">Viewing Season 4 archive content. Live Season 5 details and registration are available when Season 5 is selected.</div>
@@ -833,7 +833,7 @@
       <div style="font-size: 48px; margin-bottom: 16px;">🔒</div>
       <div style="font-family: 'Montserrat', sans-serif; font-size: 24px; font-weight: 800; margin-bottom: 12px; color: var(--text-main);">Registration Closed</div>
       <div style="color: var(--text-muted); font-size: 14px; margin-bottom: 24px; line-height: 1.6;">Player registration for EFL Season 5 has officially ended. Thank you for the overwhelming response!</div>
-      <button class="submit-btn" onclick="window.open('https://eflsupport.duckdns.org', '_blank')" style="width: auto; padding: 12px 32px; text-transform: none;">Register as a Supporter</button>
+      <button class="submit-btn" onclick="window.open('https://eflju.duckdns.org/support', '_blank')" style="width: auto; padding: 12px 32px; text-transform: none;">Register as a Supporter</button>
     </div>
 
     <div class="reg-form animate-on-scroll" id="regForm" style="display: none;">
@@ -1659,66 +1659,112 @@ function retryConnection() {
 }
 
 async function fetchPBData() {
+  const fetchOptions = { cache: 'no-store' };
   try {
-    const fetchOptions = { cache: 'no-store' };
-    
-    // Concurrently fetch all collections with auto-retry
-    const [teamsRes, playersRes, fixturesRes, resultsRes, supportersRes] = await Promise.all([
-       fetchWithRetry(`${PB_CONFIG.baseURL}/api/collections/teams/records?perPage=100`, fetchOptions),
-       fetchWithRetry(`${PB_CONFIG.baseURL}/api/collections/players/records?perPage=500`, fetchOptions),
-       fetchWithRetry(`${PB_CONFIG.baseURL}/api/collections/fixtures/records?sort=match_date`, fetchOptions),
-       fetchWithRetry(`${PB_CONFIG.baseURL}/api/collections/results/records?perPage=100`, fetchOptions),
-       fetchWithRetry(`${PB_CONFIG.baseURL}/api/collections/supporters/records?sort=-created`, fetchOptions)
-    ]);
-    
-    db_teams = (await teamsRes.json()).items || [];
-    db_players = (await playersRes.json()).items || [];
-    db_fixtures = (await fixturesRes.json()).items || [];
-    db_results = (await resultsRes.json()).items || [];
-    db_supporters = (await supportersRes.json()).items || [];
+    const endpoints = [
+      { key: 'teams', url: `${PB_CONFIG.baseURL}/api/collections/teams/records?perPage=100` },
+      { key: 'players', url: `${PB_CONFIG.baseURL}/api/collections/players/records?perPage=500` },
+      { key: 'fixtures', url: `${PB_CONFIG.baseURL}/api/collections/fixtures/records?sort=match_date` },
+      { key: 'results', url: `${PB_CONFIG.baseURL}/api/collections/results/records?perPage=100` },
+      { key: 'supporters', url: `${PB_CONFIG.baseURL}/api/collections/supporters/records?sort=-created` }
+    ];
 
+    // Use Promise.allSettled so a single failing collection won't reject everything
+    const settled = await Promise.allSettled(endpoints.map(e => fetchWithRetry(e.url, fetchOptions)));
+
+    for (let i = 0; i < endpoints.length; i++) {
+      const key = endpoints[i].key;
+      const result = settled[i];
+      try {
+        if (result && result.status === 'fulfilled' && result.value) {
+          const json = await result.value.json();
+          const items = json && json.items ? json.items : [];
+          if (key === 'teams') db_teams = items;
+          if (key === 'players') db_players = items;
+          if (key === 'fixtures') db_fixtures = items;
+          if (key === 'results') db_results = items;
+          if (key === 'supporters') db_supporters = items;
+        } else {
+          console.warn(`Fetch for ${key} failed:`, result && result.reason ? result.reason : 'unknown');
+          if (key === 'teams') db_teams = [];
+          if (key === 'players') db_players = [];
+          if (key === 'fixtures') db_fixtures = [];
+          if (key === 'results') db_results = [];
+          if (key === 'supporters') db_supporters = [];
+        }
+      } catch (innerErr) {
+        console.warn(`Error processing ${key} response`, innerErr);
+        if (key === 'teams') db_teams = [];
+        if (key === 'players') db_players = [];
+        if (key === 'fixtures') db_fixtures = [];
+        if (key === 'results') db_results = [];
+        if (key === 'supporters') db_supporters = [];
+      }
+    }
+
+    // Try to cache whatever we managed to fetch
     try {
-        localStorage.setItem(CACHE_KEY, JSON.stringify({
-            teams: db_teams,
-            players: db_players,
-            fixtures: db_fixtures,
-            results: db_results,
-            supporters: db_supporters
-        }));
-    } catch(e) { console.warn("Failed to cache data", e); }
+      localStorage.setItem(CACHE_KEY, JSON.stringify({
+        teams: db_teams,
+        players: db_players,
+        fixtures: db_fixtures,
+        results: db_results,
+        supporters: db_supporters
+      }));
+    } catch (e) { console.warn("Failed to cache data", e); }
 
-    document.getElementById('stat-players').textContent = db_players.length;
+    // Update UI stats and always call renderers even if some arrays are empty
+    const statEl = document.getElementById('stat-players');
+    if (statEl) statEl.textContent = db_players.length;
+
     renderTeamsPage();
-    setCategoryFilter('All', document.querySelector('.cat-btn.active')); 
-    renderFixturesPage(); 
-    renderResultsPage(); 
-    renderStandingsPage(); 
+    setCategoryFilter('All', document.querySelector('.cat-btn.active'));
+    renderFixturesPage();
+    renderResultsPage();
+    renderStandingsPage();
     renderSupportersPage();
-    renderVotingTeamGrid();
-    
+    if (typeof renderVotingTeamGrid === 'function') renderVotingTeamGrid();
+
     setTimeout(observeElements, 500);
 
   } catch (error) {
     console.error("PocketBase Fetch Error:", error);
-    
-    const retryHTML = `
-      <div style="grid-column:1/-1; text-align:center; padding: 2rem;">
-        <div style="color:var(--accent); margin-bottom: 1rem; font-weight: bold;">Connection issue detected. Unable to load data from ${SEASON_CONFIGS[currentSeason].name} database.</div>
-        <button class="btn-primary" onclick="retryConnection()">Retry Connection</button>
-      </div>`;
-    
-    const singleColRetry = `
-      <div style="text-align:center; padding: 2rem;">
-        <div style="color:var(--accent); margin-bottom: 1rem; font-weight: bold;">Connection issue detected.</div>
-        <button class="btn-primary" onclick="retryConnection()">Retry Connection</button>
-      </div>`;
 
-    document.getElementById('teams-container').innerHTML = retryHTML;
-    document.getElementById('players-container').innerHTML = retryHTML;
-    document.getElementById('fixtures-container').innerHTML = singleColRetry;
-    document.getElementById('results-container').innerHTML = singleColRetry;
-    document.getElementById('standings-body').innerHTML = `<tr><td colspan="11">${retryHTML}</td></tr>`;
-    document.getElementById('supporters-container').innerHTML = retryHTML;
+    // Ensure renderers run with whatever data we have (likely empty arrays)
+    try {
+      const statEl = document.getElementById('stat-players');
+      if (statEl) statEl.textContent = db_players.length || 0;
+      renderTeamsPage();
+      setCategoryFilter('All', document.querySelector('.cat-btn.active'));
+      renderFixturesPage();
+      renderResultsPage();
+      renderStandingsPage();
+      renderSupportersPage();
+      if (typeof renderVotingTeamGrid === 'function') renderVotingTeamGrid();
+      setTimeout(observeElements, 500);
+    } catch (e) { console.error('Error while rendering fallback UI:', e); }
+
+    // If absolutely nothing loaded, show retry UI in main containers
+    if ((db_teams.length || db_players.length || db_fixtures.length || db_results.length || db_supporters.length) === 0) {
+      const retryHTML = `
+        <div style="grid-column:1/-1; text-align:center; padding: 2rem;">
+          <div style="color:var(--accent); margin-bottom: 1rem; font-weight: bold;">Connection issue detected. Unable to load data from the database.</div>
+          <button class="btn-primary" onclick="retryConnection()">Retry Connection</button>
+        </div>`;
+
+      const singleColRetry = `
+        <div style="text-align:center; padding: 2rem;">
+          <div style="color:var(--accent); margin-bottom: 1rem; font-weight: bold;">Connection issue detected.</div>
+          <button class="btn-primary" onclick="retryConnection()">Retry Connection</button>
+        </div>`;
+
+      const teamsEl = document.getElementById('teams-container'); if (teamsEl) teamsEl.innerHTML = retryHTML;
+      const playersEl = document.getElementById('players-container'); if (playersEl) playersEl.innerHTML = retryHTML;
+      const fixturesEl = document.getElementById('fixtures-container'); if (fixturesEl) fixturesEl.innerHTML = singleColRetry;
+      const resultsEl = document.getElementById('results-container'); if (resultsEl) resultsEl.innerHTML = singleColRetry;
+      const standingsBody = document.getElementById('standings-body'); if (standingsBody) standingsBody.innerHTML = `<tr><td colspan="11">${retryHTML}</td></tr>`;
+      const supportersEl = document.getElementById('supporters-container'); if (supportersEl) supportersEl.innerHTML = retryHTML;
+    }
   }
 }
 
@@ -1922,13 +1968,14 @@ function renderResultsPage() {
   const topAssistsContainer = document.getElementById('top-assists-container');
   const topCardsContainer = document.getElementById('top-cards-container'); // Kung-fu player
   
-  if (db_results.length === 0) {
-      resultsContainer.innerHTML = `<div class="empty-state">No results published yet for this season.</div>`;
-      topScorersContainer.innerHTML = '<div class="empty-state">No results published yet for this season.</div>';
-      topAssistsContainer.innerHTML = '<div class="empty-state">No results published yet for this season.</div>';
-      topCardsContainer.innerHTML = '<div class="empty-state">No results published yet for this season.</div>';
+    if (db_results.length === 0) {
+      const emptyHTML = '<div class="empty-state" style="grid-column: 1/-1;">Data for this season will be updated soon.</div>';
+      resultsContainer.innerHTML = emptyHTML;
+      topScorersContainer.innerHTML = emptyHTML;
+      topAssistsContainer.innerHTML = emptyHTML;
+      topCardsContainer.innerHTML = emptyHTML;
       return;
-  }
+    }
 
   let resultsHtml = '<div class="fixture-list">';
   let playerGoalsMap = {}; 
@@ -2297,8 +2344,8 @@ function renderStandingsPage() {
     const tbody = document.getElementById('standings-body');
     
     if (db_teams.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="11" style="text-align:center; color:var(--text-muted);">No teams available.</td></tr>`;
-        return;
+      tbody.innerHTML = `<tr><td colspan="11"><div class="empty-state" style="grid-column: 1/-1;">Data for this season will be updated soon.</div></td></tr>`;
+      return;
     }
 
     let standings = {};
@@ -2647,8 +2694,8 @@ function renderSupportersPage() {
     container.innerHTML = '';
     
     if(db_supporters.length === 0) {
-        container.innerHTML = '<div style="grid-column: 1/-1; padding: 4rem 2rem; text-align: center; color: var(--text-muted); font-size: 13px; border: 1px dashed var(--border); border-radius: 12px; background: var(--bg-card);">No supporters have been added yet.</div>';
-        return;
+      container.innerHTML = '<div class="empty-state" style="grid-column: 1/-1;">Data for this season will be updated soon.</div>';
+      return;
     }
 
     db_supporters.forEach(sup => {
