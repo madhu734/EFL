@@ -7,6 +7,7 @@
   <link rel="icon" type="image/png" href="https://i.postimg.cc/j5DTGgSg/EFL.png">
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,300;0,400;0,600;0,700;0,800;0,900;1,700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <!-- PocketBase SDK -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pocketbase/0.21.1/pocketbase.umd.min.js"></script>
 
   <style>
@@ -305,7 +306,7 @@
           <h3>Squad Budget & Restrictions</h3>
           <div class="rules-grid">
             <div class="rule-item" style="border-color: var(--gold);"><span class="rule-desc" style="font-weight: 700;">Total Team Budget Maximum</span><span class="pts-badge" style="background: rgba(245,158,11,0.1); color: var(--gold);">100M</span></div>
-            <div class="rule-item" style="border-color: var(--red-accent);"><span class="rule-desc" style="font-weight: 700;">Max players from the same team</span><span class="pts-badge" style="background: rgba(229,62,62,0.1); color: var(--red-accent);">5 (7 for Q2 & FINAL)</span></div>
+            <div class="rule-item" style="border-color: var(--red-accent);"><span class="rule-desc" style="font-weight: 700;">Max players from the same team</span><span class="pts-badge" style="background: rgba(229,62,62,0.1); color: var(--red-accent);">5</span></div>
             <div class="rule-item"><span class="rule-desc">Player Prices</span><span class="pts-badge" style="background: var(--bg-input); color: var(--text-muted);">Custom (Check Player List)</span></div>
           </div>
         </div>
@@ -371,11 +372,11 @@
       <div class="modal-body" style="padding: 0;">
         <div class="auth-tabs lb-tabs-container">
           <div class="auth-tab active" onclick="switchLBTab('Overall')">Overall</div>
+          <div class="auth-tab" onclick="switchLBTab('MD 1')">MD 1</div>
+          <div class="auth-tab" onclick="switchLBTab('MD 2')">MD 2</div>
+          <div class="auth-tab" onclick="switchLBTab('MD 3')">MD 3</div>
           <div class="auth-tab" onclick="switchLBTab('MD 4')">MD 4</div>
           <div class="auth-tab" onclick="switchLBTab('MD 5')">MD 5</div>
-          <div class="auth-tab" onclick="switchLBTab('KO 1')">KO 1</div>
-          <div class="auth-tab" onclick="switchLBTab('Q2')">Q2</div>
-          <div class="auth-tab" onclick="switchLBTab('FINAL')">FINAL</div>
         </div>
         <div style="padding: 16px; background: var(--bg-input); font-size: 12px; color: var(--text-muted); text-align: center; border-bottom: 1px solid var(--border-subtle);">
           Points are calculated per Matchday. Captains must play >0 mins in the Matchday to receive x2 points.<br>Click on a manager to view their squad.
@@ -440,6 +441,7 @@
     </div>
   </div>
 
+  <!-- AUTH MODAL REDESIGNED FOR POCKETBASE AUTH COLLECTION -->
   <div class="modal-overlay" id="authModal">
     <div class="modal">
       <div class="modal-header">
@@ -451,24 +453,60 @@
           <div class="auth-tab active" onclick="switchAuthTab('login')">Login</div>
           <div class="auth-tab" onclick="switchAuthTab('register')">Register</div>
         </div>
+        
+        <!-- Login Form -->
         <form id="loginForm" class="auth-form active" onsubmit="handleLogin(event)">
-          <div class="form-group"><label>Batch (e.g. 51)</label><input type="text" id="loginBatch" required></div>
-          <div class="form-group"><label>Roll Number</label><input type="text" id="loginRoll" required></div>
-          <div class="form-group"><label>PIN / Password</label><input type="password" id="loginPin" required placeholder="Enter PIN / Password"></div>
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="loginEmail" required placeholder="your.email@example.com">
+          </div>
+          <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="loginPassword" required placeholder="Enter password">
+          </div>
+          <div style="text-align: right; margin-top: -5px;">
+             <a href="#" onclick="switchAuthTab('reset')" style="color: var(--gold); font-size: 0.8rem; text-decoration: none;">Forgot Password?</a>
+          </div>
           <button type="submit" class="form-btn">Login</button>
         </form>
+
+        <!-- Register Form -->
         <form id="registerForm" class="auth-form" onsubmit="handleRegister(event)">
-          <div class="form-group"><label>Your Name</label><input type="text" id="regName" required></div>
+          <div class="form-group"><label>Full Name</label><input type="text" id="regName" required></div>
           <div class="form-group"><label>Batch (e.g. 51)</label><input type="text" id="regBatch" required></div>
-          <div class="form-group"><label>Roll Number</label><input type="text" id="regRoll" required></div>
-          <div class="form-group"><label>Set a PIN / Password</label><input type="password" id="regPin" required placeholder="Minimum 4 characters" minlength="4"></div>
+          <div class="form-group"><label>Email Address</label><input type="email" id="regEmail" required></div>
+          <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="regPassword" required placeholder="Minimum 8 characters" minlength="8">
+            <small style="color: var(--text-muted); font-size: 11px;">* PocketBase requires minimum 8 characters</small>
+          </div>
+          <div class="form-group">
+            <label>Confirm Password</label>
+            <input type="password" id="regPasswordConfirm" required placeholder="Must match password" minlength="8">
+          </div>
           <div class="form-group"><label>Profile Picture (Optional)</label><input type="file" id="regAvatar" accept="image/*"></div>
           <button type="submit" class="form-btn">Create Account</button>
+        </form>
+
+        <!-- Password Reset Form -->
+        <form id="resetForm" class="auth-form" onsubmit="handlePasswordReset(event)">
+           <div style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 10px;">
+              Enter your registered email address and we'll send you a password reset link.
+           </div>
+           <div class="form-group">
+              <label>Email Address</label>
+              <input type="email" id="resetEmail" required placeholder="your.email@example.com">
+           </div>
+           <button type="submit" class="form-btn">Send Reset Link</button>
+           <div style="text-align: center; margin-top: 10px;">
+              <a href="#" onclick="switchAuthTab('login')" style="color: var(--text-muted); font-size: 0.85rem; text-decoration: none;">Back to Login</a>
+           </div>
         </form>
       </div>
     </div>
   </div>
 
+  <!-- PROFILE MODAL -->
   <div class="modal-overlay" id="profileModal">
     <div class="modal">
       <div class="modal-header">
@@ -484,13 +522,25 @@
             </label>
             <input type="file" id="profAvatar" accept="image/*" style="display:none;">
           </div>
-          <div class="form-group"><label>Name</label><input type="text" id="profName" required></div>
+          
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <div class="form-group"><label>Name</label><input type="text" id="profName" readonly style="opacity: 0.6; cursor: not-allowed;" title="Name cannot be changed"></div>
             <div class="form-group"><label>Batch</label><input type="text" id="profBatch" readonly style="opacity: 0.6; cursor: not-allowed;" title="Batch cannot be changed"></div>
-            <div class="form-group"><label>Roll Number</label><input type="text" id="profRoll" readonly style="opacity: 0.6; cursor: not-allowed;" title="Roll cannot be changed"></div>
           </div>
-          <div class="form-group" style="margin-top: 15px;"><label>Change PIN / Password (Optional)</label><input type="password" id="profPassword" placeholder="Leave blank to keep current password" minlength="4"></div>
-          <div style="display:flex; gap: 10px; margin-top: 15px;">
+          <div class="form-group" style="margin-top: 10px;">
+            <label>Email Address</label>
+            <input type="email" id="profEmail" readonly style="opacity: 0.6; cursor: not-allowed;" title="Email change requires verification, contact admin">
+          </div>
+          
+          <div class="form-group" style="margin-top: 15px;">
+             <label>Change Password (Optional)</label>
+             <input type="password" id="profPassword" placeholder="New Password (min 8 chars)" minlength="8">
+          </div>
+          <div class="form-group">
+             <input type="password" id="profPasswordConfirm" placeholder="Confirm New Password" minlength="8">
+          </div>
+
+          <div style="display:flex; gap: 10px; margin-top: 20px;">
             <button type="submit" class="form-btn" style="flex:1;">Update Profile</button>
             <button type="button" class="form-btn" style="flex:1; background: var(--red-accent); color: white;" onclick="handleLogout()">Logout</button>
           </div>
@@ -521,9 +571,13 @@
   });
 
   /* =========================================================
-     POCKETBASE SETUP & GLOBALS
+     DUAL POCKETBASE SETUP (New DB architecture)
      ========================================================= */
-  const pb = new PocketBase('https://efljudb.duckdns.org');
+  // pbAuth for User accounts, Authentication and System settings
+  const pbAuth = new PocketBase('https://pbdb2.duckdns.org');
+  // pbData for Match data, Results, Players, Fixtures
+  const pbData = new PocketBase('https://efljudb.duckdns.org');
+  
   let isDataLoaded = false; 
 
   /* =========================================================
@@ -532,7 +586,7 @@
   let DEADLINE_DATE = new Date('2026-05-08T12:00:00').getTime(); 
   let forceLock = false;
   let enableCountdown = true;
-  let activeMatchday = 'MD 4';
+  let activeMatchday = 'MD 1'; // Updated Default
   let snapshotTaken = false;
   let systemSettingId = ''; 
   let isSnapshotting = false;
@@ -545,7 +599,6 @@
   function updateCountdown() {
     const distance = DEADLINE_DATE - new Date().getTime();
     const bannerText = document.getElementById('countdownTimer');
-    
     const isLocked = forceLock || distance < 0;
 
     // --- Auto-Snapshot Trigger ---
@@ -553,16 +606,12 @@
         executeAutoSnapshot();
     }
 
-    // Lock/Unlock buttons
     const saveBtn = document.getElementById('saveBtn');
     if(saveBtn) saveBtn.disabled = isLocked;
-    
     const resetBtn = document.getElementById('resetBtn');
     if(resetBtn) resetBtn.disabled = isLocked;
-    
     document.querySelectorAll('.formation-btn').forEach(btn => btn.disabled = isLocked);
 
-    // Update the banner UI
     if (forceLock) {
         if (bannerText) {
             bannerText.textContent = "LOCKED BY ADMIN 🔒";
@@ -579,7 +628,6 @@
             const h = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
             const m = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
             const s = Math.floor((distance % (1000 * 60)) / 1000);
-            
             if (bannerText) {
                 bannerText.textContent = `${d}d ${h}h ${m}m ${s}s`;
                 bannerText.style.color = "var(--gold)";
@@ -595,7 +643,7 @@
   setInterval(updateCountdown, 1000); 
 
   /* =========================================================
-     POCKETBASE DATA FETCHING
+     POCKETBASE DATA FETCHING (Separated DBs)
      ========================================================= */
   let allPlayers = [], currentUser = null, allUsersList = []; 
   let db_fixtures = [], db_results = [], db_match_data = [];
@@ -612,13 +660,13 @@
   async function fetchAllData() {
     try {
       try {
-          const settings = await pb.collection('system_settings').getFullList({ requestKey: null });
+          // Fetch settings from NEW DB
+          const settings = await pbAuth.collection('system_settings').getFullList({ requestKey: null });
           if (settings && settings.length > 0) {
-              
               let validSetting = settings.find(s => s.deadline);
               if (validSetting) {
                   systemSettingId = validSetting.id;
-                  activeMatchday = validSetting.active_matchday || 'MD 4';
+                  activeMatchday = validSetting.active_matchday || 'MD 1';
                   snapshotTaken = validSetting.snapshot_taken === true;
 
                   let dStr = validSetting.deadline.replace(' ', 'T'); 
@@ -642,12 +690,13 @@
       }
 
       try {
-        const playersRecords = await pb.collection('players').getFullList({ expand: 'team', sort: 'name', requestKey: null });
+        // Fetch Players from OLD DB
+        const playersRecords = await pbData.collection('players').getFullList({ expand: 'team', sort: 'name', requestKey: null });
         allPlayers = playersRecords.map(p => {
           const teamId = p.expand?.team?.id || null;
           const tName = p.expand?.team?.name || p.expand?.team?.crest_text || 'Undrafted';
-          const badgeUrl = p.expand?.team?.banner ? pb.files.getUrl(p.expand.team, p.expand.team.banner) : null;
-          const photoUrl = p.photo ? pb.files.getUrl(p, p.photo) : null;
+          const badgeUrl = p.expand?.team?.banner ? pbData.files.getUrl(p.expand.team, p.expand.team.banner) : null;
+          const photoUrl = p.photo ? pbData.files.getUrl(p, p.photo) : null;
           let price = parseFloat(p.efl_price || p.eflPrice || p['efl price'] || p.price);
           if (isNaN(price)) price = 7.0; 
           return {
@@ -659,9 +708,10 @@
         });
       } catch (e) { console.warn("Players fetch error:", e); }
 
-      try { db_fixtures = await pb.collection('fixtures').getFullList({ requestKey: null }); } catch (e) { console.warn("Fixtures error:", e); }
-      try { db_results = await pb.collection('results').getFullList({ requestKey: null }); } catch (e) { console.warn("Results error:", e); }
-      try { db_match_data = await pb.collection('fpl_match_data').getFullList({ requestKey: null }); } catch (e) { console.error("Match data fetch error", e); }
+      // Fetch Match Data from OLD DB
+      try { db_fixtures = await pbData.collection('fixtures').getFullList({ requestKey: null }); } catch (e) { console.warn("Fixtures error:", e); }
+      try { db_results = await pbData.collection('results').getFullList({ requestKey: null }); } catch (e) { console.warn("Results error:", e); }
+      try { db_match_data = await pbData.collection('fpl_match_data').getFullList({ requestKey: null }); } catch (e) { console.error("Match data fetch error", e); }
       
       updateAllPlayersPoints();
       isDataLoaded = true; 
@@ -670,48 +720,38 @@
   }
 
   /* =========================================================
-     MATCHDAY & SNAPSHOT ENGINE
+     MATCHDAY & SNAPSHOT ENGINE (New Season Setup)
      ========================================================= */
+  // ডেটাবেসে ফিক্সচারের match_date এর সাথে মিল রেখে এই কন্ডিশনগুলো (01, 02) আপডেট করে নিবেন
   const MATCHDAYS = [
-      { name: 'MD 4', condition: f => { let d = f.match_date || ""; return d.includes('-05-08'); } },
-      { name: 'MD 5', condition: f => { let d = f.match_date || ""; return d.includes('-05-09'); } },
-      { name: 'KO 1', condition: f => { let d = f.match_date || ""; return d.includes('-05-14'); } },
-      { name: 'Q2',   condition: f => { let d = f.match_date || ""; return d.includes('-05-15'); } },
-      { name: 'FINAL',condition: f => { let d = f.match_date || ""; return d.includes('-05-16'); } }
+      { name: 'MD 1', condition: f => { let d = f.match_date || ""; return d.includes('-01-'); } },
+      { name: 'MD 2', condition: f => { let d = f.match_date || ""; return d.includes('-02-'); } },
+      { name: 'MD 3', condition: f => { let d = f.match_date || ""; return d.includes('-03-'); } },
+      { name: 'MD 4', condition: f => { let d = f.match_date || ""; return d.includes('-04-'); } },
+      { name: 'MD 5', condition: f => { let d = f.match_date || ""; return d.includes('-05-'); } }
   ];
 
   const MD_FIELDS = {
+      'MD 1': 'squad_md1',
+      'MD 2': 'squad_md2',
+      'MD 3': 'squad_md3',
       'MD 4': 'squad_md4',
-      'MD 5': 'squad_md5',
-      'KO 1': 'squad_ko1',
-      'Q2': 'squad_q2',
-      'FINAL': 'squad_final'
+      'MD 5': 'squad_md5'
   };
 
   async function executeAutoSnapshot() {
       isSnapshotting = true;
-
-      // --- 🔒 HARDCODED SAFETY LOCK: PREVENT PREVIOUS MATCHDAY OVERWRITES ---
-      const normalizedActive = String(activeMatchday).toUpperCase().replace(/\s/g, ''); 
-      if (normalizedActive !== 'FINAL') {
-          console.warn(`🔒 SYSTEM LOCKED: Snapshots are permanently disabled for ${activeMatchday}. Only 'FINAL' can be snapshotted now.`);
-          isSnapshotting = false;
-          return;
-      }
-      // -----------------------------------------------------------------------
-
       console.log(`Starting auto-snapshot for ${activeMatchday}...`);
 
       try {
-          // Lock global flag immediately
           if(systemSettingId) {
-              await pb.collection('system_settings').update(systemSettingId, { snapshot_taken: true });
+              await pbAuth.collection('system_settings').update(systemSettingId, { snapshot_taken: true });
               snapshotTaken = true;
           }
 
-          const allUsers = await pb.collection('fpl_users').getFullList({ requestKey: null });
+          // Read Users from NEW DB
+          const allUsers = await pbAuth.collection('fpl_users').getFullList({ requestKey: null });
           
-          // Smart Matchday Detection
           const normalizedActive = String(activeMatchday).toUpperCase().replace(/\s/g, ''); 
           let fieldName = null;
           for (let key in MD_FIELDS) {
@@ -722,19 +762,19 @@
           }
 
           if (!fieldName) {
-              console.warn(`Invalid active_matchday (${activeMatchday}) for snapshot. Check spelling.`);
+              console.warn(`Invalid active_matchday (${activeMatchday}) for snapshot.`);
+              isSnapshotting = false;
               return;
           }
 
           let updatePromises = [];
           for (let u of allUsers) {
-              // Safety Lock: Only copy if destination is empty or 'null'
+              // Safety Lock
               let isDestEmpty = !u[fieldName] || u[fieldName] === '{}' || u[fieldName] === 'null';
-
               if (u.squad && u.squad !== '{}' && isDestEmpty) {
                   let data = {};
                   data[fieldName] = u.squad;
-                  updatePromises.push(pb.collection('fpl_users').update(u.id, data));
+                  updatePromises.push(pbAuth.collection('fpl_users').update(u.id, data));
               }
           }
 
@@ -748,103 +788,193 @@
       } catch (err) {
           console.error("Snapshot error:", err);
           showToast("Auto-Snapshot failed! Please check PocketBase API rules.", "error");
-          isSnapshotting = false; 
       }
+      isSnapshotting = false; 
   }
 
   /* =========================================================
-     AUTH & SQUAD STATE
+     AUTH & SQUAD STATE (Auth Collection Logic)
      ========================================================= */
   function openAuthModal() {
     if(currentUser) {
       document.getElementById('profName').value = currentUser.name || '';
       document.getElementById('profBatch').value = currentUser.batch || '';
-      document.getElementById('profRoll').value = currentUser.roll || '';
+      document.getElementById('profEmail').value = currentUser.email || '';
       document.getElementById('profPassword').value = ''; 
-      document.getElementById('profAvatarPreview').src = currentUser.avatar ? pb.files.getUrl(currentUser, currentUser.avatar) : 'https://via.placeholder.com/80?text=User';
+      document.getElementById('profPasswordConfirm').value = ''; 
+      document.getElementById('profAvatarPreview').src = currentUser.avatar ? pbAuth.files.getUrl(currentUser, currentUser.avatar) : 'https://via.placeholder.com/80?text=User';
       document.getElementById('profileModal').classList.add('open');
     } else { document.getElementById('authModal').classList.add('open'); }
   }
+
   document.getElementById('profAvatar').addEventListener('change', function(e) {
     if (e.target.files && e.target.files[0]) {
       const reader = new FileReader(); reader.onload = function(e) { document.getElementById('profAvatarPreview').src = e.target.result; }; reader.readAsDataURL(e.target.files[0]);
     }
   });
+
   function switchAuthTab(tab) {
     document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
-    if(tab === 'login') { document.querySelectorAll('.auth-tab')[0].classList.add('active'); document.getElementById('loginForm').classList.add('active'); } 
-    else { document.querySelectorAll('.auth-tab')[1].classList.add('active'); document.getElementById('registerForm').classList.add('active'); }
+    
+    if (tab === 'login') { 
+        document.querySelectorAll('.auth-tab')[0].classList.add('active'); 
+        document.getElementById('loginForm').classList.add('active'); 
+    } else if (tab === 'register') { 
+        document.querySelectorAll('.auth-tab')[1].classList.add('active'); 
+        document.getElementById('registerForm').classList.add('active'); 
+    } else if (tab === 'reset') {
+        document.getElementById('resetForm').classList.add('active'); 
+    }
   }
 
   async function handleLogin(e) {
     e.preventDefault();
-    const batch = document.getElementById('loginBatch').value.trim();
-    const roll = document.getElementById('loginRoll').value.trim();
-    const pin = document.getElementById('loginPin').value.trim();
+    const btn = e.target.querySelector('button[type="submit"]'); btn.disabled = true; btn.textContent = "Logging in...";
+    const email = document.getElementById('loginEmail').value.trim();
+    const password = document.getElementById('loginPassword').value.trim();
+    
     try {
-      const record = await pb.collection('fpl_users').getFirstListItem(`batch="${batch}" && roll="${roll}" && password="${pin}"`);
-      setCurrentUser(record); document.getElementById('authModal').classList.remove('open'); showToast('Login successful!', 'success'); loadSquadFromUser();
-    } catch (err) { showToast('Invalid credentials. Check your batch, roll, and PIN.', 'error'); }
+      // Login via NEW DB Auth Collection
+      const authData = await pbAuth.collection('fpl_users').authWithPassword(email, password);
+      currentUser = pbAuth.authStore.model; 
+      updateAuthUI(); 
+      document.getElementById('authModal').classList.remove('open'); 
+      showToast('Login successful!', 'success'); 
+      loadSquadFromUser();
+    } catch (err) { 
+      console.error(err);
+      showToast('Invalid login. Please check your email and password.', 'error'); 
+    } finally {
+      btn.disabled = false; btn.textContent = "Login";
+    }
   }
 
   async function handleRegister(e) {
     e.preventDefault();
     const btn = e.target.querySelector('button[type="submit"]'); btn.disabled = true; btn.textContent = "Please wait...";
+    
     const name = document.getElementById('regName').value.trim();
     const batch = document.getElementById('regBatch').value.trim();
-    const roll = document.getElementById('regRoll').value.trim();
-    const pin = document.getElementById('regPin').value.trim();
+    const email = document.getElementById('regEmail').value.trim();
+    const password = document.getElementById('regPassword').value.trim();
+    const passwordConfirm = document.getElementById('regPasswordConfirm').value.trim();
 
-    if(pin.length < 4) { showToast('PIN must be at least 4 characters.', 'error'); btn.disabled = false; btn.textContent = "Create Account"; return; }
+    if(password.length < 8) { showToast('Password must be at least 8 characters.', 'error'); btn.disabled = false; btn.textContent = "Create Account"; return; }
+    if(password !== passwordConfirm) { showToast('Passwords do not match.', 'error'); btn.disabled = false; btn.textContent = "Create Account"; return; }
 
     try {
-      let existingUser = null; try { existingUser = await pb.collection('fpl_users').getFirstListItem(`batch="${batch}" && roll="${roll}"`); } catch(err) {}
-      if (existingUser) { showToast('An account with this Batch and Roll already exists.', 'error'); btn.disabled = false; btn.textContent = "Create Account"; return; }
-
       const formData = new FormData();
-      formData.append('name', name); formData.append('batch', batch); formData.append('roll', roll); formData.append('password', pin);
-      const fileInput = document.getElementById('regAvatar'); if(fileInput.files.length > 0) { formData.append('avatar', fileInput.files[0]); }
+      formData.append('email', email);
+      formData.append('password', password);
+      formData.append('passwordConfirm', passwordConfirm);
+      formData.append('name', name); 
+      formData.append('batch', batch); 
       formData.append('squad', '{}');
 
-      const record = await pb.collection('fpl_users').create(formData);
-      setCurrentUser(record); document.getElementById('authModal').classList.remove('open'); showToast('Account created successfully!', 'success');
-    } catch (err) { showToast('Error creating account.', 'error'); } 
+      const fileInput = document.getElementById('regAvatar'); 
+      if(fileInput.files.length > 0) { formData.append('avatar', fileInput.files[0]); }
+
+      // Create user in NEW DB Auth Collection
+      await pbAuth.collection('fpl_users').create(formData);
+      
+      // Auto-login after registration
+      await pbAuth.collection('fpl_users').authWithPassword(email, password);
+      currentUser = pbAuth.authStore.model;
+      updateAuthUI(); 
+      
+      document.getElementById('authModal').classList.remove('open'); 
+      showToast('Account created successfully!', 'success');
+    } catch (err) { 
+      console.error(err);
+      showToast('Error creating account. Email might already exist.', 'error'); 
+    } 
     finally { btn.disabled = false; btn.textContent = "Create Account"; }
+  }
+
+  async function handlePasswordReset(e) {
+      e.preventDefault();
+      const btn = e.target.querySelector('button[type="submit"]'); btn.disabled = true; btn.textContent = "Sending...";
+      const email = document.getElementById('resetEmail').value.trim();
+
+      try {
+          await pbAuth.collection('fpl_users').requestPasswordReset(email);
+          showToast('Reset link sent to your email. Check inbox/spam.', 'success');
+          switchAuthTab('login');
+      } catch (err) {
+          showToast('Failed to send reset email. Ensure the email is registered.', 'error');
+      } finally {
+          btn.disabled = false; btn.textContent = "Send Reset Link";
+      }
   }
 
   async function handleProfileUpdate(e) {
     e.preventDefault();
     const btn = e.target.querySelector('button[type="submit"]'); btn.disabled = true; btn.textContent = "Updating...";
+    
     const newPass = document.getElementById('profPassword').value.trim();
-    if(newPass && newPass.length < 4) { showToast('New PIN must be at least 4 chars.', 'error'); btn.disabled = false; btn.textContent = "Update Profile"; return; }
+    const newPassConfirm = document.getElementById('profPasswordConfirm').value.trim();
+    
+    if (newPass && newPass.length < 8) { showToast('Password must be at least 8 chars.', 'error'); btn.disabled = false; btn.textContent = "Update Profile"; return; }
+    if (newPass && newPass !== newPassConfirm) { showToast('Passwords do not match.', 'error'); btn.disabled = false; btn.textContent = "Update Profile"; return; }
 
     try {
-      const formData = new FormData(); formData.append('name', document.getElementById('profName').value.trim());
-      if(newPass) formData.append('password', newPass);
-      const fileInput = document.getElementById('profAvatar'); if(fileInput.files.length > 0) { formData.append('avatar', fileInput.files[0]); }
-      const record = await pb.collection('fpl_users').update(currentUser.id, formData);
-      setCurrentUser(record); document.getElementById('profileModal').classList.remove('open'); document.getElementById('profPassword').value = ''; showToast('Profile updated!', 'success');
-    } catch (err) { showToast('Profile update failed', 'error'); } 
+      const formData = new FormData(); 
+      
+      // Update Password if provided
+      if(newPass) {
+          formData.append('password', newPass);
+          formData.append('passwordConfirm', newPassConfirm);
+      }
+      
+      // Update Avatar
+      const fileInput = document.getElementById('profAvatar'); 
+      if(fileInput.files.length > 0) { formData.append('avatar', fileInput.files[0]); }
+      
+      const updatedRecord = await pbAuth.collection('fpl_users').update(currentUser.id, formData);
+      currentUser = updatedRecord; // AuthStore gets updated automatically by PocketBase JS SDK
+      
+      document.getElementById('profileModal').classList.remove('open'); 
+      document.getElementById('profPassword').value = ''; 
+      document.getElementById('profPasswordConfirm').value = ''; 
+      showToast('Profile updated!', 'success');
+    } catch (err) { 
+      console.error(err);
+      showToast('Profile update failed', 'error'); 
+    } 
     finally { btn.disabled = false; btn.textContent = "Update Profile"; }
   }
 
   function handleLogout() {
-    localStorage.removeItem('fpl_user_data'); currentUser = null; document.getElementById('profileModal').classList.remove('open'); updateAuthUI();
+    pbAuth.authStore.clear(); 
+    currentUser = null; 
+    document.getElementById('profileModal').classList.remove('open'); 
+    updateAuthUI();
     state.captain = null; state.viceCaptain = null; Object.keys(state.slots).forEach(k => state.slots[k] = null); renderPitch(); showToast('Logged out', 'warn');
   }
 
-  function setCurrentUser(record) { currentUser = record; localStorage.setItem('fpl_user_data', JSON.stringify(record)); updateAuthUI(); }
   function updateAuthUI() {
     const btn = document.getElementById('authHeaderBtn');
-    if(currentUser) { const avatarUrl = currentUser.avatar ? pb.files.getUrl(currentUser, currentUser.avatar) : 'https://via.placeholder.com/24'; btn.innerHTML = `<img src="${avatarUrl}" class="auth-avatar"> ${currentUser.name}`; } 
-    else { btn.innerHTML = `Login / Register`; }
+    if (currentUser) { 
+        const avatarUrl = currentUser.avatar ? pbAuth.files.getUrl(currentUser, currentUser.avatar) : 'https://via.placeholder.com/24'; 
+        btn.innerHTML = `<img src="${avatarUrl}" class="auth-avatar"> ${currentUser.name}`; 
+    } else { 
+        btn.innerHTML = `Login / Register`; 
+    }
   }
+
   function checkSession() {
-    const saved = localStorage.getItem('fpl_user_data');
-    if(saved) {
-      currentUser = JSON.parse(saved); updateAuthUI();
-      pb.collection('fpl_users').getOne(currentUser.id).then(rec => { setCurrentUser(rec); loadSquadFromUser(); }).catch(e => console.log('Session fetch error'));
+    if(pbAuth.authStore.isValid && pbAuth.authStore.model) {
+      currentUser = pbAuth.authStore.model; 
+      updateAuthUI();
+      // Ensure we have the absolute latest data from DB
+      pbAuth.collection('fpl_users').getOne(currentUser.id).then(rec => { 
+          currentUser = rec; 
+          loadSquadFromUser(); 
+      }).catch(e => {
+          console.log('Session fetch error', e);
+          handleLogout();
+      });
     }
   }
 
@@ -869,8 +999,9 @@
         if(key === state.captain) squadData.captain = state.slots[key].id;
         if(key === state.viceCaptain) squadData.viceCaptain = state.slots[key].id;
       }
-      const updatedRecord = await pb.collection('fpl_users').update(currentUser.id, { squad: JSON.stringify(squadData) });
-      setCurrentUser(updatedRecord); showToast('Squad saved successfully!', 'success');
+      const updatedRecord = await pbAuth.collection('fpl_users').update(currentUser.id, { squad: JSON.stringify(squadData) });
+      currentUser = updatedRecord;
+      showToast('Squad saved successfully!', 'success');
     } catch (err) { showToast('Error saving squad!', 'error'); } 
     finally { if(saveBtn) saveBtn.innerHTML = "💾 Save Squad"; }
   }
@@ -967,20 +1098,17 @@
   function setViceCaptain(slotKey, e) { e.stopPropagation(); if(state.captain === slotKey) state.captain = null; state.viceCaptain = state.viceCaptain === slotKey ? null : slotKey; renderPitch(); }
   function resetSquad() { if(isDeadlinePassed()) return; Object.keys(state.slots).forEach(k => state.slots[k] = null); state.captain = null; state.viceCaptain = null; renderPitch(); showToast('Squad cleared!', 'warn'); }
 
-  // --- NEW: Display Tournament Best XI Modal ---
+  // --- Display Tournament Best XI Modal ---
   function showBestXIModal() {
-      // 1. Sort all players by total points (Descending)
       let sortedPlayers = [...allPlayers].sort((a, b) => (b.totalPoints || 0) - (a.totalPoints || 0));
-
       let picked = { 'GK':[], 'DEF':[], 'MID':[], 'FWD':[] };
-      let limits = { 'GK':1, 'DEF':4, 'MID':3, 'FWD':3 }; // Fixed 4-3-3 Formation
+      let limits = { 'GK':1, 'DEF':4, 'MID':3, 'FWD':3 }; // Fixed 4-3-3
       let teamCounts = {};
       let allPicked = [];
-      const maxSameTeam = 5; // Standard global limit
+      const maxSameTeam = 5; // Reverted back to 5 globally
 
-      // 2. Fill slots with highest scoring valid players
       for (let p of sortedPlayers) {
-          if (allPicked.length >= 11) break; // Squad is full
+          if (allPicked.length >= 11) break; 
           if (p.team !== 'Undrafted' && (teamCounts[p.team] || 0) >= maxSameTeam) continue;
 
           const isWinger = p.rawPosition.toLowerCase().includes('wing');
@@ -999,24 +1127,17 @@
           }
       }
 
-      // 3. Assign C and VC to the top 2 points scorers
       let capId = allPicked.length > 0 ? allPicked[0].id : null;
       let vcId = allPicked.length > 1 ? allPicked[1].id : null;
 
-      // 4. Render on Best XI Pitch
       const pitchEl = document.getElementById('best-xi-pitch');
       pitchEl.innerHTML = '<div class="pitch-bottom-lines"></div>';
       
       let totalXIpoints = 0;
       const backupCap = state.captain;
       const backupVC = state.viceCaptain;
+      let tempCapKey = null, tempVCKey = null;
       
-      let tempCapKey = null;
-      let tempVCKey = null;
-
-      const ROW_ORDER = ['FWD', 'MID', 'DEF', 'GK'];
-      
-      // Determine slot keys for Cap/VC styling
       let slotMapping = {};
       ROW_ORDER.forEach(pos => {
           for (let i = 0; i < limits[pos]; i++) {
@@ -1037,21 +1158,17 @@
           for (let i = 0; i < limits[pos]; i++) {
               let slotKey = `bxi-${pos}-${i}`;
               let player = slotMapping[slotKey];
-              
               let pts = player ? player.totalPoints : 0;
-              if (player && player.id === capId) pts *= 2; // Double points for Captain
+              if (player && player.id === capId) pts *= 2; 
               totalXIpoints += pts;
-
               let slotEl = buildSlotEl(slotKey, pos, player, true, true, player ? player.totalPoints : null);
               slotsWrap.appendChild(slotEl);
           }
           row.appendChild(slotsWrap); pitchEl.appendChild(row);
       });
 
-      // Restore user state
       state.captain = backupCap;
       state.viceCaptain = backupVC;
-
       document.getElementById('best-xi-total').textContent = `${totalXIpoints} PTS`;
       document.getElementById('bestXIModal').classList.add('open');
   }
@@ -1378,16 +1495,12 @@
   }
 
   function getUserPointsForTab(user, tabName) {
-      if (tabName === 'MD 4') {
-          return user.md4_pts || 0;
-      } else if (tabName !== 'Overall') {
+      if (tabName !== 'Overall') {
           return getMDPoints(user, tabName).mdTotal;
       } else {
-          let total = user.md4_pts || 0;
+          let total = 0;
           MATCHDAYS.forEach(md => {
-              if (md.name !== 'MD 4') { 
-                  total += getMDPoints(user, md.name).mdTotal;
-              }
+              total += getMDPoints(user, md.name).mdTotal;
           });
           return total;
       }
@@ -1411,14 +1524,15 @@
     const listEl = document.getElementById('lb-list');
     listEl.innerHTML = `<div style="text-align:center; padding: 40px; color: var(--text-muted);">Calculating ${tab} ranking...</div>`;
     
-    pb.collection('fpl_users').getFullList().then(users => {
+    // Fetch users from NEW DB Auth Collection
+    pbAuth.collection('fpl_users').getFullList().then(users => {
        allUsersList = users;
        let usersWithPts = users.map(u => { return { ...u, calculatedPoints: getUserPointsForTab(u, tab) }; });
        usersWithPts.sort((a, b) => b.calculatedPoints - a.calculatedPoints);
 
        let html = '';
        usersWithPts.forEach((u, i) => {
-          let avatarUrl = u.avatar ? pb.files.getUrl(u, u.avatar) : 'https://via.placeholder.com/40';
+          let avatarUrl = u.avatar ? pbAuth.files.getUrl(u, u.avatar) : 'https://via.placeholder.com/40';
           html += `
              <div class="lb-user-item" onclick="viewUserSquad('${u.id}', '${tab}')">
                 <div class="lb-rank">#${i+1}</div>
@@ -1440,7 +1554,7 @@
       if(!user) return;
 
       let isOverallView = (sourceTab === 'Overall');
-      let activeVSTab = explicitTab || (isOverallView ? 'MD 4' : sourceTab);
+      let activeVSTab = explicitTab || (isOverallView ? 'MD 1' : sourceTab);
 
       let normalizedActive = String(activeMatchday).toUpperCase().replace(/\s/g, '');
       let normalizedRequest = String(activeVSTab).toUpperCase().replace(/\s/g, '');
@@ -1460,41 +1574,6 @@
           </div>`;
       } else {
           tabsContainer.innerHTML = `<div style="text-align:center; padding-bottom: 15px; color: var(--gold); font-weight: bold; font-family: var(--font-display); font-size: 1.2rem; text-transform: uppercase;">${activeVSTab} Squad</div>`;
-      }
-
-      // EXCEPTION FOR MD 4
-      if (activeVSTab === 'MD 4') {
-          const vsPitch = document.getElementById('vs-pitch'); 
-          vsPitch.innerHTML = ''; 
-          
-          let md4Pts = user.md4_pts || 0;
-          
-          let breakdownHtml = `
-            <div style="margin-top: 10px; background: var(--navy-800); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 24px; text-align: center;">
-               <h3 style="color: var(--red-accent); margin-bottom: 12px; font-family: var(--font-display); letter-spacing: 0.05em; text-transform: uppercase;">⚠️ Data Loss Alert</h3>
-               <p style="color: var(--text-primary); font-size: 1rem; line-height: 1.6; margin-bottom: 15px;">
-                  Unfortunately, Matchday 4 squad data was lost due to a server glitch. We are unable to display the detailed squad breakdown for this round.
-               </p>
-               <div style="font-family: var(--font-display); font-size: 2.5rem; font-weight: 800; color: var(--green-neon); margin: 20px 0;">
-                  ${md4Pts} pts
-               </div>
-          `;
-
-          if (md4Pts === 0) {
-              breakdownHtml += `
-                 <div style="background: rgba(240, 180, 41, 0.1); border: 1px solid var(--gold); padding: 14px; border-radius: 8px; margin-top: 20px;">
-                     <p style="color: var(--gold); font-size: 0.95rem; font-weight: 600; margin: 0;">
-                         Your points data for this matchday is missing. If you remember your squad or points, please contact the organizing committee.
-                     </p>
-                 </div>
-              `;
-          }
-
-          breakdownHtml += `</div>`;
-          document.getElementById('vs-breakdown-container').innerHTML = breakdownHtml;
-          document.getElementById('viewSquadModal').classList.add('open');
-          
-          return; 
       }
 
       let squadField = MD_FIELDS[activeVSTab];
@@ -1583,8 +1662,7 @@
     const listEl = document.getElementById('playerList'); listEl.innerHTML = '';
     if(players.length === 0) { listEl.innerHTML = '<div style="text-align:center; padding: 20px; color: var(--text-muted);">No players found</div>'; return; }
     
-    const normalizedActiveForLimit = String(activeMatchday).toUpperCase().replace(/\s/g, '');
-    const maxSameTeam = (normalizedActiveForLimit === 'Q2' || normalizedActiveForLimit === 'FINAL') ? 7 : 5;
+    const maxSameTeam = 5; // Cleaned up max player limits for new season
 
     players.sort((a, b) => {
       const ptsA = a.totalPoints || 0;
@@ -1650,7 +1728,7 @@
       initSlots(state.formation); 
       renderPitch(); 
       await fetchAllData(); 
-      loadSquadFromUser(); 
+      if(currentUser) loadSquadFromUser(); 
       renderPitch(); 
   }
   initApp();
