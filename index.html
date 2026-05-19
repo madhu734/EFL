@@ -1638,6 +1638,19 @@ function getPBLinkedTeamId(player) {
   return t;
 }
 
+// PocketBase fetch helper with timeout to avoid long network hangs
+async function fetchRecordWithTimeout(collectionName, id, timeoutMs = 4000) {
+  if (typeof pb === 'undefined' || !pb || !id) return null;
+  try {
+    const fetchPromise = pb.collection(collectionName).getOne(id);
+    const timeoutPromise = new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), timeoutMs));
+    return await Promise.race([fetchPromise, timeoutPromise]);
+  } catch (err) {
+    console.warn(`fetchRecordWithTimeout ${collectionName}/${id} failed:`, err);
+    return null;
+  }
+}
+
 window.onload = () => {
   if(typeof updateSeasonText === 'function') updateSeasonText();
   initData();
@@ -2805,30 +2818,31 @@ async function presentSinglePlayer(playerId, event) {
 
   // If not found in filtered list, try to find in global players
   if (idx === -1) {
-     let found = db_players.find(p => p && p.id === playerId);
-     if (!found && typeof pb !== 'undefined') {
-       try {
-         // Fetch single player record on-demand from PocketBase
-         const rec = await pb.collection('players').getOne(playerId);
-         if (rec) {
-           db_players.push(rec);
-           found = rec;
+       let found = db_players.find(p => p && p.id === playerId);
+       if (!found && typeof pb !== 'undefined') {
+         try {
+           // Fetch single player record on-demand from PocketBase with timeout
+           const rec = await fetchRecordWithTimeout('players', playerId, 4000);
+           if (rec) {
+             db_players.push(rec);
+             found = rec;
+           }
+         } catch (fetchErr) {
+           console.warn('presentSinglePlayer: remote fetch failed for', playerId, fetchErr);
          }
-       } catch (fetchErr) {
-         console.warn('presentSinglePlayer: remote fetch failed for', playerId, fetchErr);
        }
-     }
 
-     if (!found) {
-     console.warn('presentSinglePlayer: player not found', playerId);
-     alert('Player details are not available right now.');
-     return;
-     }
+       if (!found) {
+         console.warn('presentSinglePlayer: player not found', playerId);
+         alert('Player details are not available right now. Check console for details.');
+         return;
+       }
      currentFilteredPlayers = [found];
      idx = 0;
   }
 
   auctionIndex = idx;
+  console.log('presentSinglePlayer: presenting index', auctionIndex, 'of', currentFilteredPlayers.length, 'player id', playerId);
   updateAuctionModal();
   showModal('auctionModal');
 }
@@ -2953,14 +2967,15 @@ async function openPlayerModal(playerId) {
   let player = db_players.find(p => p && p.id === playerId);
   if (!player && typeof pb !== 'undefined') {
     try {
-      player = await pb.collection('players').getOne(playerId);
+      player = await fetchRecordWithTimeout('players', playerId, 4000);
       if (player) db_players.push(player);
     } catch (err) {
       console.warn('openPlayerModal: failed to fetch player', playerId, err);
     }
   }
   if (!player) {
-    alert('Player details are not available right now.');
+    alert('Player details are not available right now. Check console for details.');
+    console.warn('openPlayerModal: player missing after fetch attempt', playerId, 'pb?', typeof pb !== 'undefined');
     return;
   }
 
