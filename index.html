@@ -828,6 +828,7 @@
       <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(99,102,241,0.05);border:1px solid rgba(99,102,241,0.2);padding:6px 14px;border-radius:20px;font-size:11px;color:#6366f1;letter-spacing:1px;margin-bottom:1rem;font-weight:700">EFL SEASON 5</div>
       <div class="reg-title">Player Registration</div>
       <div style="font-size:13px;color:var(--text-muted);font-weight:500;">Fill in your details below to register for EFL Season 5. All fields marked * are required.</div>
+    </div>
     
     <div class="reg-form animate-on-scroll" id="regFormClosed" style="text-align: center; padding: 4rem 2rem;">
       <div style="font-size: 48px; margin-bottom: 16px;">🔒</div>
@@ -1605,7 +1606,7 @@ function getPbImageUrl(record, fileName) {
   // fall back to inline placeholder to avoid unsafe cross-origin/frame issues when opened via file://
   try {
     const base = PB_CONFIG && PB_CONFIG.baseURL ? PB_CONFIG.baseURL : null;
-    if (!base || location.protocol === 'file:') return NO_PHOTO_DATAURL;
+    if (!base) return NO_PHOTO_DATAURL;
     return `${base}/api/files/${record.collectionId}/${record.id}/${fileName}`;
   } catch (e) {
     return NO_PHOTO_DATAURL;
@@ -1638,25 +1639,6 @@ function getPBLinkedTeamId(player) {
   return t;
 }
 
-// PocketBase fetch helper with timeout to avoid long network hangs
-async function fetchRecordWithTimeout(collectionName, id, timeoutMs = 4000) {
-  if (!id) return null;
-  // Prefer using REST API fetch (fetchWithRetry) to avoid SDK-specific CORS or runtime issues.
-  try {
-    const url = `${PB_CONFIG.baseURL}/api/collections/${collectionName}/records/${id}`;
-    const fetchPromise = (async () => {
-      const res = await fetchWithRetry(url, { cache: 'no-store' }, 2);
-      if (!res) throw new Error('no-response');
-      return await res.json();
-    })();
-
-    const timeoutPromise = new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), timeoutMs));
-    return await Promise.race([fetchPromise, timeoutPromise]);
-  } catch (err) {
-    console.warn(`fetchRecordWithTimeout ${collectionName}/${id} failed:`, err);
-    return null;
-  }
-}
 
 window.onload = () => {
   if(typeof updateSeasonText === 'function') updateSeasonText();
@@ -1831,11 +1813,12 @@ function renderTeamsPage() {
   const container = document.getElementById('teams-container');
   container.innerHTML = '';
   
-    if (db_teams.length === 0) {
-      container.innerHTML = '<div class="empty-state">Data for this season will be updated soon.</div>';
-      return;
-    }
+  if (db_teams.length === 0) {
+    container.innerHTML = '<div class="empty-state">Data for this season will be updated soon.</div>';
+    return;
+  }
 
+  let html = '';
   db_teams.forEach(team => {
     const teamPlayers = db_players.filter(p => getPBLinkedTeamId(p) === team.id);
     const teamName = team.name || team.crest_text || 'Unnamed Team';
@@ -1851,7 +1834,7 @@ function renderTeamsPage() {
         crestHtml = `<img src="${getPbImageUrl(team, team.banner)}" class="crest-img" crossorigin="anonymous">`;
     }
 
-    container.innerHTML += `
+    html += `
       <div class="team-card animate-on-scroll" onclick="openTeamModal('${team.id}')">
         <div class="team-banner" style="background:${bannerStyle}">
           ${team.cover_pic ? `<img src="${getPbImageUrl(team, team.cover_pic)}" class="team-cover-pic" alt="Team Cover" onclick="viewCoverImage(event, '${getPbImageUrl(team, team.cover_pic)}')">` : ''}
@@ -1870,6 +1853,7 @@ function renderTeamsPage() {
       </div>
     `;
   });
+  container.innerHTML = html;
 }
 
 function setCategoryFilter(cat, btnElement) {
@@ -1897,6 +1881,7 @@ function renderPlayersPage() {
     return;
   }
 
+  let html = '';
   currentFilteredPlayers.forEach(player => {
     const team = db_teams.find(t => t.id === getPBLinkedTeamId(player));
     const tName = team ? (team.name || team.crest_text || 'Unnamed Team') : 'Undrafted';
@@ -1923,7 +1908,7 @@ function renderPlayersPage() {
     else if (/^C$/i.test(rawCat)) { displayCat = 'C'; catClass = 'cat-C'; }
     else if (/^GK$/i.test(rawCat)) { displayCat = 'GK'; catClass = 'cat-GK'; }
 
-    container.innerHTML += `
+    html += `
       <div class="player-card animate-on-scroll" style="position: relative;">
         <!-- Instant Presentation Button -->
         <button onclick="presentSinglePlayer('${player.id}', event)" class="instant-present-btn" title="Present Player">🖥️</button>
@@ -1941,6 +1926,7 @@ function renderPlayersPage() {
     `;
   });
   
+  container.innerHTML = html;
   setTimeout(observeElements, 100);
 }
 
@@ -2752,6 +2738,7 @@ function renderSupportersPage() {
       return;
     }
 
+    let html = '';
     db_supporters.forEach(sup => {
         let photoUrl = getPbImageUrl(sup, sup.photo);
         
@@ -2781,7 +2768,7 @@ function renderSupportersPage() {
             }
         }
 
-        container.innerHTML += `
+        html += `
             <div class="supporter-card animate-on-scroll">
                 <img src="${photoUrl}" class="supporter-photo" alt="${sName}" crossorigin="anonymous">
                 <div class="supporter-name">${sName}</div>
@@ -2791,6 +2778,7 @@ function renderSupportersPage() {
             </div>
         `;
     });
+    container.innerHTML = html;
     setTimeout(observeElements, 100);
 }
 
@@ -2827,19 +2815,6 @@ async function presentSinglePlayer(playerId, event) {
   // If not found in filtered list, try to find in global players
   if (idx === -1) {
        let found = db_players.find(p => p && p.id === playerId);
-       if (!found && typeof pb !== 'undefined') {
-         try {
-           // Fetch single player record on-demand from PocketBase with timeout
-           const rec = await fetchRecordWithTimeout('players', playerId, 4000);
-           if (rec) {
-             db_players.push(rec);
-             found = rec;
-           }
-         } catch (fetchErr) {
-           console.warn('presentSinglePlayer: remote fetch failed for', playerId, fetchErr);
-         }
-       }
-
        if (!found) {
          console.warn('presentSinglePlayer: player not found', playerId);
          alert('Player details are not available right now. Check console for details.');
@@ -2955,9 +2930,10 @@ function openTeamModal(teamId) {
   if (teamPlayers.length === 0) {
     playerContainer.innerHTML = '<div style="grid-column: 1/-1; padding: 2rem; text-align: center; color: var(--text-muted); font-size: 13px; border: 1px dashed var(--border); border-radius: 8px;">Squad members have not been drafted yet. Check back later!</div>';
   } else {
+    let html = '';
     teamPlayers.forEach(p => {
       let photoUrl = getPbImageUrl(p, p.photo);
-      playerContainer.innerHTML += `
+      html += `
         <div class="player-card-sm" onclick="openPlayerModal('${p.id}'); event.stopPropagation();">
           <img src="${photoUrl}" class="player-photo-sm" alt="${p.name}" crossorigin="anonymous">
           <div class="player-info-sm">
@@ -2967,23 +2943,15 @@ function openTeamModal(teamId) {
         </div>
       `;
     });
+    playerContainer.innerHTML = html;
   }
   showModal('teamModal');
 }
 
 async function openPlayerModal(playerId) {
   let player = db_players.find(p => p && p.id === playerId);
-  if (!player && typeof pb !== 'undefined') {
-    try {
-      player = await fetchRecordWithTimeout('players', playerId, 4000);
-      if (player) db_players.push(player);
-    } catch (err) {
-      console.warn('openPlayerModal: failed to fetch player', playerId, err);
-    }
-  }
   if (!player) {
     alert('Player details are not available right now. Check console for details.');
-    console.warn('openPlayerModal: player missing after fetch attempt', playerId, 'pb?', typeof pb !== 'undefined');
     return;
   }
 
@@ -3074,13 +3042,26 @@ function closeLightbox(event) {
   setTimeout(() => { lightbox.style.display = 'none'; }, 300);
 }
 
-// Close lightbox with Escape key
+// Keyboard controls for modals and auction mode
 document.addEventListener('keydown', function(event) {
   if (event.key === 'Escape') {
     const lightbox = document.getElementById('lightboxModal');
-    if (lightbox && lightbox.classList.contains('active')) {
-      closeLightbox();
-    }
+    if (lightbox && lightbox.classList.contains('active')) closeLightbox();
+    
+    const auctionModal = document.getElementById('auctionModal');
+    if (auctionModal && auctionModal.classList.contains('active')) closeModal('auctionModal');
+    
+    const teamModal = document.getElementById('teamModal');
+    if (teamModal && teamModal.classList.contains('active')) closeModal('teamModal');
+    
+    const playerModal = document.getElementById('playerModal');
+    if (playerModal && playerModal.classList.contains('active')) closeModal('playerModal');
+  }
+  
+  const auctionModal = document.getElementById('auctionModal');
+  if (auctionModal && auctionModal.classList.contains('active')) {
+    if (event.key === 'ArrowRight') nextAuction();
+    if (event.key === 'ArrowLeft') prevAuction();
   }
 });
 
@@ -3234,157 +3215,7 @@ function resetForm() {
   selectPay(document.querySelector('.pay-opt[data-type="digital"]'), 'digital');
 }
 
-// ==========================================
-// RESULT CARD DOWNLOAD FUNCTION
-// ==========================================
-function downloadMatchCard(resultId) {
-    const res = db_results.find(r => r.id === resultId);
-    if (!res) return;
 
-    const fixtureId = Array.isArray(res.fixture) ? res.fixture[0] : res.fixture;
-    const fixture = db_fixtures.find(f => f.id === fixtureId);
-    if (!fixture) return;
-
-    const team1Id = Array.isArray(fixture.team1) ? fixture.team1[0] : fixture.team1;
-    const team2Id = Array.isArray(fixture.team2) ? fixture.team2[0] : fixture.team2;
-    
-    const t1 = db_teams.find(t => t.id === team1Id) || { name: 'T1', crest_text: 'T1', crest_bg: '#111827' };
-    const t2 = db_teams.find(t => t.id === team2Id) || { name: 'T2', crest_text: 'T2', crest_bg: '#111827' };
-
-    const t1Name = t1.name || t1.crest_text || 'T1';
-    const t2Name = t2.name || t2.crest_text || 'T2';
-
-    document.getElementById('erc-t1-crest').style.background = t1.crest_bg;
-    document.getElementById('erc-t1-crest').style.color = getSafeCrestTextColor(t1.crest_bg);
-    let t1CrestHtml = t1.banner ? `<img src="${getPbImageUrl(t1, t1.banner)}" class="crest-img" crossorigin="anonymous">` : (t1.crest_text || 'T1');
-    document.getElementById('erc-t1-crest').innerHTML = t1CrestHtml;
-    if(t1.banner) document.getElementById('erc-t1-crest').style.padding = '0';
-    document.getElementById('erc-t1-name').textContent = t1Name;
-    const cardScore1 = parseInt(res.team1_score !== undefined ? res.team1_score : res.t1_score) || 0;
-    const cardScore2 = parseInt(res.team2_score !== undefined ? res.team2_score : res.t2_score) || 0;
-    document.getElementById('erc-t1-score').textContent = getExportScoreText(res, cardScore1, 't1');
-
-    document.getElementById('erc-t2-crest').style.background = t2.crest_bg;
-    document.getElementById('erc-t2-crest').style.color = getSafeCrestTextColor(t2.crest_bg);
-    let t2CrestHtml = t2.banner ? `<img src="${getPbImageUrl(t2, t2.banner)}" class="crest-img" crossorigin="anonymous">` : (t2.crest_text || 'T2');
-    document.getElementById('erc-t2-crest').innerHTML = t2CrestHtml;
-    if(t2.banner) document.getElementById('erc-t2-crest').style.padding = '0';
-    document.getElementById('erc-t2-name').textContent = t2Name;
-    document.getElementById('erc-t2-score').textContent = getExportScoreText(res, cardScore2, 't2');
-
-    const t1Counts = collectScorerSummary(res, 't1');
-
-    let t1ScorersHtml = '';
-    Object.entries(t1Counts).forEach(([playerRef, info]) => {
-        const player = db_players.find(p => p.id === playerRef || (p.name && p.name.toLowerCase() === playerRef.toLowerCase()));
-        let suffix = info.goals > 1 ? ` (${info.goals})` : '';
-        let penaltyTag = info.penaltyGoals > 0 ? ' (p)' : '';
-
-        if (player) {
-            const playerRealTeam = getPBLinkedTeamId(player);
-            if (playerRealTeam === t1.id) t1ScorersHtml += `<div>⚽ ${player.name}${penaltyTag}${suffix}</div>`;
-            else t1ScorersHtml += `<div style="color: #f87171; font-style:italic;">⚽ ${player.name} (og)${suffix}</div>`;
-        } else {
-            t1ScorersHtml += `<div>⚽ ${playerRef}${penaltyTag}${suffix}</div>`;
-        }
-    });
-    // -----------------------------
-    // Cards for Team 1 (Left) — Emoji first
-    // -----------------------------
-    const t1_yellow = extractFields(res, 't1_yellow', 4);
-    const t1_red = extractFields(res, 't1_red', 2);
-    let t1CardsArr = [];
-    t1_yellow.forEach(val => {
-      let strVal = String(val).trim();
-      if (strVal && strVal.toLowerCase() !== 'n/a') {
-        const p = db_players.find(p => p.id === strVal || (p.name && p.name.toLowerCase() === strVal.toLowerCase()));
-        const name = p ? p.name : strVal;
-        t1CardsArr.push(`<div style="color: #94a3b8; font-size: 14px;">🟨 ${name}</div>`);
-      }
-    });
-    t1_red.forEach(val => {
-      let strVal = String(val).trim();
-      if (strVal && strVal.toLowerCase() !== 'n/a') {
-        const p = db_players.find(p => p.id === strVal || (p.name && p.name.toLowerCase() === strVal.toLowerCase()));
-        const name = p ? p.name : strVal;
-        t1CardsArr.push(`<div style="color: #94a3b8; font-size: 14px;">🟥 ${name}</div>`);
-      }
-    });
-
-    const t1CardsHtml = t1CardsArr.length ? `<div style="margin-top:12px;">${t1CardsArr.join('')}</div>` : '';
-    document.getElementById('erc-t1-scorers').innerHTML = t1ScorersHtml + t1CardsHtml;
-
-    const t2Counts = collectScorerSummary(res, 't2');
-
-    let t2ScorersHtml = '';
-    Object.entries(t2Counts).forEach(([playerRef, info]) => {
-        const player = db_players.find(p => p.id === playerRef || (p.name && p.name.toLowerCase() === playerRef.toLowerCase()));
-        let suffix = info.goals > 1 ? ` (${info.goals})` : '';
-        let penaltyTag = info.penaltyGoals > 0 ? ' (p)' : '';
-
-        if (player) {
-            const playerRealTeam = getPBLinkedTeamId(player);
-            if (playerRealTeam === t2.id) t2ScorersHtml += `<div>${player.name}${penaltyTag}${suffix} ⚽</div>`;
-            else t2ScorersHtml += `<div style="color: #f87171; font-style:italic;">${player.name} (og)${suffix} ⚽</div>`;
-        } else {
-            t2ScorersHtml += `<div>${playerRef}${penaltyTag}${suffix} ⚽</div>`;
-        }
-    });
-    // -----------------------------
-    // Cards for Team 2 (Right) — Name first, Emoji last
-    // -----------------------------
-    const t2_yellow = extractFields(res, 't2_yellow', 4);
-    const t2_red = extractFields(res, 't2_red', 2);
-    let t2CardsArr = [];
-    t2_yellow.forEach(val => {
-      let strVal = String(val).trim();
-      if (strVal && strVal.toLowerCase() !== 'n/a') {
-        const p = db_players.find(p => p.id === strVal || (p.name && p.name.toLowerCase() === strVal.toLowerCase()));
-        const name = p ? p.name : strVal;
-        t2CardsArr.push(`<div style="color: #94a3b8; font-size: 14px;">${name} 🟨</div>`);
-      }
-    });
-    t2_red.forEach(val => {
-      let strVal = String(val).trim();
-      if (strVal && strVal.toLowerCase() !== 'n/a') {
-        const p = db_players.find(p => p.id === strVal || (p.name && p.name.toLowerCase() === strVal.toLowerCase()));
-        const name = p ? p.name : strVal;
-        t2CardsArr.push(`<div style="color: #94a3b8; font-size: 14px;">${name} 🟥</div>`);
-      }
-    });
-
-    const t2CardsHtml = t2CardsArr.length ? `<div style="margin-top:12px;">${t2CardsArr.join('')}</div>` : '';
-    document.getElementById('erc-t2-scorers').innerHTML = t2ScorersHtml + t2CardsHtml;
-
-    // Export Card MOTM Update
-    let motmId = res.motm || res.potm;
-    let motmContainer = document.getElementById('erc-motm-container');
-    if (motmId) {
-        let id = Array.isArray(motmId) ? motmId[0] : motmId;
-        let motmPlayer = db_players.find(p => p.id === id || (p.name && p.name.toLowerCase() === String(id).toLowerCase()));
-        if (motmPlayer) {
-            document.getElementById('erc-motm-photo').src = getPbImageUrl(motmPlayer, motmPlayer.photo);
-            document.getElementById('erc-motm-name').textContent = motmPlayer.name;
-            motmContainer.style.display = 'block';
-        } else {
-            motmContainer.style.display = 'none';
-        }
-    } else {
-        motmContainer.style.display = 'none';
-    }
-
-    const cardEl = document.getElementById('export-result-card');
-    cardEl.parentElement.style.top = "0";
-    cardEl.parentElement.style.zIndex = "-1";
-    
-    html2canvas(cardEl, { scale: 2, useCORS: true, backgroundColor: null }).then(canvas => {
-        const link = document.createElement('a');
-        link.download = `EFL_S4_Result_${t1Name}_vs_${t2Name}.png`;
-        link.href = canvas.toDataURL('image/png');
-        link.click();
-        cardEl.parentElement.style.top = "-10000px";
-    });
-}
 
 </script>
 </body>
