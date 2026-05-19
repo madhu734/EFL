@@ -596,7 +596,7 @@
     <div class="hero-badge animate-on-scroll"><span class="pulse" style="background: #10B981;"></span> <span id="dynamic-season-badge">Season 5</span></div>
     <div class="hero-season animate-on-scroll">Jahangirnagar University · Department of English</div>
     <div class="hero-title animate-on-scroll">English<br>Football<br>League</div>
-    <div class="hero-sub animate-on-scroll">The most anticipated football tournament of the Department of English is back. Six elite squads. One champion. <span id="dynamic-season-text">Season 5</span> begins soon.</div>
+    <div class="hero-sub animate-on-scroll">The most anticipated football tournament of the Department of English is back. Six elite squads. One champion. <span id="dynamic-season-text">Season 5 begins soon.</span></div>
     <div class="hero-actions animate-on-scroll">
       <button class="btn-primary" id="heroSupportBtn" onclick="window.open('https://eflsupport.duckdns.org', '_blank')" style="text-transform: none; min-width: 220px;">Register as a supporter of the tournament/any team (not player)</button>
       <button class="btn-outline" onclick="showPage('teams')" style="min-width: 180px;">View All Teams</button>
@@ -1269,7 +1269,8 @@ let currentSeason = '5';
 let CACHE_KEY = 'efl_cache_' + currentSeason;
 
 (function handleSeasonConfig() {
-  let activeSeason = localStorage.getItem('activeSeason');
+  let activeSeason = (localStorage.getItem('activeSeason') || 'S5').toUpperCase();
+  if (activeSeason !== 'S4') activeSeason = 'S5';
   if (activeSeason === 'S4') {
     PB_CONFIG.baseURL = 'https://pbdb2.duckdns.org';
     currentSeason = '4';
@@ -1285,6 +1286,7 @@ let CACHE_KEY = 'efl_cache_' + currentSeason;
     if(document.getElementById('dynamic-season-text')) document.getElementById('dynamic-season-text').textContent = 'Season 5 begins soon.';
     if(document.getElementById('dynamic-standings-season')) document.getElementById('dynamic-standings-season').textContent = 'SEASON 5';
   }
+  localStorage.setItem('activeSeason', activeSeason);
   const seasonLabel = document.getElementById('stat-season');
   if (seasonLabel) seasonLabel.textContent = currentSeason;
   window.PB_CONFIG = PB_CONFIG;
@@ -1304,27 +1306,34 @@ document.addEventListener('DOMContentLoaded', function() {
   // Season Switcher
   const s5Btn = document.getElementById('season5Btn');
   const s4Btn = document.getElementById('season4Btn');
-  let activeSeason = localStorage.getItem('activeSeason');
-  if (activeSeason === 'S4') {
-    s4Btn.classList.add('active');
-    s5Btn.classList.remove('active');
-  } else {
-    s5Btn.classList.add('active');
-    s4Btn.classList.remove('active');
+  let activeSeason = (localStorage.getItem('activeSeason') || 'S5').toUpperCase();
+  if (activeSeason !== 'S4') activeSeason = 'S5';
+  if (s5Btn && s4Btn) {
+    if (activeSeason === 'S4') {
+      s4Btn.classList.add('active');
+      s5Btn.classList.remove('active');
+    } else {
+      s5Btn.classList.add('active');
+      s4Btn.classList.remove('active');
+    }
   }
   applyArchiveMode(activeSeason === 'S4');
-  s5Btn.onclick = () => {
-    if (localStorage.getItem('activeSeason') !== 'S5') {
-      localStorage.setItem('activeSeason', 'S5');
-      window.location.reload();
-    }
-  };
-  s4Btn.onclick = () => {
-    if (localStorage.getItem('activeSeason') !== 'S4') {
-      localStorage.setItem('activeSeason', 'S4');
-      window.location.reload();
-    }
-  };
+  if (s5Btn && s4Btn) {
+    s5Btn.onclick = () => {
+      if (localStorage.getItem('activeSeason') !== 'S5') {
+        changeSeason('5');
+        s5Btn.classList.add('active');
+        s4Btn.classList.remove('active');
+      }
+    };
+    s4Btn.onclick = () => {
+      if (localStorage.getItem('activeSeason') !== 'S4') {
+        changeSeason('4');
+        s4Btn.classList.add('active');
+        s5Btn.classList.remove('active');
+      }
+    };
+  }
 });
 
 let db_teams = [];
@@ -1352,15 +1361,19 @@ function changeSeason(seasonValue) {
 
     if (seasonValue === '4') {
         PB_CONFIG.baseURL = 'https://pbdb2.duckdns.org';
+        localStorage.setItem('activeSeason', 'S4');
         if(document.getElementById('dynamic-season-badge')) document.getElementById('dynamic-season-badge').textContent = 'Season 4 Archive';
         if(document.getElementById('dynamic-season-text')) document.getElementById('dynamic-season-text').textContent = 'Season 4 archive content only.';
         if(document.getElementById('dynamic-standings-season')) document.getElementById('dynamic-standings-season').textContent = 'SEASON 4 ARCHIVE';
     } else {
         PB_CONFIG.baseURL = 'https://efljudb.duckdns.org';
+        localStorage.setItem('activeSeason', 'S5');
         if(document.getElementById('dynamic-season-badge')) document.getElementById('dynamic-season-badge').textContent = 'Season 5';
         if(document.getElementById('dynamic-season-text')) document.getElementById('dynamic-season-text').textContent = 'Season 5 begins soon.';
         if(document.getElementById('dynamic-standings-season')) document.getElementById('dynamic-standings-season').textContent = 'SEASON 5';
     }
+    const seasonLabel = document.getElementById('stat-season');
+    if (seasonLabel) seasonLabel.textContent = currentSeason;
     applyArchiveMode(seasonValue === '4');
     
     if (typeof pb !== 'undefined') pb.baseUrl = PB_CONFIG.baseURL;
@@ -1424,10 +1437,13 @@ window.addEventListener('DOMContentLoaded', () => {
 // ==========================================
 // SEARCH LOGIC FOR PLAYERS
 // ==========================================
-document.getElementById('player-search').addEventListener('input', function(e) {
+const playerSearchInput = document.getElementById('player-search');
+if (playerSearchInput) {
+  playerSearchInput.addEventListener('input', function(e) {
     searchQuery = e.target.value.toLowerCase();
     renderPlayersPage();
-});
+  });
+}
 
 // ==========================================
 // SCROLL ANIMATION LOGIC (Intersection Observer)
@@ -1703,7 +1719,7 @@ async function fetchPBData() {
     
     const retryHTML = `
       <div style="grid-column:1/-1; text-align:center; padding: 2rem;">
-        <div style="color:var(--accent); margin-bottom: 1rem; font-weight: bold;">Connection issue detected. Unable to load data from ${SEASON_CONFIGS[currentSeason].name} database.</div>
+        <div style="color:var(--accent); margin-bottom: 1rem; font-weight: bold;">Connection issue detected. Unable to load data from the selected season database.</div>
         <button class="btn-primary" onclick="retryConnection()">Retry Connection</button>
       </div>`;
     
@@ -3038,10 +3054,10 @@ function showPage(id, btn) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   const targetPage = document.getElementById('page-' + id);
   if (targetPage) targetPage.classList.add('active');
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.nav-btn, .sidebar-btn').forEach(b => b.classList.remove('active'));
   if (btn) btn.classList.add('active');
   else {
-    const activeNav = document.querySelector(`.nav-btn[onclick*="'${id}'"]`);
+    const activeNav = document.querySelector(`.nav-btn[onclick*="'${id}'"], .sidebar-btn[onclick*="'${id}'"]`);
     if (activeNav) activeNav.classList.add('active');
   }
   window.scrollTo({ top: 0, behavior: 'smooth' });
