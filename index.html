@@ -1640,9 +1640,16 @@ function getPBLinkedTeamId(player) {
 
 // PocketBase fetch helper with timeout to avoid long network hangs
 async function fetchRecordWithTimeout(collectionName, id, timeoutMs = 4000) {
-  if (typeof pb === 'undefined' || !pb || !id) return null;
+  if (!id) return null;
+  // Prefer using REST API fetch (fetchWithRetry) to avoid SDK-specific CORS or runtime issues.
   try {
-    const fetchPromise = pb.collection(collectionName).getOne(id);
+    const url = `${PB_CONFIG.baseURL}/api/collections/${collectionName}/records/${id}`;
+    const fetchPromise = (async () => {
+      const res = await fetchWithRetry(url, { cache: 'no-store' }, 2);
+      if (!res) throw new Error('no-response');
+      return await res.json();
+    })();
+
     const timeoutPromise = new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), timeoutMs));
     return await Promise.race([fetchPromise, timeoutPromise]);
   } catch (err) {
@@ -1706,6 +1713,7 @@ function retryConnection() {
 
 async function fetchPBData() {
   const fetchOptions = { cache: 'no-store' };
+  console.log('fetchPBData: PB baseURL=', PB_CONFIG && PB_CONFIG.baseURL);
   try {
     const endpoints = [
       { key: 'teams', url: `${PB_CONFIG.baseURL}/api/collections/teams/records?perPage=100` },
