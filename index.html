@@ -1665,7 +1665,7 @@ async function initData() {
           renderSupportersPage();
           if (typeof renderVotingTeamGrid === 'function') renderVotingTeamGrid();
           setTimeout(observeElements, 500);
-          return;
+          // fetchPBData will be called below to revalidate cache with fresh database data
       } catch (e) {
           console.error("Cache parsing error", e);
       }
