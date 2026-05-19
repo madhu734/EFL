@@ -46,22 +46,84 @@
   body { font-family: 'Inter', sans-serif; background: var(--bg-body); color: var(--text-main); min-height: 100vh; overflow-x: hidden; transition: background-color 0.3s, color 0.3s; font-size: 14px; }
   
   /* GLASSMORPHISM NAVBAR */
-  nav { 
-    background: var(--glass-bg); 
-    backdrop-filter: blur(12px); 
-    -webkit-backdrop-filter: blur(12px);
-    border-bottom: 1px solid var(--border); 
-    padding: 0 2rem; 
-    position: sticky; 
-    top: 0; 
-    z-index: 100; 
-    display: flex; 
-    align-items: center; 
-    justify-content: space-between; 
-    min-height: 70px; 
-    box-shadow: 0 4px 20px rgba(0,0,0,0.05); 
+  nav {
+    background: var(--glass-bg);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 1rem;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 64px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
     transition: background-color 0.3s, border-color 0.3s;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
+  }
+  .season-switcher {
+    display: flex;
+    align-items: center;
+    background: rgba(255,255,255,0.5);
+    border-radius: 1.2rem;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    margin-right: 0.3rem;
+    padding: 0.1rem 0.2rem;
+  }
+  .season-toggle-btn {
+    border: none;
+    background: none;
+    font-weight: 600;
+    font-size: 1rem;
+    color: var(--text-main);
+    padding: 0.3rem 0.9rem;
+    border-radius: 1rem;
+    cursor: pointer;
+    transition: background 0.18s, color 0.18s;
+  }
+  .season-toggle-btn.active {
+    background: var(--accent);
+    color: #fff;
+  }
+  @media (max-width: 768px) {
+    .section, .fixtures-wrap, .results-wrap, .about-wrap, .standings-wrap, .supporters-wrap {
+      padding: 1rem 0.5rem !important;
+    }
+    .team-card, .player-card, .result-card, .fixture-card {
+      width: 98vw !important;
+      max-width: 99vw !important;
+      margin-left: 1vw !important;
+      margin-right: 1vw !important;
+    }
+    .hero-title, .hero-sub, .hero-season {
+      color: var(--text-main) !important;
+      text-shadow: 0 1px 8px rgba(255,255,255,0.12);
+    }
+  }
+  @media (max-width: 600px) {
+    .section, .fixtures-wrap, .results-wrap, .about-wrap, .standings-wrap, .supporters-wrap {
+      padding: 0.7rem 0.2rem !important;
+    }
+    .team-card, .player-card, .result-card, .fixture-card {
+      width: 99vw !important;
+      max-width: 100vw !important;
+      margin-left: 0.5vw !important;
+      margin-right: 0.5vw !important;
+    }
+    .hero-title, .hero-sub, .hero-season {
+      color: var(--text-main) !important;
+      text-shadow: 0 1px 8px rgba(255,255,255,0.12);
+    }
+  }
+  .empty-state {
+    text-align: center;
+    color: #888;
+    font-size: 1.2rem;
+    padding: 2.5rem 0 2.5rem 0;
+    background: #f8fafc;
+    border-radius: 1.2rem;
   }
   .nav-logo { display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 10px 0;}
   .logo-img { height: 50px; width: auto; object-fit: contain; }
@@ -487,24 +549,11 @@
     </div>
   </div>
 
-  <div class="nav-actions">
-    <!-- Season Switcher -->
-    <div style="display: flex; flex-direction: column; align-items: center; gap: 2px; margin-right: 10px;">
-        <select id="seasonSwitcher" onchange="changeSeason(this.value)" style="padding: 6px 10px; border-radius: 8px; border: 1.5px solid var(--border); background: var(--glass-bg); color: var(--brand); font-weight: 700; font-size: 11px; cursor: pointer; outline: none; font-family: 'Inter', sans-serif;">
-            <option value="5" selected>Season 5 (Current)</option>
-            <option value="4">Season 4 (Archive)</option>
-        </select>
-        <span style="font-size: 9px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Season</span>
+  <div class="nav-actions" style="display: flex; align-items: center; gap: 0.5rem;">
+    <div class="season-switcher" id="seasonSwitcherUI">
+      <button class="season-toggle-btn" id="season5Btn">S5</button>
+      <button class="season-toggle-btn" id="season4Btn">S4</button>
     </div>
-    <!-- App Download Button -->
-    <div style="display: flex; flex-direction: column; align-items: center; gap: 2px; margin-right: 10px;">
-      <a href="https://github.com/madhu734/EFL/releases/download/SP/EFL.apk" class="nav-btn" style="text-decoration: none; border: 1.5px solid #10B981; color: #10B981; background: rgba(16, 185, 129, 0.05);" title="Download EFL Season 4 Android App">
-        📱 Download App
-      </a>
-      <span style="font-size: 7.5px; color: var(--text-muted); text-align: center; max-width: 125px; line-height: 1.3;">*(Only Android, may show harmful warning, but can be ignored and continued anyway)</span>
-    </div>
-
-    <!-- Theme Toggle Button -->
     <div style="display: flex; flex-direction: column; align-items: center; gap: 2px; margin-right: 10px;">
       <button class="theme-toggle-btn" onclick="toggleTheme()" id="themeToggleBtn" title="Toggle Dark/Light Mode">🌙</button>
       <span id="themeToggleText" style="font-size: 9px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Dark</span>
@@ -513,8 +562,6 @@
       <span>🌌 EFL Universe (3D)</span>
     </a>
     <button class="nav-cta" style="background: var(--text-muted); cursor: default; box-shadow: none;" disabled>Registration Closed</button>
-    
-    <!-- Hamburger Icon -->
     <div class="hamburger-btn" onclick="toggleSidebar()">
       <span></span><span></span><span></span>
     </div>
@@ -535,6 +582,8 @@
     <button class="sidebar-btn" onclick="showPage('supporters'); toggleSidebar()">🤝 Supporters</button>
     <button class="sidebar-btn" onclick="showPage('about'); toggleSidebar()">ℹ️ About</button>
     <button class="sidebar-btn" onclick="window.open('/fpl/', '_blank'); toggleSidebar()">🎮 Fantasy</button>
+    <a href="https://github.com/madhu734/EFL/releases/download/SP/EFL.apk" class="nav-btn" style="margin-top:1.5rem; text-decoration: none; border: 1.5px solid #10B981; color: #10B981; background: rgba(16, 185, 129, 0.05); display:block; text-align:center; border-radius:8px; padding:10px 0; font-weight:700;" title="Download EFL Season 4 Android App">📱 Download App</a>
+    <span style="font-size: 8px; color: var(--text-muted); text-align: center; max-width: 125px; line-height: 1.3; display:block; margin:0 auto 0.5rem auto;">*(Only Android, may show harmful warning, but can be ignored and continued anyway)</span>
   </div>
 </div>
 
@@ -1209,12 +1258,57 @@
 // ==========================================
 // POCKETBASE CONFIGURATION
 // ==========================================
-const PB_CONFIG = {
-  baseURL: 'https://efljudb.duckdns.org', 
-};
 
+// --- Season Switcher Logic ---
+let PB_CONFIG = window.PB_CONFIG || { baseURL: 'https://efljudb.duckdns.org' };
 let currentSeason = '5';
 let CACHE_KEY = 'efl_cache_' + currentSeason;
+
+(function handleSeasonConfig() {
+  let activeSeason = localStorage.getItem('activeSeason');
+  if (activeSeason === 'S4') {
+    PB_CONFIG.baseURL = 'https://pbdb2.duckdns.org';
+    currentSeason = '4';
+    CACHE_KEY = 'efl_cache_4';
+    if(document.getElementById('dynamic-season-badge')) document.getElementById('dynamic-season-badge').textContent = 'Season 4';
+    if(document.getElementById('dynamic-season-text')) document.getElementById('dynamic-season-text').textContent = 'Season 4';
+    if(document.getElementById('dynamic-standings-season')) document.getElementById('dynamic-standings-season').textContent = 'SEASON 4';
+  } else {
+    PB_CONFIG.baseURL = 'https://efljudb.duckdns.org';
+    currentSeason = '5';
+    CACHE_KEY = 'efl_cache_5';
+    if(document.getElementById('dynamic-season-badge')) document.getElementById('dynamic-season-badge').textContent = 'Season 5';
+    if(document.getElementById('dynamic-season-text')) document.getElementById('dynamic-season-text').textContent = 'Season 5';
+    if(document.getElementById('dynamic-standings-season')) document.getElementById('dynamic-standings-season').textContent = 'SEASON 5';
+  }
+  window.PB_CONFIG = PB_CONFIG;
+})();
+// --- Season Switcher UI ---
+document.addEventListener('DOMContentLoaded', function() {
+  // Season Switcher
+  const s5Btn = document.getElementById('season5Btn');
+  const s4Btn = document.getElementById('season4Btn');
+  let activeSeason = localStorage.getItem('activeSeason');
+  if (activeSeason === 'S4') {
+    s4Btn.classList.add('active');
+    s5Btn.classList.remove('active');
+  } else {
+    s5Btn.classList.add('active');
+    s4Btn.classList.remove('active');
+  }
+  s5Btn.onclick = () => {
+    if (localStorage.getItem('activeSeason') !== 'S5') {
+      localStorage.setItem('activeSeason', 'S5');
+      window.location.reload();
+    }
+  };
+  s4Btn.onclick = () => {
+    if (localStorage.getItem('activeSeason') !== 'S4') {
+      localStorage.setItem('activeSeason', 'S4');
+      window.location.reload();
+    }
+  };
+});
 
 let db_teams = [];
 let db_players = [];
@@ -1619,10 +1713,10 @@ function renderTeamsPage() {
   const container = document.getElementById('teams-container');
   container.innerHTML = '';
   
-  if (db_teams.length === 0) {
-      container.innerHTML = '<div style="grid-column:1/-1; padding: 4rem 2rem; text-align:center; color:var(--text-muted); font-size:14px; border:1px dashed var(--border); border-radius:12px; background: var(--bg-card);">No records found for this season yet.</div>';
+    if (db_teams.length === 0) {
+      container.innerHTML = '<div class="empty-state">Data for this season will be updated soon.</div>';
       return;
-  }
+    }
 
   db_teams.forEach(team => {
     const teamPlayers = db_players.filter(p => getPBLinkedTeamId(p) === team.id);
@@ -1681,7 +1775,7 @@ function renderPlayersPage() {
   });
 
   if (currentFilteredPlayers.length === 0) {
-    container.innerHTML = '<div style="grid-column: 1/-1; padding: 4rem 2rem; text-align: center; color: var(--text-muted); font-size: 14px; border: 1px dashed var(--border); border-radius: 12px; background: var(--bg-card);">No records found for this season yet.</div>';
+    container.innerHTML = '<div class="empty-state">Data for this season will be updated soon.</div>';
     return;
   }
 
@@ -1736,11 +1830,7 @@ function renderFixturesPage() {
   const container = document.getElementById('fixtures-container');
   
   if (db_fixtures.length === 0) {
-      container.innerHTML = `
-        <div class="coming-soon-box">
-          <span class="cs-icon" style="font-size: 42px;">⚽</span>
-          <div class="cs-title" style="font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 20px; margin-top: 10px;">No records found for this season yet.</div>
-        </div>`;
+      container.innerHTML = `<div class="empty-state">Data for this season will be updated soon.</div>`;
       return;
   }
 
@@ -1815,14 +1905,10 @@ function renderResultsPage() {
   const topCardsContainer = document.getElementById('top-cards-container'); // Kung-fu player
   
   if (db_results.length === 0) {
-      resultsContainer.innerHTML = `
-        <div class="coming-soon-box" style="padding: 3rem 2rem;">
-          <span class="cs-icon" style="font-size: 32px;">🏆</span>
-          <div class="cs-title" style="font-size: 16px; margin-top: 8px;">No results published yet.</div>
-        </div>`;
-      topScorersContainer.innerHTML = '<div style="text-align: center; color: var(--text-muted); font-size: 13px; padding: 2rem 0;">Stats will update once matches are played.</div>';
-      topAssistsContainer.innerHTML = '<div style="text-align: center; color: var(--text-muted); font-size: 13px; padding: 2rem 0;">Stats will update once matches are played.</div>';
-      topCardsContainer.innerHTML = '<div style="text-align: center; color: var(--text-muted); font-size: 13px; padding: 2rem 0;">Stats will update once matches are played.</div>';
+      resultsContainer.innerHTML = `<div class="empty-state">Data for this season will be updated soon.</div>`;
+      topScorersContainer.innerHTML = '<div class="empty-state">Data for this season will be updated soon.</div>';
+      topAssistsContainer.innerHTML = '<div class="empty-state">Data for this season will be updated soon.</div>';
+      topCardsContainer.innerHTML = '<div class="empty-state">Data for this season will be updated soon.</div>';
       return;
   }
 
