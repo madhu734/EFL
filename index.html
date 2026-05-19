@@ -161,8 +161,8 @@
   @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
   /* SCROLL ANIMATION CLASSES */
-  .animate-on-scroll { opacity: 0; transform: translateY(30px); transition: opacity 0.6s ease-out, transform 0.6s ease-out; }
-  .animate-on-scroll.is-visible { opacity: 1; transform: translateY(0); }
+  .animate-on-scroll { opacity: 1; transform: none; transition: none; }
+  .animate-on-scroll.is-visible { opacity: 1; transform: none; }
 
   /* HERO SECTION */
   .hero { background: var(--bg-card); padding: 3rem 1.5rem 2.5rem; text-align: center; position: relative; overflow: hidden; border-bottom: 1px solid var(--border); transition: background-color 0.3s; }
@@ -1936,134 +1936,135 @@ function renderResultsPage() {
   let playerCardsMap = {}; // Maps { yellow: 0, red: 0, pts: 0 }
 
   db_results.forEach(res => {
-      const fixtureId = Array.isArray(res.fixture) ? res.fixture[0] : res.fixture;
-      const fixture = db_fixtures.find(f => f.id === fixtureId);
-      
-      if (!fixture) {
-          console.warn("Skipping a result record because Fixture is missing or unlinked: ", res);
-          return;
-      }
-
-      const team1Id = Array.isArray(fixture.team1) ? fixture.team1[0] : fixture.team1;
-      const team2Id = Array.isArray(fixture.team2) ? fixture.team2[0] : fixture.team2;
-      
-      const t1 = db_teams.find(t => t.id === team1Id) || { name: 'TBD', crest_text: '?', crest_bg: '#94a3b8' };
-      const t2 = db_teams.find(t => t.id === team2Id) || { name: 'TBD', crest_text: '?', crest_bg: '#94a3b8' };
-
-      const t1Name = t1.name || t1.crest_text || 'TBD';
-      const t2Name = t2.name || t2.crest_text || 'TBD';
-
-      const t1CrestTextCol = getSafeCrestTextColor(t1.crest_bg);
-      const t2CrestTextCol = getSafeCrestTextColor(t2.crest_bg);
-
-      let t1CrestHtml = t1.banner ? `<img src="${getPbImageUrl(t1, t1.banner)}" class="crest-img" crossorigin="anonymous">` : (t1.crest_text || '?');
-      let t2CrestHtml = t2.banner ? `<img src="${getPbImageUrl(t2, t2.banner)}" class="crest-img" crossorigin="anonymous">` : (t2.crest_text || '?');
-
-      const score1 = parseInt(res.team1_score !== undefined ? res.team1_score : res.t1_score) || 0;
-      const score2 = parseInt(res.team2_score !== undefined ? res.team2_score : res.t2_score) || 0;
-      const resultScoreText = getResultScoreText(res, score1, score2);
-
-      // ----------------------------------------------------
-      // GOALS PROCESSING
-      // ----------------------------------------------------
-      const { t1Counts, t2Counts } = processAggregatedStats(res, t1, t2, playerGoalsMap);
-
-      let t1ScorersUI = [];
-      Object.entries(t1Counts).forEach(([playerRef, info]) => {
-          const player = db_players.find(p => p.id === playerRef || (p.name && p.name.toLowerCase() === playerRef.toLowerCase()));
-          let suffix = info.goals > 1 ? ` (${info.goals})` : '';
-          let penaltyTag = info.penaltyGoals > 0 ? ' (p)' : '';
-
-          if (player) {
-              const playerRealTeam = getPBLinkedTeamId(player);
-              if (playerRealTeam === t1.id) {
-                  t1ScorersUI.push(`<span>⚽ ${player.name}${penaltyTag}${suffix}</span>`);
-              } else {
-                  t1ScorersUI.push(`<span class="scorer-item-og">⚽ ${player.name} (og)${suffix}</span>`);
-              }
-          } else {
-              t1ScorersUI.push(`<span>⚽ ${playerRef}${penaltyTag}${suffix}</span>`);
+      try {
+          const fixtureId = Array.isArray(res.fixture) ? res.fixture[0] : res.fixture;
+          const fixture = db_fixtures.find(f => f.id === fixtureId);
+          
+          if (!fixture) {
+              console.warn("Skipping a result record because Fixture is missing or unlinked: ", res);
+              return;
           }
-      });
 
-      let t2ScorersUI = [];
-      Object.entries(t2Counts).forEach(([playerRef, info]) => {
-          const player = db_players.find(p => p.id === playerRef || (p.name && p.name.toLowerCase() === playerRef.toLowerCase()));
-          let suffix = info.goals > 1 ? ` (${info.goals})` : '';
-          let penaltyTag = info.penaltyGoals > 0 ? ' (p)' : '';
+          const team1Id = Array.isArray(fixture.team1) ? fixture.team1[0] : fixture.team1;
+          const team2Id = Array.isArray(fixture.team2) ? fixture.team2[0] : fixture.team2;
+          
+          const t1 = db_teams?.find(t => t.id === team1Id) || { name: 'TBD', crest_text: '?', crest_bg: '#94a3b8' };
+          const t2 = db_teams?.find(t => t.id === team2Id) || { name: 'TBD', crest_text: '?', crest_bg: '#94a3b8' };
 
-          if (player) {
-              const playerRealTeam = getPBLinkedTeamId(player);
-              if (playerRealTeam === t2.id) {
-                  t2ScorersUI.push(`<span>${player.name}${penaltyTag}${suffix} ⚽</span>`);
-              } else {
-                  t2ScorersUI.push(`<span class="scorer-item-og">${player.name} (og)${suffix} ⚽</span>`);
-              }
-          } else {
-              t2ScorersUI.push(`<span>${playerRef}${penaltyTag}${suffix} ⚽</span>`);
-          }
-      });
+          const t1Name = t1?.name || t1?.crest_text || 'TBD';
+          const t2Name = t2?.name || t2?.crest_text || 'TBD';
 
-      // ----------------------------------------------------
-      // ASSISTS PROCESSING (Only for Stats, not Match UI)
-      // ----------------------------------------------------
-      let t1AssistsRaw = extractAssists(res, 't1');
-      t1AssistsRaw.forEach(val => {
-          if(val) {
-              let strVal = String(val).trim();
-              if (strVal !== '' && strVal.toLowerCase() !== 'n/a') {
-                  const player = db_players.find(p => p.id === strVal || (p.name && p.name.toLowerCase() === strVal.toLowerCase()));
-                  if (player) {
-                      playerAssistsMap[player.id] = (playerAssistsMap[player.id] || 0) + 1;
+          const t1CrestTextCol = getSafeCrestTextColor(t1?.crest_bg);
+          const t2CrestTextCol = getSafeCrestTextColor(t2?.crest_bg);
+
+          let t1CrestHtml = t1?.banner ? `<img src="${getPbImageUrl(t1, t1.banner)}" class="crest-img" crossorigin="anonymous">` : (t1?.crest_text || '?');
+          let t2CrestHtml = t2?.banner ? `<img src="${getPbImageUrl(t2, t2.banner)}" class="crest-img" crossorigin="anonymous">` : (t2?.crest_text || '?');
+
+          const score1 = parseInt(res.team1_score !== undefined ? res.team1_score : res.t1_score) || 0;
+          const score2 = parseInt(res.team2_score !== undefined ? res.team2_score : res.t2_score) || 0;
+          const resultScoreText = getResultScoreText(res, score1, score2);
+
+          // ----------------------------------------------------
+          // GOALS PROCESSING
+          // ----------------------------------------------------
+          const { t1Counts, t2Counts } = processAggregatedStats(res, t1, t2, playerGoalsMap);
+
+          let t1ScorersUI = [];
+          Object.entries(t1Counts).forEach(([playerRef, info]) => {
+              const player = db_players?.find(p => p.id === playerRef || (p.name && p.name.toLowerCase() === playerRef.toLowerCase()));
+              let suffix = info.goals > 1 ? ` (${info.goals})` : '';
+              let penaltyTag = info.penaltyGoals > 0 ? ' (p)' : '';
+
+              if (player) {
+                  const playerRealTeam = getPBLinkedTeamId(player);
+                  if (playerRealTeam === t1?.id) {
+                      t1ScorersUI.push(`<span>⚽ ${player.name}${penaltyTag}${suffix}</span>`);
+                  } else {
+                      t1ScorersUI.push(`<span class="scorer-item-og">⚽ ${player.name} (og)${suffix}</span>`);
                   }
+              } else {
+                  t1ScorersUI.push(`<span>⚽ ${playerRef}${penaltyTag}${suffix}</span>`);
               }
-          }
-      });
+          });
 
-      let t2AssistsRaw = extractAssists(res, 't2');
-      t2AssistsRaw.forEach(val => {
-          if(val) {
-              let strVal = String(val).trim();
-              if (strVal !== '' && strVal.toLowerCase() !== 'n/a') {
-                  const player = db_players.find(p => p.id === strVal || (p.name && p.name.toLowerCase() === strVal.toLowerCase()));
-                  if (player) {
-                      playerAssistsMap[player.id] = (playerAssistsMap[player.id] || 0) + 1;
+          let t2ScorersUI = [];
+          Object.entries(t2Counts).forEach(([playerRef, info]) => {
+              const player = db_players?.find(p => p.id === playerRef || (p.name && p.name.toLowerCase() === playerRef.toLowerCase()));
+              let suffix = info.goals > 1 ? ` (${info.goals})` : '';
+              let penaltyTag = info.penaltyGoals > 0 ? ' (p)' : '';
+
+              if (player) {
+                  const playerRealTeam = getPBLinkedTeamId(player);
+                  if (playerRealTeam === t2?.id) {
+                      t2ScorersUI.push(`<span>${player.name}${penaltyTag}${suffix} ⚽</span>`);
+                  } else {
+                      t2ScorersUI.push(`<span class="scorer-item-og">${player.name} (og)${suffix} ⚽</span>`);
                   }
+              } else {
+                  t2ScorersUI.push(`<span>${playerRef}${penaltyTag}${suffix} ⚽</span>`);
               }
-          }
-      });
+          });
 
-      // ----------------------------------------------------
-      // CARDS (KUNG-FU PLAYER) PROCESSING
-      // ----------------------------------------------------
-      ['t1', 't2'].forEach(teamPrefix => {
-          let yellows = extractFields(res, `${teamPrefix}_yellow`, 4);
-          let reds = extractFields(res, `${teamPrefix}_red`, 2);
-
-          yellows.forEach(val => {
-              let strVal = String(val).trim();
-              if (strVal && strVal.toLowerCase() !== 'n/a') {
-                  const p = db_players.find(p => p.id === strVal || (p.name && p.name.toLowerCase() === strVal.toLowerCase()));
-                  if (p) {
-                      if(!playerCardsMap[p.id]) playerCardsMap[p.id] = { yellow: 0, red: 0, pts: 0 };
-                      playerCardsMap[p.id].yellow += 1;
-                      playerCardsMap[p.id].pts += 1; // 1 point for yellow
+          // ----------------------------------------------------
+          // ASSISTS PROCESSING (Only for Stats, not Match UI)
+          // ----------------------------------------------------
+          let t1AssistsRaw = extractAssists(res, 't1');
+          t1AssistsRaw.forEach(val => {
+              if(val) {
+                  let strVal = String(val).trim();
+                  if (strVal !== '' && strVal.toLowerCase() !== 'n/a') {
+                      const player = db_players?.find(p => p.id === strVal || (p.name && p.name.toLowerCase() === strVal.toLowerCase()));
+                      if (player) {
+                          playerAssistsMap[player.id] = (playerAssistsMap[player.id] || 0) + 1;
+                      }
                   }
               }
           });
 
-          reds.forEach(val => {
-              let strVal = String(val).trim();
-              if (strVal && strVal.toLowerCase() !== 'n/a') {
-                  const p = db_players.find(p => p.id === strVal || (p.name && p.name.toLowerCase() === strVal.toLowerCase()));
-                  if (p) {
-                      if(!playerCardsMap[p.id]) playerCardsMap[p.id] = { yellow: 0, red: 0, pts: 0 };
-                      playerCardsMap[p.id].red += 1;
-                      playerCardsMap[p.id].pts += 2; // 2 points for red
+          let t2AssistsRaw = extractAssists(res, 't2');
+          t2AssistsRaw.forEach(val => {
+              if(val) {
+                  let strVal = String(val).trim();
+                  if (strVal !== '' && strVal.toLowerCase() !== 'n/a') {
+                      const player = db_players?.find(p => p.id === strVal || (p.name && p.name.toLowerCase() === strVal.toLowerCase()));
+                      if (player) {
+                          playerAssistsMap[player.id] = (playerAssistsMap[player.id] || 0) + 1;
+                      }
                   }
               }
           });
-      });
+
+          // ----------------------------------------------------
+          // CARDS (KUNG-FU PLAYER) PROCESSING
+          // ----------------------------------------------------
+          ['t1', 't2'].forEach(teamPrefix => {
+              let yellows = extractFields(res, `${teamPrefix}_yellow`, 4);
+              let reds = extractFields(res, `${teamPrefix}_red`, 2);
+
+              yellows.forEach(val => {
+                  let strVal = String(val).trim();
+                  if (strVal && strVal.toLowerCase() !== 'n/a') {
+                      const p = db_players?.find(p => p.id === strVal || (p.name && p.name.toLowerCase() === strVal.toLowerCase()));
+                      if (p) {
+                          if(!playerCardsMap[p.id]) playerCardsMap[p.id] = { yellow: 0, red: 0, pts: 0 };
+                          playerCardsMap[p.id].yellow += 1;
+                          playerCardsMap[p.id].pts += 1; // 1 point for yellow
+                      }
+                  }
+              });
+
+              reds.forEach(val => {
+                  let strVal = String(val).trim();
+                  if (strVal && strVal.toLowerCase() !== 'n/a') {
+                      const p = db_players?.find(p => p.id === strVal || (p.name && p.name.toLowerCase() === strVal.toLowerCase()));
+                      if (p) {
+                          if(!playerCardsMap[p.id]) playerCardsMap[p.id] = { yellow: 0, red: 0, pts: 0 };
+                          playerCardsMap[p.id].red += 1;
+                          playerCardsMap[p.id].pts += 2; // 2 points for red
+                      }
+                  }
+              });
+          });
 
           // ----------------------------------------------------
           // PER-MATCH CARDS UI (Shown on each result card)
@@ -2075,7 +2076,7 @@ function renderResultsPage() {
           t1_yellow.forEach(val => {
             let strVal = String(val).trim();
             if (strVal && strVal.toLowerCase() !== 'n/a') {
-              const p = db_players.find(p => p.id === strVal || (p.name && p.name.toLowerCase() === strVal.toLowerCase()));
+              const p = db_players?.find(p => p.id === strVal || (p.name && p.name.toLowerCase() === strVal.toLowerCase()));
               const name = p ? p.name : strVal;
               t1CardsUI.push(`<span style="display: flex; align-items: center; gap: 4px;">🟨 ${name}</span>`);
             }
@@ -2083,7 +2084,7 @@ function renderResultsPage() {
           t1_red.forEach(val => {
             let strVal = String(val).trim();
             if (strVal && strVal.toLowerCase() !== 'n/a') {
-              const p = db_players.find(p => p.id === strVal || (p.name && p.name.toLowerCase() === strVal.toLowerCase()));
+              const p = db_players?.find(p => p.id === strVal || (p.name && p.name.toLowerCase() === strVal.toLowerCase()));
               const name = p ? p.name : strVal;
               t1CardsUI.push(`<span style="display: flex; align-items: center; gap: 4px;">🟥 ${name}</span>`);
             }
@@ -2096,7 +2097,7 @@ function renderResultsPage() {
           t2_yellow.forEach(val => {
             let strVal = String(val).trim();
             if (strVal && strVal.toLowerCase() !== 'n/a') {
-              const p = db_players.find(p => p.id === strVal || (p.name && p.name.toLowerCase() === strVal.toLowerCase()));
+              const p = db_players?.find(p => p.id === strVal || (p.name && p.name.toLowerCase() === strVal.toLowerCase()));
               const name = p ? p.name : strVal;
               t2CardsUI.push(`<span style="display: flex; align-items: center; gap: 4px; justify-content: flex-end;">${name} 🟨</span>`);
             }
@@ -2104,78 +2105,79 @@ function renderResultsPage() {
           t2_red.forEach(val => {
             let strVal = String(val).trim();
             if (strVal && strVal.toLowerCase() !== 'n/a') {
-              const p = db_players.find(p => p.id === strVal || (p.name && p.name.toLowerCase() === strVal.toLowerCase()));
+              const p = db_players?.find(p => p.id === strVal || (p.name && p.name.toLowerCase() === strVal.toLowerCase()));
               const name = p ? p.name : strVal;
               t2CardsUI.push(`<span style="display: flex; align-items: center; gap: 4px; justify-content: flex-end;">${name} 🟥</span>`);
             }
           });
 
-
-
-      // 🏅 Player of the Match logic
-      let motmId = res.motm || res.potm;
-      let motmHtml = '';
-      if (motmId) {
-          let id = Array.isArray(motmId) ? motmId[0] : motmId;
-          let motmPlayer = db_players.find(p => p.id === id || (p.name && p.name.toLowerCase() === String(id).toLowerCase()));
-          if (motmPlayer) {
-              let motmPhoto = getPbImageUrl(motmPlayer, motmPlayer.photo);
-              motmHtml = `
-              <div style="width: 100%; display: flex; justify-content: center; margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--border);">
-                  <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); padding: 4px 12px; border-radius: 20px;">
-                      <span style="font-size: 14px;">🏅</span>
-                      <span style="font-size: 10px; font-weight: 800; color: #B45309; text-transform: uppercase; letter-spacing: 0.5px;">Player of the Match:</span>
-                      <img src="${motmPhoto}" style="width: 20px; height: 20px; border-radius: 50%; object-fit: cover; border: 1px solid #B45309;" crossorigin="anonymous">
-                      <span style="font-size: 12px; font-weight: 700; color: var(--text-main);">${motmPlayer.name}</span>
-                  </div>
-              </div>`;
+          // 🏅 Player of the Match logic
+          let motmId = res.motm || res.potm;
+          let motmHtml = '';
+          if (motmId) {
+              let id = Array.isArray(motmId) ? motmId[0] : motmId;
+              let motmPlayer = db_players?.find(p => p.id === id || (p.name && p.name.toLowerCase() === String(id).toLowerCase()));
+              if (motmPlayer) {
+                  let motmPhoto = getPbImageUrl(motmPlayer, motmPlayer.photo);
+                  motmHtml = \`
+                  <div style="width: 100%; display: flex; justify-content: center; margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--border);">
+                      <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); padding: 4px 12px; border-radius: 20px;">
+                          <span style="font-size: 14px;">🏅</span>
+                          <span style="font-size: 10px; font-weight: 800; color: #B45309; text-transform: uppercase; letter-spacing: 0.5px;">Player of the Match:</span>
+                          <img src="\${motmPhoto}" style="width: 20px; height: 20px; border-radius: 50%; object-fit: cover; border: 1px solid #B45309;" crossorigin="anonymous">
+                          <span style="font-size: 12px; font-weight: 700; color: var(--text-main);">\${motmPlayer.name}</span>
+                      </div>
+                  </div>\`;
+              }
           }
-      }
 
-      resultsHtml += `
-      <div class="result-card animate-on-scroll">
-          <div class="fixture-header">
-              <span>${fixture.match_type || 'Match Result'}</span>
-              <span style="color:var(--brand);">Full Time</span>
-          </div>
-          <div class="result-body">
-              <div class="fixture-team" style="flex-direction: column; align-items: flex-start;">
-                  <div style="display: flex; align-items: center; gap: 12px;">
-                      <div class="fixture-crest" style="background:${t1.crest_bg}; color:${t1CrestTextCol}; ${t1.banner ? 'padding:0; border:2px solid transparent;' : ''}">${t1CrestHtml}</div>
-                      <div class="fixture-tname">${t1Name}</div>
-                  </div>
-                  <div class="result-scorer-list">
-                      ${t1ScorersUI.join('')}
-                  </div>
-                    <div class="result-card-list" style="font-size: 11px; color: var(--text-muted); margin-top: 6px; display: flex; flex-direction: column; gap: 3px;">
-                      ${t1CardsUI.join('')}
-                    </div>
+          resultsHtml += \`
+          <div class="result-card animate-on-scroll">
+              <div class="fixture-header">
+                  <span>\${fixture.match_type || 'Match Result'}</span>
+                  <span style="color:var(--brand);">Full Time</span>
               </div>
-              <div class="fixture-center">
-                  <div class="fixture-score">${resultScoreText}</div>
-              </div>
-              <div class="fixture-team away" style="flex-direction: column; align-items: flex-end;">
-                  <div style="display: flex; align-items: center; gap: 12px; flex-direction: row-reverse;">
-                      <div class="fixture-crest" style="background:${t2.crest_bg}; color:${t2CrestTextCol}; ${t2.banner ? 'padding:0; border:2px solid transparent;' : ''}">${t2CrestHtml}</div>
-                      <div class="fixture-tname">${t2Name}</div>
+              <div class="result-body">
+                  <div class="fixture-team" style="flex-direction: column; align-items: flex-start;">
+                      <div style="display: flex; align-items: center; gap: 12px;">
+                          <div class="fixture-crest" style="background:\${t1?.crest_bg || '#94a3b8'}; color:\${t1CrestTextCol}; \${t1?.banner ? 'padding:0; border:2px solid transparent;' : ''}">\${t1CrestHtml}</div>
+                          <div class="fixture-tname">\${t1Name}</div>
+                      </div>
+                      <div class="result-scorer-list">
+                          \${t1ScorersUI.join('')}
+                      </div>
+                        <div class="result-card-list" style="font-size: 11px; color: var(--text-muted); margin-top: 6px; display: flex; flex-direction: column; gap: 3px;">
+                          \${t1CardsUI.join('')}
+                        </div>
                   </div>
-                  <div class="result-scorer-list right">
-                      ${t2ScorersUI.join('')}
+                  <div class="fixture-center">
+                      <div class="fixture-score">\${resultScoreText}</div>
                   </div>
-                    <div class="result-card-list" style="font-size: 11px; color: var(--text-muted); margin-top: 6px; display: flex; flex-direction: column; gap: 3px;">
-                      ${t2CardsUI.join('')}
-                    </div>
+                  <div class="fixture-team away" style="flex-direction: column; align-items: flex-end;">
+                      <div style="display: flex; align-items: center; gap: 12px; flex-direction: row-reverse;">
+                          <div class="fixture-crest" style="background:\${t2?.crest_bg || '#94a3b8'}; color:\${t2CrestTextCol}; \${t2?.banner ? 'padding:0; border:2px solid transparent;' : ''}">\${t2CrestHtml}</div>
+                          <div class="fixture-tname">\${t2Name}</div>
+                      </div>
+                      <div class="result-scorer-list right">
+                          \${t2ScorersUI.join('')}
+                      </div>
+                        <div class="result-card-list" style="font-size: 11px; color: var(--text-muted); margin-top: 6px; display: flex; flex-direction: column; gap: 3px;">
+                          \${t2CardsUI.join('')}
+                        </div>
+                  </div>
               </div>
-          </div>
-          
-          ${motmHtml} <!-- Player of the match UI -->
-          
-          <div style="display:flex; justify-content:center; gap:12px; flex-wrap:wrap; margin-top:8px;">
-              <button class="export-btn" onclick="downloadMatchCard('${res.id}')">
-                 ⬇️ Download Result Card
-              </button>
-          </div>
-      </div>`;
+              
+              \${motmHtml} <!-- Player of the match UI -->
+              
+              <div style="display:flex; justify-content:center; gap:12px; flex-wrap:wrap; margin-top:8px;">
+                  <button class="export-btn" onclick="downloadMatchCard('\${res.id}')">
+                     ⬇️ Download Result Card
+                  </button>
+              </div>
+          </div>\`;
+      } catch (err) {
+          console.error("Error rendering result card for match:", res, err);
+      }
   });
   
   resultsHtml += '</div>';
