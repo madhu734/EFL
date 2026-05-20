@@ -202,6 +202,8 @@
   .team-crest { width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 14px; color: #fff; border: 2px solid rgba(255,255,255,0.3); text-transform: uppercase; overflow: hidden; text-align: center; line-height: 1.1; position: absolute; bottom: -28px; z-index: 5; }
   .team-info { padding: 1.5rem 1rem 0.75rem 1rem; }
   .team-name { font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 18px; letter-spacing: 0.5px; margin-bottom: 4px; text-transform: uppercase; color: var(--text-main); }
+  /* Ensure team name text always follows theme text color to avoid contrast issues */
+  #tm-name, .pm-team-name { color: var(--text-main) !important; }
   .team-meta { font-size: 12px; color: var(--text-muted); display: flex; gap: 12px; font-weight: 500; }
   .team-badge { font-size: 11px; padding: 4px 10px; border-radius: 20px; font-weight: 600; letter-spacing: 0.5px; display: inline-block; margin-top: 8px; }
   .team-roster { padding: 0.5rem 1rem; border-top: 1px solid var(--border); display: flex; gap: 8px; flex-wrap: wrap; background: var(--bg-input); }
@@ -584,7 +586,7 @@
     <button class="sidebar-btn" onclick="showPage('standings'); toggleSidebar()">🏆 Points Table</button>
     <button class="sidebar-btn" onclick="showPage('supporters'); toggleSidebar()">🤝 Supporters</button>
     <button class="sidebar-btn" onclick="showPage('about'); toggleSidebar()">ℹ️ About</button>
-    <button class="sidebar-btn" onclick="window.open('/fpl/', '_blank'); toggleSidebar()">🎮 EFL-FPL</button>
+    <button class="sidebar-btn" onclick="window.open('/fpl/', '_blank'); toggleSidebar()">🎮 EFL - FPL</button>
     <a href="https://github.com/madhu734/EFL/releases/download/SP/EFL.apk" class="nav-btn" style="margin-top:1.5rem; text-decoration: none; border: 1.5px solid #10B981; color: #10B981; background: rgba(16, 185, 129, 0.05); display:block; text-align:center; border-radius:8px; padding:10px 0; font-weight:700;" title="Download EFL Season 5 Android App">📱 Download App</a>
     <span style="font-size: 8px; color: var(--text-muted); text-align: center; max-width: 125px; line-height: 1.3; display:block; margin:0 auto 0.5rem auto;">*(Only Android, may show harmful warning, but can be ignored and continued anyway)</span>
   </div>
@@ -1022,42 +1024,84 @@
         <div style="font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 20px; margin-bottom: 16px; text-transform: uppercase;">The Tournament</div>
         <p style="font-size: 14px; color: var(--text-muted); line-height: 1.7; font-weight: 500;">The English Football League (EFL) is the annual intra-departmental football tournament organized by students of the Department of English, Jahangirnagar University. Now entering its 5th season, EFL has grown into a celebrated tradition that brings together football enthusiasts from all batches.</p>
       </div>
-      
-      <div class="about-card animate-on-scroll">
-        <div style="font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 20px; margin-bottom: 16px; text-transform: uppercase;">Season History</div>
-        <div class="about-history-list">
-          <div class="about-history-item"><div class="about-history-dot"></div><div><div class="rule-title">Season 1</div><div class="rule-text">Inaugural edition. The tradition begins by Batch 48.</div></div></div>
-          <div class="about-history-item"><div class="about-history-dot"></div><div><div class="rule-title">Season 2</div><div class="rule-text">Expanded format with more teams and players.</div></div></div>
-          <div class="about-history-item"><div class="about-history-dot"></div><div><div class="rule-title">Season 3</div><div class="rule-text">Record participation and memorable finals.</div></div></div>
-              <div class="about-history-item"><div class="about-history-dot"></div><div><div class="rule-title">Season 4</div><div class="rule-text">Introduced the dedicated digital platform from Batch 51.</div></div></div>
-          <div class="about-history-item"><div class="about-history-dot current"></div><div><div class="rule-title">Season 5</div><div class="rule-text">The current season is focused on the biggest competition yet, with six elite squads battling for the title.</div></div></div>
+    </div>
+
+    <!-- About content split by season: S5 visible by default, S4 hidden -->
+    <div id="about-content-s5">
+      <div class="about-grid">
+        <div class="about-card animate-on-scroll">
+          <div style="font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 20px; margin-bottom: 16px; text-transform: uppercase;">Season History</div>
+          <div class="about-history-list">
+            <div class="about-history-item"><div class="about-history-dot"></div><div><div class="rule-title">Season 1</div><div class="rule-text">Inaugural edition. The tradition begins by Batch 48.</div></div></div>
+            <div class="about-history-item"><div class="about-history-dot"></div><div><div class="rule-title">Season 2</div><div class="rule-text">Expanded format with more teams and players.</div></div></div>
+            <div class="about-history-item"><div class="about-history-dot"></div><div><div class="rule-title">Season 3</div><div class="rule-text">Record participation and memorable finals.</div></div></div>
+            <div class="about-history-item"><div class="about-history-dot"></div><div><div class="rule-title">Season 4</div><div class="rule-text">Introduced the dedicated digital platform from Batch 51.</div></div></div>
+            <div class="about-history-item"><div class="about-history-dot current"></div><div><div class="rule-title">Season 5</div><div class="rule-text">Season 5 — The current active season.</div></div></div>
+          </div>
         </div>
+      </div>
+
+      <div class="about-card animate-on-scroll" style="margin-bottom: 20px;">
+          <div style="font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 20px; margin-bottom: 20px; text-transform: uppercase;">Tournament Rules</div>
+          <div class="about-rules-grid">
+              <div class="rule-item"><div class="rule-num">01</div><div><span class="rule-title">Tournament Format:</span> <br><span class="rule-text">Rules to be updated for Season 5</span></div></div>
+              <div class="rule-item"><div class="rule-num">02</div><div><span class="rule-title">Match Duration:</span> <br><span class="rule-text">TBD</span></div></div>
+              <div class="rule-item"><div class="rule-num">03</div><div><span class="rule-title">Walkover & Forfeit:</span> <br><span class="rule-text">TBD</span></div></div>
+              <div class="rule-item"><div class="rule-num">04</div><div><span class="rule-title">Knockout Ties:</span> <br><span class="rule-text">Rules to be updated for Season 5</span></div></div>
+              <div class="rule-item"><div class="rule-num">05</div><div><span class="rule-title">Special Rule:</span> <br><span class="rule-text">TBD</span></div></div>
+              <div class="rule-item"><div class="rule-num">06</div><div><span class="rule-title">Special Rule:</span> <br><span class="rule-text">TBD</span></div></div>
+          </div>
+      </div>
+
+      <div class="about-card animate-on-scroll">
+          <div style="font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 20px; margin-bottom: 12px; text-transform: uppercase;">Organizing Committee</div>
+          <p style="font-size: 14px; color: var(--text-muted); line-height: 1.7; font-weight: 500;">To be announced. Organizing committee details for Season 5 will be updated here soon.</p>
+          <div class="committee-grid">
+              <div class="committee-badge"><div class="committee-title">Tournament Director</div><div class="committee-name">TBD</div></div>
+              <div class="committee-badge"><div class="committee-title">Registration Lead & Logistics</div><div class="committee-name">TBD</div></div>
+              <div class="committee-badge"><div class="committee-title">Media & Comms</div><div class="committee-name">TBD</div></div>
+              <div class="committee-badge"><div class="committee-title">Alumni Dealers</div><div class="committee-name">TBD</div></div>
+              <div class="committee-badge"><div class="committee-title">Rules</div><div class="committee-name">TBD</div></div>
+          </div>
       </div>
     </div>
 
-    <!-- UPDATED RULES SECTION -->
-    <div class="about-card animate-on-scroll" style="margin-bottom: 20px;">
-        <div style="font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 20px; margin-bottom: 20px; text-transform: uppercase;">Tournament Rules</div>
-        <div class="about-rules-grid">
-            <div class="rule-item"><div class="rule-num">01</div><div><span class="rule-title">Tournament Format:</span> <br><span class="rule-text">In the primary group stage, all teams will play against each other. The top 4 teams on the points table will advance. Semi-final 1: 1st vs 4th. Semi-final 2: 2nd vs 3rd. The winners will play the Final.</span></div></div>
-            <div class="rule-item"><div class="rule-num">02</div><div><span class="rule-title">Match Duration:</span> <br><span class="rule-text">Each match consists of 30 minutes (15 minutes per half) with a 10-minute half-time break.</span></div></div>
-            <div class="rule-item"><div class="rule-num">03</div><div><span class="rule-title">Walkover & Forfeit:</span> <br><span class="rule-text">Teams must be present at the Central Field at the scheduled time. If one team fails to appear, the opponent gets a 2-0 win. If both teams fail to appear, both will be considered to have lost by 1 goal.</span></div></div>
-            <div class="rule-item"><div class="rule-num">04</div><div><span class="rule-title">Knockout Ties:</span> <br><span class="rule-text">If a knockout match ends in a draw, the winner will be decided directly through a penalty shootout tiebreaker.</span></div></div>
-            <div class="rule-item"><div class="rule-num">05</div><div><span class="rule-title">Special Rule:</span> <br><span class="rule-text">To be added...</span></div></div>
-            <div class="rule-item"><div class="rule-num">06</div><div><span class="rule-title">Special Rule:</span> <br><span class="rule-text">To be added...</span></div></div>
+    <div id="about-content-s4" style="display: none;">
+      <div class="about-grid">
+        <div class="about-card animate-on-scroll">
+          <div style="font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 20px; margin-bottom: 16px; text-transform: uppercase;">Season History</div>
+          <div class="about-history-list">
+            <div class="about-history-item"><div class="about-history-dot"></div><div><div class="rule-title">Season 1</div><div class="rule-text">Inaugural edition. The tradition begins by Batch 48.</div></div></div>
+            <div class="about-history-item"><div class="about-history-dot"></div><div><div class="rule-title">Season 2</div><div class="rule-text">Expanded format with more teams and players.</div></div></div>
+            <div class="about-history-item"><div class="about-history-dot"></div><div><div class="rule-title">Season 3</div><div class="rule-text">Record participation and memorable finals.</div></div></div>
+            <div class="about-history-item"><div class="about-history-dot current"></div><div><div class="rule-title">Season 4</div><div class="rule-text">Introduced the dedicated digital platform from Batch 51.</div></div></div>
+          </div>
         </div>
-    </div>
+      </div>
 
-    <div class="about-card animate-on-scroll">
-        <div style="font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 20px; margin-bottom: 12px; text-transform: uppercase;">Organizing Committee</div>
-        <p style="font-size: 14px; color: var(--text-muted); line-height: 1.7; font-weight: 500;">EFL Season 5 is organized by dedicated student volunteers from the Department of English, Jahangirnagar University. Committee member details will be published here soon.</p>
-        <div class="committee-grid">
-            <div class="committee-badge"><div class="committee-title">Tournament Director</div><div class="committee-name">UTAU -(The Watcher)</div></div>
-            <div class="committee-badge"><div class="committee-title">Registration Lead & Logistics</div><div class="committee-name">Sayem</div></div>
-            <div class="committee-badge"><div class="committee-title">Media & Comms</div><div class="committee-name">Madhu, Indrolal</div></div>
-            <div class="committee-badge"><div class="committee-title">Alumni Dealers</div><div class="committee-name">Akon & Sayem</div></div>
-            <div class="committee-badge"><div class="committee-title">Rules</div><div class="committee-name">Yacchine, Jannat, Atik, Shishir</div></div>
-        </div>
+      <div class="about-card animate-on-scroll" style="margin-bottom: 20px;">
+          <div style="font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 20px; margin-bottom: 20px; text-transform: uppercase;">Tournament Rules</div>
+          <div class="about-rules-grid">
+              <div class="rule-item"><div class="rule-num">01</div><div><span class="rule-title">Tournament Format:</span> <br><span class="rule-text">In the primary group stage, all teams will play against each other. The top 4 teams on the points table will advance. Semi-final 1: 1st vs 4th. Semi-final 2: 2nd vs 3rd. The winners will play the Final.</span></div></div>
+              <div class="rule-item"><div class="rule-num">02</div><div><span class="rule-title">Match Duration:</span> <br><span class="rule-text">Each match consists of 30 minutes (15 minutes per half) with a 10-minute half-time break.</span></div></div>
+              <div class="rule-item"><div class="rule-num">03</div><div><span class="rule-title">Walkover & Forfeit:</span> <br><span class="rule-text">Teams must be present at the Central Field at the scheduled time. If one team fails to appear, the opponent gets a 2-0 win. If both teams fail to appear, both will be considered to have lost by 1 goal.</span></div></div>
+              <div class="rule-item"><div class="rule-num">04</div><div><span class="rule-title">Knockout Ties:</span> <br><span class="rule-text">If a knockout match ends in a draw, the winner will be decided directly through a penalty shootout tiebreaker.</span></div></div>
+              <div class="rule-item"><div class="rule-num">05</div><div><span class="rule-title">Special Rule:</span> <br><span class="rule-text">To be added...</span></div></div>
+              <div class="rule-item"><div class="rule-num">06</div><div><span class="rule-title">Special Rule:</span> <br><span class="rule-text">To be added...</span></div></div>
+          </div>
+      </div>
+
+      <div class="about-card animate-on-scroll">
+          <div style="font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 20px; margin-bottom: 12px; text-transform: uppercase;">Organizing Committee</div>
+          <p style="font-size: 14px; color: var(--text-muted); line-height: 1.7; font-weight: 500;">EFL Season 4 organizing committee and historical details.</p>
+          <div class="committee-grid">
+              <div class="committee-badge"><div class="committee-title">Tournament Director</div><div class="committee-name">UTAU -(The Watcher)</div></div>
+              <div class="committee-badge"><div class="committee-title">Registration Lead & Logistics</div><div class="committee-name">Sayem</div></div>
+              <div class="committee-badge"><div class="committee-title">Media & Comms</div><div class="committee-name">Madhu, Indrolal</div></div>
+              <div class="committee-badge"><div class="committee-title">Alumni Dealers</div><div class="committee-name">Akon & Sayem</div></div>
+              <div class="committee-badge"><div class="committee-title">Rules</div><div class="committee-name">Yacchine, Jannat, Atik, Shishir</div></div>
+          </div>
+      </div>
     </div>
   </div>
 </div>
@@ -1300,6 +1344,17 @@ function applyArchiveMode(isArchive) {
   if (heroBadge && isArchive) heroBadge.textContent = 'Season 4 Archive';
 }
 
+function updateUIForSeason(isS4) {
+  const s4El = document.getElementById('about-content-s4');
+  const s5El = document.getElementById('about-content-s5');
+  if (s4El && s5El) {
+    s4El.style.display = isS4 ? 'block' : 'none';
+    s5El.style.display = isS4 ? 'none' : 'block';
+  }
+  // Update archive-related UI too
+  applyArchiveMode(isS4);
+}
+
 // --- Season Switcher UI ---
 document.addEventListener('DOMContentLoaded', function() {
   // Season Switcher
@@ -1314,6 +1369,7 @@ document.addEventListener('DOMContentLoaded', function() {
     s4Btn.classList.remove('active');
   }
   applyArchiveMode(activeSeason === 'S4');
+  updateUIForSeason(activeSeason === 'S4');
   s5Btn.onclick = () => {
     if (localStorage.getItem('activeSeason') !== 'S5') {
       localStorage.setItem('activeSeason', 'S5');
@@ -1363,6 +1419,7 @@ function changeSeason(seasonValue) {
         if(document.getElementById('dynamic-standings-season')) document.getElementById('dynamic-standings-season').textContent = 'SEASON 5';
     }
     applyArchiveMode(seasonValue === '4');
+    updateUIForSeason(seasonValue === '4');
     
     if (typeof pb !== 'undefined') pb.baseUrl = PB_CONFIG.baseURL;
 
@@ -2913,7 +2970,7 @@ function openTeamModal(teamId) {
   }
   
   document.getElementById('tm-name').textContent = teamName;
-  document.getElementById('tm-name').style.color = safeTextColor; 
+  // Ensure team name color follows site theme CSS (no inline crest-safe color)
   
   document.getElementById('tm-manager').textContent = team.manager_name || 'TBD';
   const mgrImg = document.getElementById('tm-manager-img');
@@ -2995,8 +3052,7 @@ async function openPlayerModal(playerId) {
     teamBox.style.display = 'block';
     teamBox.style.borderColor = safeTextColor;
     teamBox.style.background = `${safeTextColor}15`;
-    document.getElementById('pm-team').innerHTML = crestHtml + `<span style="vertical-align:middle;">${teamName}</span>`;
-    document.getElementById('pm-team').style.color = safeTextColor;
+    document.getElementById('pm-team').innerHTML = crestHtml + `<span class="pm-team-name" style="vertical-align:middle;">${teamName}</span>`;
   } else {
     teamBox.style.display = 'none';
   }
