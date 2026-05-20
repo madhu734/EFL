@@ -123,7 +123,7 @@
     .reset-btn:hover:not(:disabled) { border-color: var(--red-accent); color: var(--red-accent); background: rgba(229,62,62,0.07); }
     .reset-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-    /* ─── MODALS ─── */
+    /* ─── MODALS & FORMS ─── */
     .modal-overlay { position: fixed; inset: 0; background: rgba(5,10,20,0.85); backdrop-filter: blur(6px); z-index: 1000; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
     [data-theme="light"] .modal-overlay { background: rgba(255,255,255,0.7); }
     .modal-overlay.open { opacity: 1; pointer-events: all; }
@@ -155,7 +155,6 @@
     .player-item-meta { font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px; display: flex; align-items: center; gap: 5px; transition: color 0.3s;}
     .player-item-meta img { width: 18px; height: 18px; border-radius: 50%; object-fit: cover; }
     
-    /* ─── AUTH FORMS ─── */
     .auth-tabs { display: flex; border-bottom: 1px solid var(--border-subtle); margin-bottom: 20px; transition: border-color 0.3s;}
     .auth-tab { flex: 1; padding: 12px; text-align: center; cursor: pointer; font-weight: 600; color: var(--text-secondary); border-bottom: 2px solid transparent; transition: 0.3s; }
     .auth-tab.active { color: var(--gold); border-color: var(--gold); }
@@ -163,10 +162,16 @@
     .auth-form.active { display: flex; }
     .form-group { display: flex; flex-direction: column; gap: 6px; }
     .form-group label { font-size: 0.85rem; color: var(--text-secondary); transition: color 0.3s;}
-    .form-group input { background: var(--bg-input); border: 1px solid var(--border-subtle); padding: 12px; border-radius: 8px; color: var(--text-primary); outline: none; transition: background-color 0.3s, border-color 0.3s, color 0.3s;}
+    .form-group input { background: var(--bg-input); border: 1px solid var(--border-subtle); padding: 12px; border-radius: 8px; color: var(--text-primary); outline: none; transition: background-color 0.3s, border-color 0.3s, color 0.3s; width: 100%;}
     .form-group input:focus { border-color: var(--gold); }
     .form-btn { background: var(--gold); color: black; padding: 12px; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; margin-top: 10px; transition: 0.2s; }
     .form-btn:hover { opacity: 0.9; }
+
+    /* Custom Password Wrapper for Eye Icon */
+    .password-wrap { position: relative; display: flex; align-items: center; }
+    .password-wrap input { padding-right: 40px; }
+    .eye-toggle { position: absolute; right: 12px; cursor: pointer; color: var(--text-muted); font-size: 1.1rem; user-select: none; transition: color 0.2s; }
+    .eye-toggle:hover { color: var(--gold); }
 
     /* ─── LEADERBOARD & RULES ─── */
     .lb-user-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid var(--border-subtle); transition: background 0.2s, border-color 0.3s; cursor: pointer; }
@@ -461,8 +466,11 @@
             <input type="email" id="loginEmail" required placeholder="your.email@example.com">
           </div>
           <div class="form-group">
-            <label>Password</label>
-            <input type="password" id="loginPassword" required placeholder="Enter password">
+            <label>PIN / Password</label>
+            <div class="password-wrap">
+               <input type="password" id="loginPassword" required placeholder="Enter 4+ digit PIN/Password" minlength="4">
+               <span class="eye-toggle" onclick="togglePasswordVisibility('loginPassword', this)">👁️</span>
+            </div>
           </div>
           <div style="text-align: right; margin-top: -5px;">
              <a href="#" onclick="switchAuthTab('reset')" style="color: var(--gold); font-size: 0.8rem; text-decoration: none;">Forgot Password?</a>
@@ -476,19 +484,24 @@
           <div class="form-group"><label>Batch (e.g. 51)</label><input type="text" id="regBatch" required></div>
           <div class="form-group"><label>Email Address</label><input type="email" id="regEmail" required></div>
           <div class="form-group">
-            <label>Password</label>
-            <input type="password" id="regPassword" required placeholder="Minimum 8 characters" minlength="8">
-            <small style="color: var(--text-muted); font-size: 11px;">* PocketBase requires minimum 8 characters</small>
+            <label>PIN / Password</label>
+            <div class="password-wrap">
+               <input type="password" id="regPassword" required placeholder="Minimum 4 characters" minlength="4">
+               <span class="eye-toggle" onclick="togglePasswordVisibility('regPassword', this)">👁️</span>
+            </div>
           </div>
           <div class="form-group">
-            <label>Confirm Password</label>
-            <input type="password" id="regPasswordConfirm" required placeholder="Must match password" minlength="8">
+            <label>Confirm PIN / Password</label>
+            <div class="password-wrap">
+               <input type="password" id="regPasswordConfirm" required placeholder="Must match PIN/Password" minlength="4">
+               <span class="eye-toggle" onclick="togglePasswordVisibility('regPasswordConfirm', this)">👁️</span>
+            </div>
           </div>
           <div class="form-group"><label>Profile Picture (Optional)</label><input type="file" id="regAvatar" accept="image/*"></div>
           <button type="submit" class="form-btn">Create Account</button>
         </form>
 
-        <!-- Password Reset Form -->
+        <!-- Password Reset Request Form -->
         <form id="resetForm" class="auth-form" onsubmit="handlePasswordReset(event)">
            <div style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 10px;">
               Enter your registered email address and we'll send you a password reset link.
@@ -529,21 +542,57 @@
           </div>
           <div class="form-group" style="margin-top: 10px;">
             <label>Email Address</label>
-            <input type="email" id="profEmail" readonly style="opacity: 0.6; cursor: not-allowed;" title="Email change requires verification, contact admin">
+            <input type="email" id="profEmail" required title="Change your registered email">
           </div>
           
           <div class="form-group" style="margin-top: 15px;">
-             <label>Change Password (Optional)</label>
-             <input type="password" id="profPassword" placeholder="New Password (min 8 chars)" minlength="8">
+             <label>Change PIN / Password (Optional)</label>
+             <div class="password-wrap">
+                 <input type="password" id="profPassword" placeholder="New PIN/Password (min 4 chars)" minlength="4">
+                 <span class="eye-toggle" onclick="togglePasswordVisibility('profPassword', this)">👁️</span>
+             </div>
           </div>
           <div class="form-group">
-             <input type="password" id="profPasswordConfirm" placeholder="Confirm New Password" minlength="8">
+             <div class="password-wrap">
+                 <input type="password" id="profPasswordConfirm" placeholder="Confirm New PIN/Password" minlength="4">
+                 <span class="eye-toggle" onclick="togglePasswordVisibility('profPasswordConfirm', this)">👁️</span>
+             </div>
           </div>
 
           <div style="display:flex; gap: 10px; margin-top: 20px;">
             <button type="submit" class="form-btn" style="flex:1;">Update Profile</button>
             <button type="button" class="form-btn" style="flex:1; background: var(--red-accent); color: white;" onclick="handleLogout()">Logout</button>
           </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- NEW: CONFIRM PASSWORD RESET MODAL -->
+  <div class="modal-overlay" id="confirmResetModal">
+    <div class="modal" style="width: min(400px, 94vw);">
+      <div class="modal-header">
+        <span class="modal-title" style="color: var(--green-neon);">Set New Password</span>
+        <button class="modal-close-btn" onclick="document.getElementById('confirmResetModal').classList.remove('open')">✕</button>
+      </div>
+      <div class="modal-body">
+        <form id="confirmResetForm" class="auth-form active" onsubmit="handleConfirmPasswordReset(event)">
+           <input type="hidden" id="confirmResetToken">
+           <div class="form-group">
+              <label>New PIN / Password</label>
+              <div class="password-wrap">
+                 <input type="password" id="newResetPassword" required placeholder="Min 4 characters" minlength="4">
+                 <span class="eye-toggle" onclick="togglePasswordVisibility('newResetPassword', this)">👁️</span>
+              </div>
+           </div>
+           <div class="form-group">
+              <label>Confirm New PIN / Password</label>
+              <div class="password-wrap">
+                 <input type="password" id="newResetPasswordConfirm" required placeholder="Must match" minlength="4">
+                 <span class="eye-toggle" onclick="togglePasswordVisibility('newResetPasswordConfirm', this)">👁️</span>
+              </div>
+           </div>
+           <button type="submit" class="form-btn" style="background: var(--green-neon);">Save Password</button>
         </form>
       </div>
     </div>
@@ -581,12 +630,37 @@
   let isDataLoaded = false; 
 
   /* =========================================================
+     MATCHDAY NORMALIZATION (Robust Case & Space Handling)
+     ========================================================= */
+  function getNormalizedMD(mdName) {
+      // Turns "md 4", "MD4", "m d 4" -> "MD4"
+      return String(mdName).toUpperCase().replace(/\s/g, '');
+  }
+
+  // Exact Database Matchday field mappings
+  const MD_FIELDS = {
+      'MD1': 'squad_md1',
+      'MD2': 'squad_md2',
+      'MD3': 'squad_md3',
+      'MD4': 'squad_md4',
+      'MD5': 'squad_md5'
+  };
+
+  const MATCHDAYS = [
+      { name: 'MD 1', condition: f => { let d = f.match_date || ""; return d.includes('-01-'); } },
+      { name: 'MD 2', condition: f => { let d = f.match_date || ""; return d.includes('-02-'); } },
+      { name: 'MD 3', condition: f => { let d = f.match_date || ""; return d.includes('-03-'); } },
+      { name: 'MD 4', condition: f => { let d = f.match_date || ""; return d.includes('-04-'); } },
+      { name: 'MD 5', condition: f => { let d = f.match_date || ""; return d.includes('-05-'); } }
+  ];
+
+  /* =========================================================
      DYNAMIC DEADLINE & AUTO-SNAPSHOT LOGIC
      ========================================================= */
   let DEADLINE_DATE = new Date('2026-05-08T12:00:00').getTime(); 
   let forceLock = false;
   let enableCountdown = true;
-  let activeMatchday = 'MD 1'; // Updated Default
+  let activeMatchday = 'MD 1'; 
   let snapshotTaken = false;
   let systemSettingId = ''; 
   let isSnapshotting = false;
@@ -660,7 +734,6 @@
   async function fetchAllData() {
     try {
       try {
-          // Fetch settings from NEW DB
           const settings = await pbAuth.collection('system_settings').getFullList({ requestKey: null });
           if (settings && settings.length > 0) {
               let validSetting = settings.find(s => s.deadline);
@@ -690,7 +763,6 @@
       }
 
       try {
-        // Fetch Players from OLD DB
         const playersRecords = await pbData.collection('players').getFullList({ expand: 'team', sort: 'name', requestKey: null });
         allPlayers = playersRecords.map(p => {
           const teamId = p.expand?.team?.id || null;
@@ -708,7 +780,6 @@
         });
       } catch (e) { console.warn("Players fetch error:", e); }
 
-      // Fetch Match Data from OLD DB
       try { db_fixtures = await pbData.collection('fixtures').getFullList({ requestKey: null }); } catch (e) { console.warn("Fixtures error:", e); }
       try { db_results = await pbData.collection('results').getFullList({ requestKey: null }); } catch (e) { console.warn("Results error:", e); }
       try { db_match_data = await pbData.collection('fpl_match_data').getFullList({ requestKey: null }); } catch (e) { console.error("Match data fetch error", e); }
@@ -719,47 +790,21 @@
     } catch (err) { console.error("Critical error fetching data:", err); }
   }
 
-  /* =========================================================
-     MATCHDAY & SNAPSHOT ENGINE (New Season Setup)
-     ========================================================= */
-  // ডেটাবেসে ফিক্সচারের match_date এর সাথে মিল রেখে এই কন্ডিশনগুলো (01, 02) আপডেট করে নিবেন
-  const MATCHDAYS = [
-      { name: 'MD 1', condition: f => { let d = f.match_date || ""; return d.includes('-01-'); } },
-      { name: 'MD 2', condition: f => { let d = f.match_date || ""; return d.includes('-02-'); } },
-      { name: 'MD 3', condition: f => { let d = f.match_date || ""; return d.includes('-03-'); } },
-      { name: 'MD 4', condition: f => { let d = f.match_date || ""; return d.includes('-04-'); } },
-      { name: 'MD 5', condition: f => { let d = f.match_date || ""; return d.includes('-05-'); } }
-  ];
-
-  const MD_FIELDS = {
-      'MD 1': 'squad_md1',
-      'MD 2': 'squad_md2',
-      'MD 3': 'squad_md3',
-      'MD 4': 'squad_md4',
-      'MD 5': 'squad_md5'
-  };
-
   async function executeAutoSnapshot() {
+      if (snapshotTaken || isSnapshotting) return; 
       isSnapshotting = true;
+      snapshotTaken = true; // Lock locally immediately to prevent continuous loop
+      
       console.log(`Starting auto-snapshot for ${activeMatchday}...`);
 
       try {
           if(systemSettingId) {
               await pbAuth.collection('system_settings').update(systemSettingId, { snapshot_taken: true });
-              snapshotTaken = true;
           }
 
-          // Read Users from NEW DB
           const allUsers = await pbAuth.collection('fpl_users').getFullList({ requestKey: null });
           
-          const normalizedActive = String(activeMatchday).toUpperCase().replace(/\s/g, ''); 
-          let fieldName = null;
-          for (let key in MD_FIELDS) {
-              if (key.toUpperCase().replace(/\s/g, '') === normalizedActive) {
-                  fieldName = MD_FIELDS[key];
-                  break;
-              }
-          }
+          let fieldName = MD_FIELDS[getNormalizedMD(activeMatchday)];
 
           if (!fieldName) {
               console.warn(`Invalid active_matchday (${activeMatchday}) for snapshot.`);
@@ -787,14 +832,32 @@
 
       } catch (err) {
           console.error("Snapshot error:", err);
-          showToast("Auto-Snapshot failed! Please check PocketBase API rules.", "error");
+          showToast("Auto-Snapshot failed! Check console.", "error");
       }
       isSnapshotting = false; 
   }
 
   /* =========================================================
-     AUTH & SQUAD STATE (Auth Collection Logic)
+     AUTH LOGIC & PASSWORD PADDING HACK
      ========================================================= */
+  // This pads any password to ensure it meets Pocketbase's strict 8 character minimum requirement.
+  // Example: user types "1234", we send "1234_EFLSEC" to Pocketbase. Completely hidden from user.
+  function padPassword(pwd) {
+      if (!pwd) return pwd;
+      return pwd + "_EFLSEC"; 
+  }
+
+  function togglePasswordVisibility(inputId, iconEl) {
+      const el = document.getElementById(inputId);
+      if (el.type === 'password') {
+          el.type = 'text';
+          iconEl.textContent = '🙈'; // Closed eye
+      } else {
+          el.type = 'password';
+          iconEl.textContent = '👁️'; // Open eye
+      }
+  }
+
   function openAuthModal() {
     if(currentUser) {
       document.getElementById('profName').value = currentUser.name || '';
@@ -835,8 +898,7 @@
     const password = document.getElementById('loginPassword').value.trim();
     
     try {
-      // Login via NEW DB Auth Collection
-      const authData = await pbAuth.collection('fpl_users').authWithPassword(email, password);
+      const authData = await pbAuth.collection('fpl_users').authWithPassword(email, padPassword(password));
       currentUser = pbAuth.authStore.model; 
       updateAuthUI(); 
       document.getElementById('authModal').classList.remove('open'); 
@@ -860,14 +922,14 @@
     const password = document.getElementById('regPassword').value.trim();
     const passwordConfirm = document.getElementById('regPasswordConfirm').value.trim();
 
-    if(password.length < 8) { showToast('Password must be at least 8 characters.', 'error'); btn.disabled = false; btn.textContent = "Create Account"; return; }
+    if(password.length < 4) { showToast('PIN/Password must be at least 4 characters.', 'error'); btn.disabled = false; btn.textContent = "Create Account"; return; }
     if(password !== passwordConfirm) { showToast('Passwords do not match.', 'error'); btn.disabled = false; btn.textContent = "Create Account"; return; }
 
     try {
       const formData = new FormData();
       formData.append('email', email);
-      formData.append('password', password);
-      formData.append('passwordConfirm', passwordConfirm);
+      formData.append('password', padPassword(password));
+      formData.append('passwordConfirm', padPassword(passwordConfirm));
       formData.append('name', name); 
       formData.append('batch', batch); 
       formData.append('squad', '{}');
@@ -875,11 +937,10 @@
       const fileInput = document.getElementById('regAvatar'); 
       if(fileInput.files.length > 0) { formData.append('avatar', fileInput.files[0]); }
 
-      // Create user in NEW DB Auth Collection
       await pbAuth.collection('fpl_users').create(formData);
       
       // Auto-login after registration
-      await pbAuth.collection('fpl_users').authWithPassword(email, password);
+      await pbAuth.collection('fpl_users').authWithPassword(email, padPassword(password));
       currentUser = pbAuth.authStore.model;
       updateAuthUI(); 
       
@@ -908,31 +969,56 @@
       }
   }
 
+  async function handleConfirmPasswordReset(e) {
+      e.preventDefault();
+      const btn = e.target.querySelector('button[type="submit"]'); btn.disabled = true; btn.textContent = "Saving...";
+      
+      const token = document.getElementById('confirmResetToken').value;
+      const newPass = document.getElementById('newResetPassword').value.trim();
+      const newPassConfirm = document.getElementById('newResetPasswordConfirm').value.trim();
+
+      if(newPass.length < 4) { showToast('PIN/Password must be at least 4 characters.', 'error'); btn.disabled = false; btn.textContent = "Save Password"; return; }
+      if(newPass !== newPassConfirm) { showToast('Passwords do not match.', 'error'); btn.disabled = false; btn.textContent = "Save Password"; return; }
+
+      try {
+          await pbAuth.collection('fpl_users').confirmPasswordReset(token, padPassword(newPass), padPassword(newPassConfirm));
+          document.getElementById('confirmResetModal').classList.remove('open');
+          showToast('Password reset successful! You can now login.', 'success');
+          openAuthModal();
+          switchAuthTab('login');
+      } catch (err) {
+          console.error(err);
+          showToast('Failed to reset password. The link might be expired.', 'error');
+      } finally {
+          btn.disabled = false; btn.textContent = "Save Password";
+      }
+  }
+
   async function handleProfileUpdate(e) {
     e.preventDefault();
     const btn = e.target.querySelector('button[type="submit"]'); btn.disabled = true; btn.textContent = "Updating...";
     
+    const newEmail = document.getElementById('profEmail').value.trim();
     const newPass = document.getElementById('profPassword').value.trim();
     const newPassConfirm = document.getElementById('profPasswordConfirm').value.trim();
     
-    if (newPass && newPass.length < 8) { showToast('Password must be at least 8 chars.', 'error'); btn.disabled = false; btn.textContent = "Update Profile"; return; }
+    if (newPass && newPass.length < 4) { showToast('Password must be at least 4 chars.', 'error'); btn.disabled = false; btn.textContent = "Update Profile"; return; }
     if (newPass && newPass !== newPassConfirm) { showToast('Passwords do not match.', 'error'); btn.disabled = false; btn.textContent = "Update Profile"; return; }
 
     try {
       const formData = new FormData(); 
       
-      // Update Password if provided
+      if(newEmail) { formData.append('email', newEmail); }
       if(newPass) {
-          formData.append('password', newPass);
-          formData.append('passwordConfirm', newPassConfirm);
+          formData.append('password', padPassword(newPass));
+          formData.append('passwordConfirm', padPassword(newPassConfirm));
       }
       
-      // Update Avatar
       const fileInput = document.getElementById('profAvatar'); 
       if(fileInput.files.length > 0) { formData.append('avatar', fileInput.files[0]); }
       
       const updatedRecord = await pbAuth.collection('fpl_users').update(currentUser.id, formData);
-      currentUser = updatedRecord; // AuthStore gets updated automatically by PocketBase JS SDK
+      currentUser = updatedRecord; 
       
       document.getElementById('profileModal').classList.remove('open'); 
       document.getElementById('profPassword').value = ''; 
@@ -940,7 +1026,7 @@
       showToast('Profile updated!', 'success');
     } catch (err) { 
       console.error(err);
-      showToast('Profile update failed', 'error'); 
+      showToast('Profile update failed. Email might be in use.', 'error'); 
     } 
     finally { btn.disabled = false; btn.textContent = "Update Profile"; }
   }
@@ -967,7 +1053,6 @@
     if(pbAuth.authStore.isValid && pbAuth.authStore.model) {
       currentUser = pbAuth.authStore.model; 
       updateAuthUI();
-      // Ensure we have the absolute latest data from DB
       pbAuth.collection('fpl_users').getOne(currentUser.id).then(rec => { 
           currentUser = rec; 
           loadSquadFromUser(); 
@@ -976,6 +1061,17 @@
           handleLogout();
       });
     }
+  }
+
+  function checkURLForResetToken() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const resetToken = urlParams.get('reset_token');
+      if (resetToken) {
+          document.getElementById('confirmResetToken').value = resetToken;
+          document.getElementById('confirmResetModal').classList.add('open');
+          // Clean the URL so token doesn't stay in browser history
+          window.history.replaceState({}, document.title, window.location.pathname);
+      }
   }
 
   /* =========================================================
@@ -1105,7 +1201,7 @@
       let limits = { 'GK':1, 'DEF':4, 'MID':3, 'FWD':3 }; // Fixed 4-3-3
       let teamCounts = {};
       let allPicked = [];
-      const maxSameTeam = 5; // Reverted back to 5 globally
+      const maxSameTeam = 5; 
 
       for (let p of sortedPlayers) {
           if (allPicked.length >= 11) break; 
@@ -1470,13 +1566,12 @@
   }
 
   function getMDPoints(user, mdName) {
-      let squadField = MD_FIELDS[mdName];
+      let squadField = MD_FIELDS[getNormalizedMD(mdName)];
       let squadStr = user[squadField]; 
       
-      let normalizedActive = String(activeMatchday).toUpperCase().replace(/\s/g, '');
-      let normalizedRequest = String(mdName).toUpperCase().replace(/\s/g, '');
+      let normalizedActive = getNormalizedMD(activeMatchday);
+      let normalizedRequest = getNormalizedMD(mdName);
 
-      // Strict fallback logic to avoid data leaks
       if ((!squadStr || squadStr === '{}') && normalizedRequest === normalizedActive && isDeadlinePassed() && !snapshotTaken) {
           squadStr = user.squad; 
       }
@@ -1524,7 +1619,6 @@
     const listEl = document.getElementById('lb-list');
     listEl.innerHTML = `<div style="text-align:center; padding: 40px; color: var(--text-muted);">Calculating ${tab} ranking...</div>`;
     
-    // Fetch users from NEW DB Auth Collection
     pbAuth.collection('fpl_users').getFullList().then(users => {
        allUsersList = users;
        let usersWithPts = users.map(u => { return { ...u, calculatedPoints: getUserPointsForTab(u, tab) }; });
@@ -1556,8 +1650,8 @@
       let isOverallView = (sourceTab === 'Overall');
       let activeVSTab = explicitTab || (isOverallView ? 'MD 1' : sourceTab);
 
-      let normalizedActive = String(activeMatchday).toUpperCase().replace(/\s/g, '');
-      let normalizedRequest = String(activeVSTab).toUpperCase().replace(/\s/g, '');
+      let normalizedActive = getNormalizedMD(activeMatchday);
+      let normalizedRequest = getNormalizedMD(activeVSTab);
 
       if (normalizedRequest === normalizedActive && !isDeadlinePassed()) {
           showToast(`${activeVSTab} squads are hidden until the deadline passes!`, "error");
@@ -1576,7 +1670,7 @@
           tabsContainer.innerHTML = `<div style="text-align:center; padding-bottom: 15px; color: var(--gold); font-weight: bold; font-family: var(--font-display); font-size: 1.2rem; text-transform: uppercase;">${activeVSTab} Squad</div>`;
       }
 
-      let squadField = MD_FIELDS[activeVSTab];
+      let squadField = MD_FIELDS[normalizedRequest];
       let squadDataStr = user[squadField];
 
       if ((!squadDataStr || squadDataStr === '{}') && normalizedRequest === normalizedActive && isDeadlinePassed() && !snapshotTaken) {
@@ -1662,7 +1756,7 @@
     const listEl = document.getElementById('playerList'); listEl.innerHTML = '';
     if(players.length === 0) { listEl.innerHTML = '<div style="text-align:center; padding: 20px; color: var(--text-muted);">No players found</div>'; return; }
     
-    const maxSameTeam = 5; // Cleaned up max player limits for new season
+    const maxSameTeam = 5;
 
     players.sort((a, b) => {
       const ptsA = a.totalPoints || 0;
@@ -1724,6 +1818,7 @@
      INITIALIZATION
      ========================================================= */
   async function initApp() { 
+      checkURLForResetToken();
       checkSession(); 
       initSlots(state.formation); 
       renderPitch(); 
