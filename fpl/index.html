@@ -134,14 +134,14 @@
     .modal-title { font-family: var(--font-display); font-size: 1.5rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-primary); transition: color 0.3s;}
     .modal-close-btn { width: 36px; height: 36px; background: var(--surface-glass); border: 1px solid var(--border-subtle); border-radius: 10px; color: var(--text-secondary); font-size: 1.2rem; cursor: pointer; display: grid; place-items: center; transition: all 0.2s; z-index: 10; }
     .modal-close-btn:hover { background: rgba(229,62,62,0.15); border-color: var(--red-accent); color: var(--red-accent); }
-    .modal-body { padding: 24px; overflow-y: auto; }
+    .modal-body { padding: 24px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
     
     .modal-search-wrap { padding: 16px 24px 0; flex-shrink: 0; position: relative;}
     .modal-search { width: 100%; background: var(--bg-input); border: 1px solid var(--border-subtle); border-radius: 10px; padding: 12px 16px 12px 42px; color: var(--text-primary); font-family: var(--font-body); font-size: 0.95rem; outline: none; transition: border-color 0.25s, background-color 0.3s, color 0.3s; }
     .modal-search:focus { border-color: var(--gold); }
     .modal-search-wrap::before { content: '🔍'; position: absolute; left: 40px; top: 55%; transform: translateY(-50%); font-size: 1rem; pointer-events: none; }
     
-    .player-list { overflow-y: auto; padding: 16px 24px 24px; flex: 1; }
+    .player-list { overflow-y: auto; padding: 16px 24px 24px; flex: 1; -webkit-overflow-scrolling: touch; will-change: scroll-position; }
     .player-list::-webkit-scrollbar { width: 8px; }
     .player-list::-webkit-scrollbar-track { background: transparent; }
     .player-list::-webkit-scrollbar-thumb { background: var(--border-subtle); border-radius: 8px; }
@@ -201,22 +201,25 @@
 
     @media (max-width: 900px) { .main-grid { grid-template-columns: 1fr; } .app-header { flex-direction: column; align-items: flex-start; } .header-controls { width: 100%; justify-content: space-between; } }
     @media (max-width: 600px) { 
-      .slot-card { width: 52px; height: 52px; border-width: 2px; } 
-      .row-slots { gap: 4px; flex-wrap: nowrap; } 
-      .formation-btn { font-size: 0.85rem; padding: 6px 12px; } 
-      .pitch { min-height: 480px; padding: 15px 5px; } 
-      .slot-name { font-size: 0.7rem; max-width: 55px; padding: 2px 4px; }
+      .slot-card { width: 48px; height: 48px; border-width: 2px; } 
+      .row-slots { gap: 3px; flex-wrap: nowrap; } 
+      .formation-btn { font-size: 0.8rem; padding: 6px 10px; } 
+      .pitch { min-height: 420px; padding: 10px 2px; } 
+      .slot-name { font-size: 0.65rem; max-width: 52px; padding: 2px 3px; margin-top: -2px; }
       .read-only-pts { font-size: 9px; padding: 2px 4px; bottom: -10px; }
-      .cvc-btn { width: 18px; height: 18px; font-size: 8px; top: -6px; }
+      .cvc-btn { width: 16px; height: 16px; font-size: 7px; top: -6px; }
       .cvc-btn.btn-c { left: -6px; }
-      .cvc-btn.btn-vc { left: 14px; }
-      .read-only-cvc { width: 18px; height: 18px; font-size: 8px; top: -6px; left: -6px; }
+      .cvc-btn.btn-vc { left: 12px; }
+      .read-only-cvc { width: 16px; height: 16px; font-size: 7px; top: -6px; left: -6px; }
+      .player-item { padding: 10px; gap: 12px; margin-bottom: 8px; }
+      .player-item-name { font-size: 0.9rem; }
+      .player-avatar { width: 40px; height: 40px; font-size: 1.2rem; }
     }
     @media (max-width: 380px) {
-      .slot-card { width: 44px; height: 44px; border-width: 1.5px; }
-      .slot-name { font-size: 0.6rem; max-width: 48px; }
+      .slot-card { width: 40px; height: 40px; border-width: 1.5px; }
+      .slot-name { font-size: 0.6rem; max-width: 46px; }
       .row-slots { gap: 2px; }
-      .team-badge { width: 18px; height: 18px; bottom: -3px; right: -3px; }
+      .team-badge { width: 16px; height: 16px; bottom: -2px; right: -2px; }
     }
   </style>
 </head>
@@ -620,6 +623,15 @@
   });
 
   /* =========================================================
+     মডাল হেল্পার (Modal Helper)
+     ========================================================= */
+  // যেকোন মডাল খোলার আগে অন্য সব মডাল বন্ধ করার হেল্পার
+  // এটি পিসিতে ওভারল্যাপিং বাগ (Z-index/Click issue) ১০০% ফিক্স করে
+  function closeAllModals() {
+      document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('open'));
+  }
+
+  /* =========================================================
      ডুয়াল পকেটবেস সেটআপ (Dual PocketBase Setup)
      ========================================================= */
   // pbAuth - ইউজার একাউন্ট, লগইন এবং সিস্টেম সেটিংসের জন্য
@@ -633,7 +645,6 @@
      ম্যাচ ডে নরমালাইজেশন (Robust Case & Space Handling)
      ========================================================= */
   function getNormalizedMD(mdName) {
-      // এটি "md 4", "MD4", "m d 4" কে অটোমেটিক "MD4" তে কনভার্ট করে নিবে
       return String(mdName).toUpperCase().replace(/\s/g, '');
   }
 
@@ -675,7 +686,6 @@
     const bannerText = document.getElementById('countdownTimer');
     const isLocked = forceLock || distance < 0;
 
-    // --- অটো-স্ন্যাপশট ট্রিগার (Auto-Snapshot Trigger) ---
     if (isLocked && !snapshotTaken && !isSnapshotting && activeMatchday && isDataLoaded) {
         executeAutoSnapshot();
     }
@@ -793,7 +803,7 @@
   async function executeAutoSnapshot() {
       if (snapshotTaken || isSnapshotting) return; 
       isSnapshotting = true;
-      snapshotTaken = true; // লুপ এড়ানোর জন্য লোকাল লক
+      snapshotTaken = true; 
       
       console.log(`Starting auto-snapshot for ${activeMatchday}...`);
 
@@ -814,7 +824,6 @@
 
           let updatePromises = [];
           for (let u of allUsers) {
-              // আগের ডেটা ওভাররাইট বন্ধ করার সেফটি লক
               let isDestEmpty = !u[fieldName] || u[fieldName] === '{}' || u[fieldName] === 'null';
               if (u.squad && u.squad !== '{}' && isDestEmpty) {
                   let data = {};
@@ -840,13 +849,11 @@
   /* =========================================================
      অথেনটিকেশন ও পাসওয়ার্ড হ্যাক (Auth & Padding Hack)
      ========================================================= */
-  // PocketBase এর ৮ ডিজিট রিকোয়ারমেন্ট বাইপাস করার হ্যাক
   function padPassword(pwd) {
       if (!pwd) return pwd;
       return pwd + "_EFLSEC"; 
   }
 
-  // পাসওয়ার্ডের Eye বাটন টগল করার ফাংশন
   function togglePasswordVisibility(inputId, iconEl) {
       const el = document.getElementById(inputId);
       if (el.type === 'password') {
@@ -859,6 +866,7 @@
   }
 
   function openAuthModal() {
+    closeAllModals();
     if(currentUser) {
       document.getElementById('profName').value = currentUser.name || '';
       document.getElementById('profBatch').value = currentUser.batch || '';
@@ -1007,7 +1015,6 @@
     try {
       const formData = new FormData(); 
       
-      // ইমেইল আপডেট
       if(newEmail && newEmail !== currentUser.email) { 
           formData.append('email', newEmail); 
       }
@@ -1066,16 +1073,13 @@
     }
   }
 
-  // ইমেইলের রিসেট লিংকে ক্লিক করলে ব্রাউজার লিংক চেক করে মডাল ওপেন করবে
   function checkURLForResetToken() {
       const urlParams = new URLSearchParams(window.location.search);
       const resetToken = urlParams.get('reset_token');
       if (resetToken) {
-          // একটু ডিলে করে মডাল ওপেন করছি যাতে ওয়েবসাইট পুরোপুরি লোড হয়ে যায়
           setTimeout(() => {
               document.getElementById('confirmResetToken').value = resetToken;
               document.getElementById('confirmResetModal').classList.add('open');
-              // ব্রাউজারের লিংক থেকে টোকেনটা হাইড করে দিচ্ছি
               window.history.replaceState({}, document.title, window.location.pathname);
           }, 500);
       }
@@ -1203,6 +1207,7 @@
 
   // --- Display Tournament Best XI Modal ---
   function showBestXIModal() {
+      closeAllModals(); // ওভারল্যাপিং এড়ানোর জন্য
       let sortedPlayers = [...allPlayers].sort((a, b) => (b.totalPoints || 0) - (a.totalPoints || 0));
       let picked = { 'GK':[], 'DEF':[], 'MID':[], 'FWD':[] };
       let limits = { 'GK':1, 'DEF':4, 'MID':3, 'FWD':3 }; // Fixed 4-3-3
@@ -1616,7 +1621,11 @@
     });
   });
 
-  async function openLeaderboard() { document.getElementById('leaderboardModal').classList.add('open'); switchLBTab('Overall'); }
+  async function openLeaderboard() { 
+      closeAllModals();
+      document.getElementById('leaderboardModal').classList.add('open'); 
+      switchLBTab('Overall'); 
+  }
 
   function switchLBTab(tab) {
     if(window.event && window.event.target) {
@@ -1665,6 +1674,7 @@
           return;
       }
 
+      closeAllModals();
       document.getElementById('vs-title').textContent = `${user.name}'s Squad`;
 
       let tabsContainer = document.getElementById('vs-tabs-container');
@@ -1743,7 +1753,7 @@
   }
 
   /* =========================================================
-     PLAYER SELECTION & MISC
+     PLAYER SELECTION (Optimized for Mobile/Performance)
      ========================================================= */
   let activeModalSlot = null; const playerModal = document.getElementById('playerModal'); const searchInput = document.getElementById('playerSearch');
   function openPlayerModal(slotKey, position) {
@@ -1756,11 +1766,16 @@
       if (position === 'FWD') return p.position === 'FWD' || p.position === 'MID' || isWinger;
       return p.position === position; 
     });
-    renderPlayerList(playersInPos); playerModal.classList.add('open');
+    
+    closeAllModals();
+    renderPlayerList(playersInPos); 
+    playerModal.classList.add('open');
   }
 
+  // Uses DocumentFragment for lag-free mobile scrolling
   function renderPlayerList(players) {
-    const listEl = document.getElementById('playerList'); listEl.innerHTML = '';
+    const listEl = document.getElementById('playerList');
+    listEl.innerHTML = '';
     if(players.length === 0) { listEl.innerHTML = '<div style="text-align:center; padding: 20px; color: var(--text-muted);">No players found</div>'; return; }
     
     const maxSameTeam = 5;
@@ -1774,6 +1789,8 @@
 
     const currentSquad = Object.entries(state.slots).filter(([key, val]) => val !== null && key !== activeModalSlot).map(([key, val]) => val);
     const selectedIds = currentSquad.map(p => p.id);
+
+    const frag = document.createDocumentFragment();
 
     players.forEach(p => {
       const isSelected = selectedIds.includes(p.id); const item = document.createElement('div');
@@ -1798,20 +1815,27 @@
           state.slots[activeModalSlot] = p; playerModal.classList.remove('open'); renderPitch();
         };
       }
-      listEl.appendChild(item);
+      frag.appendChild(item);
     });
+    
+    listEl.appendChild(frag);
   }
 
+  // Debounce search to eliminate keyboard typing lag on smartphones
+  let searchTimeout;
   searchInput.addEventListener('input', (e) => {
-    const term = e.target.value.toLowerCase(); const pos = activeModalSlot.split('-')[0];
-    const filtered = allPlayers.filter(p => {
-      const isWinger = p.rawPosition.toLowerCase().includes('wing'); let matchPos = false;
-      if (pos === 'MID') matchPos = (p.position === 'MID' || isWinger); 
-      else if (pos === 'FWD') matchPos = (p.position === 'FWD' || p.position === 'MID' || isWinger); 
-      else matchPos = (p.position === pos);
-      return matchPos && (p.name.toLowerCase().includes(term) || p.team.toLowerCase().includes(term)); 
-    });
-    renderPlayerList(filtered);
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+        const term = e.target.value.toLowerCase(); const pos = activeModalSlot.split('-')[0];
+        const filtered = allPlayers.filter(p => {
+          const isWinger = p.rawPosition.toLowerCase().includes('wing'); let matchPos = false;
+          if (pos === 'MID') matchPos = (p.position === 'MID' || isWinger); 
+          else if (pos === 'FWD') matchPos = (p.position === 'FWD' || p.position === 'MID' || isWinger); 
+          else matchPos = (p.position === pos);
+          return matchPos && (p.name.toLowerCase().includes(term) || p.team.toLowerCase().includes(term)); 
+        });
+        renderPlayerList(filtered);
+    }, 150);
   });
 
   function showToast(msg, type) {
