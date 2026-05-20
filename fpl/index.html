@@ -604,7 +604,7 @@
   'use strict';
 
   /* =========================================================
-     THEME LOGIC
+     থিম টগল লজিক (Theme Logic)
      ========================================================= */
   function toggleTheme() {
       const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
@@ -620,24 +620,24 @@
   });
 
   /* =========================================================
-     DUAL POCKETBASE SETUP (New DB architecture)
+     ডুয়াল পকেটবেস সেটআপ (Dual PocketBase Setup)
      ========================================================= */
-  // pbAuth for User accounts, Authentication and System settings
+  // pbAuth - ইউজার একাউন্ট, লগইন এবং সিস্টেম সেটিংসের জন্য
   const pbAuth = new PocketBase('https://pbdb2.duckdns.org');
-  // pbData for Match data, Results, Players, Fixtures
+  // pbData - প্লেয়ার, ফিক্সচার এবং ম্যাচ পয়েন্টের জন্য
   const pbData = new PocketBase('https://efljudb.duckdns.org');
   
   let isDataLoaded = false; 
 
   /* =========================================================
-     MATCHDAY NORMALIZATION (Robust Case & Space Handling)
+     ম্যাচ ডে নরমালাইজেশন (Robust Case & Space Handling)
      ========================================================= */
   function getNormalizedMD(mdName) {
-      // Turns "md 4", "MD4", "m d 4" -> "MD4"
+      // এটি "md 4", "MD4", "m d 4" কে অটোমেটিক "MD4" তে কনভার্ট করে নিবে
       return String(mdName).toUpperCase().replace(/\s/g, '');
   }
 
-  // Exact Database Matchday field mappings
+  // ডেটাবেসের আসল ফিল্ডগুলোর ম্যাপিং
   const MD_FIELDS = {
       'MD1': 'squad_md1',
       'MD2': 'squad_md2',
@@ -655,7 +655,7 @@
   ];
 
   /* =========================================================
-     DYNAMIC DEADLINE & AUTO-SNAPSHOT LOGIC
+     ডাইনামিক ডেডলাইন ও অটো-স্ন্যাপশট (Deadline & Snapshot)
      ========================================================= */
   let DEADLINE_DATE = new Date('2026-05-08T12:00:00').getTime(); 
   let forceLock = false;
@@ -675,7 +675,7 @@
     const bannerText = document.getElementById('countdownTimer');
     const isLocked = forceLock || distance < 0;
 
-    // --- Auto-Snapshot Trigger ---
+    // --- অটো-স্ন্যাপশট ট্রিগার (Auto-Snapshot Trigger) ---
     if (isLocked && !snapshotTaken && !isSnapshotting && activeMatchday && isDataLoaded) {
         executeAutoSnapshot();
     }
@@ -717,7 +717,7 @@
   setInterval(updateCountdown, 1000); 
 
   /* =========================================================
-     POCKETBASE DATA FETCHING (Separated DBs)
+     ডেটা ফেচিং ফাংশন (PocketBase Data Fetching)
      ========================================================= */
   let allPlayers = [], currentUser = null, allUsersList = []; 
   let db_fixtures = [], db_results = [], db_match_data = [];
@@ -793,7 +793,7 @@
   async function executeAutoSnapshot() {
       if (snapshotTaken || isSnapshotting) return; 
       isSnapshotting = true;
-      snapshotTaken = true; // Lock locally immediately to prevent continuous loop
+      snapshotTaken = true; // লুপ এড়ানোর জন্য লোকাল লক
       
       console.log(`Starting auto-snapshot for ${activeMatchday}...`);
 
@@ -814,7 +814,7 @@
 
           let updatePromises = [];
           for (let u of allUsers) {
-              // Safety Lock
+              // আগের ডেটা ওভাররাইট বন্ধ করার সেফটি লক
               let isDestEmpty = !u[fieldName] || u[fieldName] === '{}' || u[fieldName] === 'null';
               if (u.squad && u.squad !== '{}' && isDestEmpty) {
                   let data = {};
@@ -838,23 +838,23 @@
   }
 
   /* =========================================================
-     AUTH LOGIC & PASSWORD PADDING HACK
+     অথেনটিকেশন ও পাসওয়ার্ড হ্যাক (Auth & Padding Hack)
      ========================================================= */
-  // This pads any password to ensure it meets Pocketbase's strict 8 character minimum requirement.
-  // Example: user types "1234", we send "1234_EFLSEC" to Pocketbase. Completely hidden from user.
+  // PocketBase এর ৮ ডিজিট রিকোয়ারমেন্ট বাইপাস করার হ্যাক
   function padPassword(pwd) {
       if (!pwd) return pwd;
       return pwd + "_EFLSEC"; 
   }
 
+  // পাসওয়ার্ডের Eye বাটন টগল করার ফাংশন
   function togglePasswordVisibility(inputId, iconEl) {
       const el = document.getElementById(inputId);
       if (el.type === 'password') {
           el.type = 'text';
-          iconEl.textContent = '🙈'; // Closed eye
+          iconEl.textContent = '🙈'; 
       } else {
           el.type = 'password';
-          iconEl.textContent = '👁️'; // Open eye
+          iconEl.textContent = '👁️'; 
       }
   }
 
@@ -939,7 +939,6 @@
 
       await pbAuth.collection('fpl_users').create(formData);
       
-      // Auto-login after registration
       await pbAuth.collection('fpl_users').authWithPassword(email, padPassword(password));
       currentUser = pbAuth.authStore.model;
       updateAuthUI(); 
@@ -1008,7 +1007,11 @@
     try {
       const formData = new FormData(); 
       
-      if(newEmail) { formData.append('email', newEmail); }
+      // ইমেইল আপডেট
+      if(newEmail && newEmail !== currentUser.email) { 
+          formData.append('email', newEmail); 
+      }
+      
       if(newPass) {
           formData.append('password', padPassword(newPass));
           formData.append('passwordConfirm', padPassword(newPassConfirm));
@@ -1063,14 +1066,18 @@
     }
   }
 
+  // ইমেইলের রিসেট লিংকে ক্লিক করলে ব্রাউজার লিংক চেক করে মডাল ওপেন করবে
   function checkURLForResetToken() {
       const urlParams = new URLSearchParams(window.location.search);
       const resetToken = urlParams.get('reset_token');
       if (resetToken) {
-          document.getElementById('confirmResetToken').value = resetToken;
-          document.getElementById('confirmResetModal').classList.add('open');
-          // Clean the URL so token doesn't stay in browser history
-          window.history.replaceState({}, document.title, window.location.pathname);
+          // একটু ডিলে করে মডাল ওপেন করছি যাতে ওয়েবসাইট পুরোপুরি লোড হয়ে যায়
+          setTimeout(() => {
+              document.getElementById('confirmResetToken').value = resetToken;
+              document.getElementById('confirmResetModal').classList.add('open');
+              // ব্রাউজারের লিংক থেকে টোকেনটা হাইড করে দিচ্ছি
+              window.history.replaceState({}, document.title, window.location.pathname);
+          }, 500);
       }
   }
 
