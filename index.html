@@ -145,7 +145,7 @@
   .sidebar-btn:hover, .sidebar-btn.active { background: var(--bg-input); color: var(--brand); }
   
   .nav-actions { display: flex; align-items: center; gap: 10px; padding: 10px 0;}
-  .nav-cta { background: #E63946; color: #fff; font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 700; padding: 8px 16px; border-radius: 6px; cursor: pointer; border: none; letter-spacing: 1px; text-transform: uppercase; transition: all .2s; }
+  .nav-cta { background: #E63946; color: #fff; font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 700; padding: 8px 16px; border-radius: 6px; cursor: pointer; border: none; letter-spacing: 1px; text-transform: uppercase; transition: all .2s; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; }
   .nav-cta:hover { background: #d90429; box-shadow: 0 4px 12px rgba(230, 57, 70, 0.3); }
   .nav-3d-btn { display: inline-flex; align-items: center; gap: 8px; padding: 9px 18px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.25); background: linear-gradient(135deg, rgba(124,58,237,0.96), rgba(14,165,233,0.92)); color: #fff; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 0.5px; text-decoration: none; box-shadow: 0 12px 30px rgba(14,165,233,0.18), inset 0 0 0 1px rgba(255,255,255,0.08); transition: transform .3s ease, box-shadow .3s ease, background .3s ease; position: relative; overflow: hidden; }
   .nav-3d-btn::after { content: ''; position: absolute; inset: 0; border-radius: 999px; box-shadow: 0 0 24px rgba(14,165,233,0.35); opacity: 0; transition: opacity .3s ease; }
@@ -210,55 +210,7 @@
   .roster-tag { font-size: 11px; background: var(--border); padding: 4px 10px; border-radius: 4px; color: var(--text-muted); font-weight: 500; }
   .tbd { color: var(--text-muted); font-style: italic; }
 
-  /* FORMS & REGISTRATION */
-  .reg-wrap { max-width: 680px; margin: 0 auto; padding: 2rem 1.5rem; }
-  .reg-header { text-align: center; margin-bottom: 2rem; padding-bottom: 2rem; border-bottom: 1px solid var(--border); }
-  .reg-title { font-family: 'Montserrat', sans-serif; font-weight: 800; text-transform: uppercase; font-size: 32px; letter-spacing: 1px; margin-bottom: 8px; color: var(--text-main); }
-  .reg-form { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 1.5rem; display: flex; flex-direction: column; gap: 20px; box-shadow: 0 4px 16px rgba(0,0,0,0.03); }
-  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  
-  .form-group { display: flex; flex-direction: column; position: relative; margin-bottom: 4px; }
-  .form-group.full { grid-column: 1 / -1; }
-  
-  .form-group label { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); font-weight: 700; margin-bottom: 6px; display: block; }
-  .form-group label span { color: var(--accent); }
-  
-  input, select, textarea { background: var(--bg-input); border: 1.5px solid var(--border); color: var(--text-main); font-family: 'Inter', sans-serif; font-size: 14px; padding: 12px 14px; border-radius: 10px; outline: none; transition: all .3s ease; width: 100%; font-weight: 500; box-shadow: inset 0 2px 4px rgba(0,0,0,0.01); }
-  input:focus, select:focus, textarea:focus { border-color: #6366f1; background: var(--bg-card); box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1); }
-  input::placeholder, textarea::placeholder { color: var(--text-muted); font-weight: 400; opacity: 0.7; }
-  textarea { resize: vertical; min-height: 100px; }
-  
-  .input-error { border-color: var(--accent) !important; background: rgba(230,57,70,0.02) !important; animation: shake 0.4s ease-in-out; }
-  .error-msg { color: var(--accent); font-size: 11px; font-weight: 600; margin-top: 6px; display: none; letter-spacing: 0.5px; }
-  .input-error + .error-msg { display: block; }
-  .form-error-summary { background: rgba(230,57,70,0.05); border: 1px solid rgba(230,57,70,0.2); color: var(--accent); padding: 12px; border-radius: 8px; font-size: 13px; font-weight: 600; text-align: center; display: none; margin-bottom: 10px; }
-  @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
-
-  .photo-upload { border: 2px dashed var(--border); border-radius: 12px; padding: 2rem 1.5rem; text-align: center; cursor: pointer; transition: all .3s ease; background: var(--bg-input); }
-  .photo-upload:hover { border-color: #6366f1; background: var(--bg-card); transform: translateY(-2px); box-shadow: 0 8px 16px rgba(0,0,0,0.04); }
-  .photo-upload.input-error { border-color: var(--accent) !important; background: rgba(230,57,70,0.02) !important; }
-  .photo-icon { font-size: 32px; margin-bottom: 12px; display: block; }
-  .photo-text { font-size: 14px; color: var(--text-main); font-weight: 600; }
-  .photo-sub { font-size: 11px; color: var(--text-muted); margin-top: 6px; font-weight: 500; line-height: 1.5; }
-  
-  /* PAYMENTS */
-  .payment-box { background: var(--bg-input); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem; }
-  .payment-title { font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); font-weight: 700; margin-bottom: 12px; }
-  .pay-opt { flex: 1; min-width: 120px; background: var(--bg-card); border: 1.5px solid var(--border); border-radius: 10px; padding: 12px; text-align: center; cursor: pointer; transition: all .2s; font-size: 13px; font-weight: 600; }
-  .pay-opt:hover { border-color: var(--text-muted); }
-  .pay-opt.selected { border-color: var(--brand); background: var(--bg-body); color: var(--brand); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-  .pay-amount { font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 20px; color: var(--brand); letter-spacing: 1px; display: block; margin-top: 6px; transition: color 0.3s ease; }
-  .pay-number-row { display: flex; align-items: center; gap: 10px; margin-top: 12px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px; }
-  .pay-number-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); font-weight: 700; white-space: nowrap; }
-  .pay-number-val { font-size: 15px; font-weight: 700; color: var(--brand); letter-spacing: 1px; }
-
-  .submit-btn { background: var(--brand); color: var(--bg-card); font-family: 'Inter', sans-serif; font-size: 15px; font-weight: 700; padding: 14px; border-radius: 10px; cursor: pointer; border: none; letter-spacing: 1px; text-transform: uppercase; transition: all .3s cubic-bezier(0.4, 0, 0.2, 1); width: 100%; margin-top: 8px; }
-  .submit-btn:hover { background: var(--brand-light); transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.15); }
-  .submit-btn:disabled { opacity: 0.7; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
-  
-  .success-box { background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); border-radius: 12px; padding: 3rem 1.5rem; text-align: center; display: none; box-shadow: 0 4px 16px rgba(0,0,0,0.03); }
-  .success-icon { font-size: 48px; margin-bottom: 16px; display: block; }
-  .success-title { font-family: 'Montserrat', sans-serif; font-weight: 800; text-transform: uppercase; font-size: 28px; letter-spacing: 1px; color: #15803D; margin-bottom: 12px; }
+  #player-search { font-weight: 500; box-shadow: inset 0 2px 4px rgba(0,0,0,0.01); }
 
   /* FIXTURE CARDS STYLES */
   .fixture-list { display: flex; flex-direction: column; gap: 22px; margin-top: 24px; }
@@ -566,7 +518,7 @@
     <a href="/efl3d" class="nav-3d-btn" title="Enter the EFL Universe in 3D">
       <span>🌌 EFL Universe (3D)</span>
     </a>
-    <button class="nav-cta" style="background: var(--text-muted); cursor: default; box-shadow: none;" disabled>Registration Closed</button>
+    <span id="navCtaContainer"></span>
     <div class="hamburger-btn" onclick="toggleSidebar()">
       <span></span><span></span><span></span>
     </div>
@@ -823,192 +775,7 @@
   </div>
 </div>
 
-<!-- REGISTRATION (CLOSED) -->
-<div id="page-register" class="page">
-  <div class="reg-wrap">
-    <div class="reg-header animate-on-scroll">
-      <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(99,102,241,0.05);border:1px solid rgba(99,102,241,0.2);padding:6px 14px;border-radius:20px;font-size:11px;color:#6366f1;letter-spacing:1px;margin-bottom:1rem;font-weight:700">EFL SEASON 5</div>
-      <div class="reg-title">Player Registration</div>
-      <div style="font-size:13px;color:var(--text-muted);font-weight:500;">Fill in your details below to register for EFL Season 5. All fields marked * are required.</div>
-    </div>
-    
-    <div class="reg-form animate-on-scroll" id="regFormClosed" style="text-align: center; padding: 4rem 2rem;">
-      <div style="font-size: 48px; margin-bottom: 16px;">🔒</div>
-      <div style="font-family: 'Montserrat', sans-serif; font-size: 24px; font-weight: 800; margin-bottom: 12px; color: var(--text-main);">Registration Closed</div>
-      <div style="color: var(--text-muted); font-size: 14px; margin-bottom: 24px; line-height: 1.6;">Player registration for EFL Season 5 has officially ended. Thank you for the overwhelming response!</div>
-      <button class="submit-btn" onclick="window.open('https://eflju.duckdns.org/support', '_blank')" style="width: auto; padding: 12px 32px; text-transform: none;">Register as a Supporter</button>
-    </div>
 
-    <div class="reg-form animate-on-scroll" id="regForm" style="display: none;">
-      <div class="form-error-summary" id="formErrorSummary">Please check the highlighted fields and fill them correctly.</div>
-      
-      <div class="form-row">
-        <div class="form-group">
-          <label>Full Name <span>*</span></label>
-          <input type="text" placeholder="Your full name" id="f-name" oninput="removeError(this)">
-          <div class="error-msg">Name is required</div>
-        </div>
-        <div class="form-group">
-          <label>Batch <span>*</span></label>
-          <input type="text" placeholder="e.g. 51st" id="f-batch" oninput="removeError(this)">
-          <div class="error-msg">Batch is required</div>
-        </div>
-      </div>
-      
-      <div class="form-row">
-        <div class="form-group">
-          <label>Contact Number <span>*</span></label>
-          <input type="tel" placeholder="+880 XXXXXXXXXX" id="f-phone" oninput="removeError(this)">
-          <div class="error-msg">Valid contact number is required</div>
-        </div>
-        <div class="form-group">
-          <label>Preferred Position <span>*</span></label>
-          <select id="f-pos" onchange="removeError(this)">
-            <option value="">Select position</option>
-            <option>Goalkeeper</option>
-            <option>Defender — Centre-Back</option>
-            <option>Defender — Right-Back</option>
-            <option>Defender — Left-Back</option>
-            <option>Midfielder — Defensive</option>
-            <option>Midfielder — Central</option>
-            <option>Midfielder — Attacking</option>
-            <option>Winger — Right</option>
-            <option>Winger — Left</option>
-            <option>Forward — Striker</option>
-            <option>Enthusiast</option>
-          </select>
-          <div class="error-msg">Please select your preferred position</div>
-        </div>
-      </div>
-      
-      <div class="form-row">
-        <div class="form-group">
-          <label>Secondary Position</label>
-          <select id="f-sec-pos">
-            <option value="">Select position (optional)</option>
-            <option>Goalkeeper</option>
-            <option>Defender</option>
-            <option>Midfielder</option>
-            <option>Forward</option>
-            <option>Enthusiast</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Available to play? <span>*</span></label>
-          <select id="f-availability" onchange="removeError(this)">
-            <option value="">Select availability</option>
-            <option value="will be available">will be available</option>
-            <option value="will not be available">will not be available</option>
-          </select>
-          <div class="error-msg">Please select your availability</div>
-        </div>
-      </div>
-
-      <div class="form-group full">
-        <label>Profile Photo <span>*</span></label>
-        <div class="photo-upload" onclick="document.getElementById('photoInput').click()" id="photoBox">
-          <span class="photo-icon" id="photoIcon">📷</span>
-          <div class="photo-text" id="photoText">Click to upload your photo</div>
-          <div class="photo-sub">JPG, PNG or WEBP · Max 20MB · This Photo will be in your profile and will be presented during Auction.</div>
-        </div>
-        <div class="error-msg" id="photoError">Profile photo is required</div>
-        <input type="file" id="photoInput" accept="image/*" style="display:none" onchange="handlePhoto(this)">
-      </div>
-      
-      <div class="form-group full">
-        <label>Previous Football Experience</label>
-        <textarea id="f-exp" placeholder="Briefly describe your playing style or past experience. E.g. 'I am fast, played inter-batch last year, good at crossing...'"></textarea>
-      </div>
-      
-      <div class="payment-box" id="payBox">
-        <div class="payment-title">Registration Fee Payment *</div>
-        <div style="font-size:12px;color:var(--text-muted);margin-bottom:14px;line-height:1.5;font-weight:500;">Select your payment method. Complete the payment first, then enter your transaction ID or reference below.</div>
-
-        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;">
-          <div class="pay-opt selected" data-type="digital" onclick="selectPay(this,'digital')">
-            <div style="font-size:12px;color:var(--text-muted);margin-bottom:4px">bKash / Nagad / Rocket-8</div>
-            <div style="font-weight:700;font-size:15px;color:var(--text-main)">Mobile Banking</div>
-            <span class="pay-amount">355 <span style="font-size:12px;font-family:'Inter',sans-serif;font-weight:600;color:var(--text-muted);text-transform:none;letter-spacing:0.5px">(with Jersey)</span></span>
-          </div>
-          <div class="pay-opt" data-type="bank" onclick="selectPay(this,'bank')">
-            <div style="font-size:12px;color:var(--text-muted);margin-bottom:4px">Bank / Card Transfer</div>
-            <div style="font-weight:700;font-size:15px;color:var(--text-main)">Bank & Card</div>
-            <span class="pay-amount">355 <span style="font-size:12px;font-family:'Inter',sans-serif;font-weight:600;color:var(--text-muted);text-transform:none;letter-spacing:0.5px">(with Jersey)</span></span>
-          </div>
-        </div>
-        
-        <div id="digitalInfo">
-          <div class="pay-number-row">
-            <div class="pay-number-label">Send Money / Cash In</div>
-            <div class="pay-number-val">01932323940</div>
-            <div style="font-size:11px;color:var(--text-muted);margin-left:auto;font-weight:600;">(Personal)</div>
-          </div>
-          <div class="form-group" style="margin-top:12px">
-            <label>Transaction ID <span>*</span></label>
-            <input type="text" placeholder="e.g. 8N7X3Q2L" id="f-txn-digital" oninput="removeError(this)">
-            <div class="error-msg">Transaction ID is required</div>
-          </div>
-        </div>
-        
-        <div id="bankInfo" style="display:none">
-          <div class="pay-number-row" style="flex-direction:column; align-items:flex-start; gap:8px;">
-            <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
-               <span class="pay-number-label">Account Name</span>
-               <span class="pay-number-val" style="font-size:13px; color:var(--text-main)">TAUHIDUL ISLAM MADHU</span>
-            </div>
-            <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
-               <span class="pay-number-label">Account Number</span>
-               <span class="pay-number-val">1067304020001</span>
-            </div>
-            <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
-               <span class="pay-number-label">Card Number</span>
-               <span class="pay-number-val" style="font-size:14px; color:var(--brand)">4777920800295224</span>
-            </div>
-            <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
-               <span class="pay-number-label">Bank Name</span>
-               <span class="pay-number-val" style="font-size:13px; color:var(--text-main)">BRAC Bank PLC</span>
-            </div>
-            <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
-               <span class="pay-number-label">Branch</span>
-               <span class="pay-number-val" style="font-size:13px; color:var(--text-main)">JAMALPUR BRANCH</span>
-            </div>
-            <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
-               <span class="pay-number-label">Routing Number</span>
-               <span class="pay-number-val" style="font-size:13px; color:var(--text-muted)">060390855</span>
-            </div>
-            <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
-               <span class="pay-number-label">SWIFT Code</span>
-               <span class="pay-number-val" style="font-size:13px; color:var(--text-muted)">BRAKBDDH</span>
-            </div>
-          </div>
-          <div class="form-group" style="margin-top:12px">
-            <label>Transaction Ref / Note <span>*</span></label>
-            <input type="text" placeholder="e.g. Bank Ref or Last 4 digits of card" id="f-txn-bank" oninput="removeError(this)">
-            <div class="error-msg">Reference is required</div>
-          </div>
-        </div>
-      </div>
-      
-      <div>
-        <div style="display:flex;align-items:flex-start;gap:10px">
-          <input type="checkbox" id="f-agree" style="width:auto;margin-top:3px" onchange="removeCheckboxError()">
-          <label for="f-agree" id="f-agree-label" style="font-size:12px;text-transform:none;letter-spacing:0;font-weight:500;color:var(--text-muted);line-height:1.5;cursor:pointer;transition:color 0.2s;">
-            I confirm that all information provided is accurate and I agree to abide by the rules and regulations of EFL Season 5 as set by the Department of English, Jahangirnagar University. *
-          </label>
-        </div>
-      </div>
-      
-      <button class="submit-btn" onclick="submitForm()">Submit Registration</button>
-    </div>
-    
-    <div class="success-box" id="successBox">
-      <span class="success-icon">✅</span>
-      <div class="success-title">Registration Submitted!</div>
-      <div style="font-size:14px;color:var(--text-muted);line-height:1.7;margin-bottom:1.5rem;font-weight:500;">Thank you for registering for <strong style="color:var(--text-main);font-weight:700;">EFL Season 5</strong>. Your application has been saved to the database.</div>
-      <button class="btn-outline" onclick="resetForm()">Register Another</button>
-    </div>
-  </div>
-</div>
 
 <!-- ABOUT PAGE -->
 <div id="page-about" class="page">
@@ -1220,31 +987,7 @@
   </div>
 </div>
 
-<!-- HIDDEN PLAYER CARD TEMPLATE FOR EXPORT -->
-<div style="position: absolute; top: -10000px; left: -10000px; width: 0; height: 0; overflow: hidden;">
-  <div id="player-card" style="width: 400px; background: #0f172a; border-radius: 20px; padding: 32px; font-family: 'Inter', sans-serif; color: #fff; text-align: center; border: 2px solid rgba(255,255,255,0.1); box-sizing: border-box; position: relative;">
-      <div style="position: relative; z-index: 1;">
-          <div style="font-family: 'Montserrat', sans-serif; font-size: 30px; font-weight: 900; color: #fff; letter-spacing: 2px;">EFL SEASON 5</div>
-          <div style="font-size: 9px; color: #cbd5e1; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 28px; font-weight: 700;">Jahangirnagar University · Dept. of English</div>
-          <div style="width: 160px; height: 160px; margin: 0 auto 24px; border-radius: 50%; overflow: hidden; border: 4px solid #fff; background: #1e293b; box-shadow: 0 10px 25px rgba(0,0,0,0.4); position: relative;">
-              <img id="card-photo" src="" style="width: 100%; height: 100%; object-fit: cover; display: block;" crossorigin="anonymous">
-          </div>
-          <div id="card-name" style="font-family: 'Montserrat', sans-serif; font-size: 26px; font-weight: 900; text-transform: uppercase; line-height: 1.1; margin-bottom: 8px; color: #f8fafc;">PLAYER NAME</div>
-          <div id="card-pos" style="font-size: 14px; color: #ef4444; font-weight: 800; margin-bottom: 24px; text-transform: uppercase; letter-spacing: 1px;">POSITION</div>
-          <div style="background: rgba(255,255,255,0.05); border-radius: 12px; padding: 16px; display: flex; justify-content: space-between; margin-bottom: 24px; border: 1px solid rgba(255,255,255,0.1);">
-              <div style="flex: 1; border-right: 1px solid rgba(255,255,255,0.1);">
-                  <div style="font-size: 10px; color: #94a3b8; text-transform: uppercase; font-weight: 700; margin-bottom: 4px; letter-spacing: 1px;">Batch</div>
-                  <div id="card-batch" style="font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 18px; color: #fff;">51st</div>
-              </div>
-              <div style="flex: 1;">
-                  <div style="font-size: 10px; color: #94a3b8; text-transform: uppercase; font-weight: 700; margin-bottom: 4px; letter-spacing: 1px;">Status</div>
-                  <div style="font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 18px; color: #22c55e;">VERIFIED</div>
-              </div>
-          </div>
-          <div style="font-size: 11px; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">Official Player Registration Card</div>
-      </div>
-  </div>
-</div>
+
 
 <!-- HIDDEN MATCH RESULT CARD TEMPLATE FOR EXPORT -->
 <div style="position: absolute; top: -10000px; left: -10000px; width: 0; height: 0; overflow: hidden;">
@@ -1342,6 +1085,16 @@ function applyArchiveMode(isArchive) {
   if (heroSupportBtn) heroSupportBtn.style.display = isArchive ? 'none' : '';
   if (archiveNotice) archiveNotice.style.display = isArchive ? 'block' : 'none';
   if (heroBadge && isArchive) heroBadge.textContent = 'Season 4 Archive';
+  
+  // Dynamic Navbar CTA
+  const ctaContainer = document.getElementById('navCtaContainer');
+  if (ctaContainer) {
+    if (isArchive) {
+      ctaContainer.innerHTML = `<button class="nav-cta" style="background: var(--text-muted); cursor: default; box-shadow: none;" disabled>Registration Closed</button>`;
+    } else {
+      ctaContainer.innerHTML = `<a href="register.html" class="nav-cta">Register Now</a>`;
+    }
+  }
 }
 
 function updateUIForSeason(isS4) {
@@ -1491,7 +1244,7 @@ document.getElementById('player-search').addEventListener('input', function(e) {
 // SCROLL ANIMATION LOGIC (Intersection Observer)
 // ==========================================
 function observeElements() {
-    const elements = document.querySelectorAll('.animate-on-scroll, .team-card, .player-card, .fixture-card, .supporter-card, .about-card, .standings-table-container, .reg-form, .success-box, .player-filter-bar, .hero-badge, .hero-season, .hero-title, .hero-sub, .hero-actions, .top-scorer-card');
+    const elements = document.querySelectorAll('.animate-on-scroll, .team-card, .player-card, .fixture-card, .supporter-card, .about-card, .standings-table-container, .player-filter-bar, .hero-badge, .hero-season, .hero-title, .hero-sub, .hero-actions, .top-scorer-card');
     
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
@@ -3125,111 +2878,7 @@ document.addEventListener('keydown', function(event) {
 // VIDEO PLAYER LOGIC - REMOVED (No more live streaming/highlights)
 // ==========================================
 
-// ==========================================
-// FORM SUBMISSION
-// ==========================================
-let isSubmitting = false; 
 
-async function submitForm() {
-  if (isSubmitting) return; 
-
-  document.getElementById('formErrorSummary').style.display = 'none';
-  
-  const name = document.getElementById('f-name').value.trim();
-  const batch = document.getElementById('f-batch').value.trim();
-  const pos = document.getElementById('f-pos').value;
-  const secPos = document.getElementById('f-sec-pos').value;
-  const availability = document.getElementById('f-availability').value; 
-  const phone = document.getElementById('f-phone').value.trim();
-  const exp = document.getElementById('f-exp').value.trim();
-  const photoInput = document.getElementById('photoInput');
-  const agree = document.getElementById('f-agree').checked;
-  
-  const payType = document.querySelector('.pay-opt.selected').getAttribute('data-type');
-  const trxId = payType === 'digital' ? document.getElementById('f-txn-digital').value.trim() : document.getElementById('f-txn-bank').value.trim();
-  
-  if (!name || !batch || !pos || !availability || !phone || !trxId || photoInput.files.length === 0 || !agree) {
-    document.getElementById('formErrorSummary').style.display = 'block';
-    return;
-  }
-
-  isSubmitting = true; 
-  const btn = document.querySelector('.submit-btn');
-  btn.disabled = true;
-  btn.style.pointerEvents = 'none'; 
-  btn.innerHTML = '<span class="ai-loader"></span> Uploading Data to Server...';
-
-  try {
-      let baseName = name.toLowerCase().replace(/[^a-z0-9]/g, '');
-      if (baseName.length < 3) baseName = baseName.padEnd(3, 'x');
-      baseName = baseName.substring(0, 13);
-      let randomSuffix = Math.floor(10 + Math.random() * 90); 
-      let customId = baseName + randomSuffix;
-
-      const formData = new FormData();
-      formData.append('id', customId);
-      formData.append('name', name);
-      formData.append('batch', batch);
-      formData.append('position', pos);
-      formData.append('secondary_position', secPos);
-      formData.append('availability', availability);
-      formData.append('phone', phone);
-      formData.append('experience', exp);
-      formData.append('payment_method', payType);
-      formData.append('trx_id', trxId);
-      formData.append('photo', photoInput.files[0]);
-      
-      if (pos === 'Goalkeeper') {
-          formData.append('category', 'GK');
-          formData.append('Catagory', 'GK'); 
-      }
-
-      const recordRes = await fetch(`${PB_CONFIG.baseURL}/api/collections/players/records`, {
-          method: 'POST',
-          body: formData
-      });
-
-      if (!recordRes.ok) {
-          const errBody = await recordRes.text();
-          console.error("PocketBase Error Log:", errBody);
-          throw new Error("Database insert failed. Check your API Rules.");
-      }
-
-      document.getElementById('card-name').textContent = name;
-      document.getElementById('card-pos').textContent = pos;
-      document.getElementById('card-batch').textContent = batch;
-      
-      document.getElementById('regForm').style.display = 'none';
-      document.getElementById('successBox').style.display = 'block';
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      
-      fetchPBData(); 
-
-      const reader = new FileReader();
-      reader.onload = function(e) {
-          document.getElementById('card-photo').src = e.target.result;
-          setTimeout(() => { 
-            html2canvas(document.getElementById('player-card'), { scale: 3, useCORS: true, backgroundColor: null })
-            .then(canvas => {
-              const link = document.createElement('a');
-              link.download = `EFL_S4_${name.replace(/\s+/g, '_')}_Card.png`;
-              link.href = canvas.toDataURL('image/png');
-              link.click(); 
-            }).catch(e => console.error("ID Card Generation failed:", e));
-          }, 300);
-      };
-      reader.readAsDataURL(photoInput.files[0]);
-
-  } catch (error) {
-      console.error("Submission Error: ", error);
-      alert("Sorry, there was an error saving the data. Error: " + error.message);
-  } finally {
-      isSubmitting = false; 
-      btn.disabled = false;
-      btn.style.pointerEvents = 'auto';
-      btn.innerHTML = 'Submit Registration';
-  }
-}
 
 function showPage(id, btn) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -3243,32 +2892,6 @@ function showPage(id, btn) {
   }
   window.scrollTo({ top: 0, behavior: 'smooth' });
   setTimeout(observeElements, 100);
-}
-
-function selectPay(el, type) {
-  document.querySelectorAll('.pay-opt').forEach(o => o.classList.remove('selected'));
-  el.classList.add('selected');
-  document.getElementById('digitalInfo').style.display = (type === 'digital') ? 'block' : 'none';
-  document.getElementById('bankInfo').style.display = (type === 'bank') ? 'block' : 'none';
-}
-
-function handlePhoto(input) {
-  if (input.files && input.files[0]) {
-    document.getElementById('photoText').textContent = '✓ ' + input.files[0].name;
-    document.getElementById('photoIcon').textContent = '✅';
-  }
-}
-
-function removeError(el) { el.classList.remove('input-error'); document.getElementById('formErrorSummary').style.display = 'none'; }
-function removeCheckboxError() { document.getElementById('formErrorSummary').style.display = 'none'; }
-
-function resetForm() {
-  document.getElementById('regForm').reset();
-  document.getElementById('regForm').style.display = 'flex';
-  document.getElementById('successBox').style.display = 'none';
-  document.getElementById('photoText').textContent = 'Click to upload your photo';
-  document.getElementById('photoIcon').textContent = '📷';
-  selectPay(document.querySelector('.pay-opt[data-type="digital"]'), 'digital');
 }
 
 
