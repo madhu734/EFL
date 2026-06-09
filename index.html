@@ -474,7 +474,12 @@
   }
 
   @media(max-width: 600px) {
-    .nav-cta, .nav-3d-btn { display: none; }
+    .nav-cta, .nav-3d-btn, #seasonSwitcherUI, #headerThemeToggleContainer { display: none !important; }
+    .nav-title { font-size: 15px; }
+    .nav-sub { font-size: 8px; }
+    .logo-img { height: 38px; }
+    .sidebar-mobile-only { display: flex !important; }
+    #sidebarCtaContainer .sidebar-btn { padding: 12px !important; margin-bottom: 8px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
     .form-row { grid-template-columns: 1fr; }
     .stats-bar { grid-template-columns: repeat(2, 1fr); padding: 15px; gap: 10px; }
     .hero { padding: 2.5rem 1rem 1.5rem; min-height: auto; }
@@ -511,11 +516,11 @@
       <button class="season-toggle-btn" id="season5Btn">S5</button>
       <button class="season-toggle-btn" id="season4Btn">S4</button>
     </div>
-    <div style="display: flex; flex-direction: column; align-items: center; gap: 2px; margin-right: 10px;">
+    <div id="headerThemeToggleContainer" style="display: flex; flex-direction: column; align-items: center; gap: 2px; margin-right: 10px;">
       <button class="theme-toggle-btn" onclick="toggleTheme()" id="themeToggleBtn" title="Toggle Dark/Light Mode">🌙</button>
       <span id="themeToggleText" style="font-size: 9px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Dark</span>
     </div>
-    <a href="/efl3d" class="nav-3d-btn" title="Enter the EFL Universe in 3D">
+    <a href="/EFL/efl3d/" class="nav-3d-btn" title="Enter the EFL Universe in 3D">
       <span>🌌 EFL Universe (3D)</span>
     </a>
     <span id="navCtaContainer"></span>
@@ -531,6 +536,9 @@
   <button class="sidebar-close" onclick="toggleSidebar()">×</button>
   <div style="font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 18px; color: var(--brand); margin-bottom: 20px; padding: 0 12px;">MENU</div>
   <div class="sidebar-links">
+    <!-- Mobile Registration CTA -->
+    <div id="sidebarCtaContainer"></div>
+    
     <button class="sidebar-btn" onclick="showPage('teams'); toggleSidebar()">🛡️ Teams</button>
     <button class="sidebar-btn" onclick="showPage('players'); toggleSidebar()">🏃‍♂️ Players</button>
     <button class="sidebar-btn" onclick="showPage('fixtures'); toggleSidebar()">📅 Fixtures</button>
@@ -538,8 +546,28 @@
     <button class="sidebar-btn" onclick="showPage('standings'); toggleSidebar()">🏆 Points Table</button>
     <button class="sidebar-btn" onclick="showPage('supporters'); toggleSidebar()">🤝 Supporters</button>
     <button class="sidebar-btn" onclick="showPage('about'); toggleSidebar()">ℹ️ About</button>
-    <button class="sidebar-btn" onclick="window.open('/fpl/', '_blank'); toggleSidebar()">🎮 EFL - FPL</button>
-    <a href="https://github.com/madhu734/EFL-app/releases/download/NN/EFL.apk" class="nav-btn" style="margin-top:1.5rem; text-decoration: none; border: 1.5px solid #10B981; color: #10B981; background: rgba(16, 185, 129, 0.05); display:block; text-align:center; border-radius:8px; padding:10px 0; font-weight:700;" title="Download EFL Season 5 Android App">📱 Download App</a>
+    <button class="sidebar-btn" onclick="window.open('/EFL/fpl/', '_blank'); toggleSidebar()">🎮 EFL - FPL</button>
+    <a href="/EFL/efl3d/" class="sidebar-btn" style="background: linear-gradient(135deg, rgba(124,58,237,0.1), rgba(14,165,233,0.1)); color: #6366f1; font-weight: 700; border: 1px solid var(--border);" onclick="toggleSidebar()">🌌 EFL Universe (3D)</a>
+    
+    <!-- Mobile Season Switcher & Theme Toggle inside Sidebar -->
+    <div class="sidebar-mobile-only" style="border-top: 1px solid var(--border); padding-top: 15px; margin-top: 10px; display: none; flex-direction: column; gap: 15px;">
+      <div style="display: flex; align-items: center; justify-content: space-between; padding: 0 12px;">
+        <span style="font-size: 13px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Theme</span>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <button class="theme-toggle-btn" onclick="toggleTheme()" id="sidebarThemeToggleBtn" title="Toggle Dark/Light Mode">🌙</button>
+          <span id="sidebarThemeToggleText" style="font-size: 9px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Dark</span>
+        </div>
+      </div>
+      <div style="display: flex; align-items: center; justify-content: space-between; padding: 0 12px;">
+        <span style="font-size: 13px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Season</span>
+        <div class="season-switcher" id="sidebarSeasonSwitcherUI" style="display: flex; gap: 4px;">
+          <button class="season-toggle-btn" id="sidebarSeason5Btn">S5</button>
+          <button class="season-toggle-btn" id="sidebarSeason4Btn">S4</button>
+        </div>
+      </div>
+    </div>
+
+    <a href="https://github.com/madhu734/EFL/releases/download/SP/EFL.apk" class="nav-btn" style="margin-top:1.5rem; text-decoration: none; border: 1.5px solid #10B981; color: #10B981; background: rgba(16, 185, 129, 0.05); display:block; text-align:center; border-radius:8px; padding:10px 0; font-weight:700;" title="Download EFL Season 5 Android App">📱 Download App</a>
     <span style="font-size: 8px; color: var(--text-muted); text-align: center; max-width: 125px; line-height: 1.3; display:block; margin:0 auto 0.5rem auto;">*(Only Android, may show harmful warning, but can be ignored and continued anyway)</span>
   </div>
 </div>
@@ -552,7 +580,7 @@
     <div class="hero-title animate-on-scroll">English<br>Football<br>League</div>
     <div class="hero-sub animate-on-scroll">The most anticipated football tournament of the Department of English is back. Six elite squads. One champion. <span id="dynamic-season-text">Season 5</span> begins soon.</div>
     <div class="hero-actions animate-on-scroll">
-      <button class="btn-primary" id="heroSupportBtn" onclick="window.open('https://eflju.duckdns.org/support', '_blank')" style="text-transform: none; min-width: 220px;">Register as a supporter of the tournament/any team (not player)</button>
+      <button class="btn-primary" id="heroSupportBtn" onclick="window.open('/EFL/support/', '_blank')" style="text-transform: none; min-width: 220px;">Register as a supporter of the tournament/any team (not player)</button>
       <button class="btn-outline" onclick="showPage('teams')" style="min-width: 180px;">View All Teams</button>
     </div>
     <div id="archiveNotice" class="archive-note" style="display:none; margin: 1.25rem auto 0; max-width: 560px; font-size: 14px; color: #f97316; line-height:1.6;">Viewing Season 4 archive content. Live Season 5 details and registration are available when Season 5 is selected.</div>
@@ -1092,7 +1120,17 @@ function applyArchiveMode(isArchive) {
     if (isArchive) {
       ctaContainer.innerHTML = `<button class="nav-cta" style="background: var(--text-muted); cursor: default; box-shadow: none;" disabled>Registration Closed</button>`;
     } else {
-      ctaContainer.innerHTML = `<a href="/registration/" class="nav-cta">Register Now</a>`;
+      ctaContainer.innerHTML = `<a href="/EFL/registration/" class="nav-cta">Register Now</a>`;
+    }
+  }
+
+  // Dynamic Sidebar CTA for mobile
+  const sidebarCtaContainer = document.getElementById('sidebarCtaContainer');
+  if (sidebarCtaContainer) {
+    if (isArchive) {
+      sidebarCtaContainer.innerHTML = `<button class="sidebar-btn" style="color: var(--text-muted); font-weight: 700; width: 100%; border: 1.5px dashed var(--border); display: flex; align-items: center; justify-content: center;" disabled>🔒 Registration Closed</button>`;
+    } else {
+      sidebarCtaContainer.innerHTML = `<a href="/EFL/registration/" class="sidebar-btn" style="background: #E63946; color: #fff; font-weight: 700; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(230, 57, 70, 0.2);" onclick="toggleSidebar()">📝 Register Now</a>`;
     }
   }
 }
@@ -1110,31 +1148,52 @@ function updateUIForSeason(isS4) {
 
 // --- Season Switcher UI ---
 document.addEventListener('DOMContentLoaded', function() {
-  // Season Switcher
   const s5Btn = document.getElementById('season5Btn');
   const s4Btn = document.getElementById('season4Btn');
+  const sidebarS5Btn = document.getElementById('sidebarSeason5Btn');
+  const sidebarS4Btn = document.getElementById('sidebarSeason4Btn');
+  
   let activeSeason = localStorage.getItem('activeSeason');
-  if (activeSeason === 'S4') {
-    s4Btn.classList.add('active');
-    s5Btn.classList.remove('active');
+  const isS4 = activeSeason === 'S4';
+  
+  if (isS4) {
+    if (s4Btn) s4Btn.classList.add('active');
+    if (s5Btn) s5Btn.classList.remove('active');
+    if (sidebarS4Btn) {
+      sidebarS4Btn.style.background = 'var(--accent)';
+      sidebarS4Btn.style.color = '#fff';
+    }
+    if (sidebarS5Btn) {
+      sidebarS5Btn.style.background = 'none';
+      sidebarS5Btn.style.color = 'var(--text-main)';
+    }
   } else {
-    s5Btn.classList.add('active');
-    s4Btn.classList.remove('active');
+    if (s5Btn) s5Btn.classList.add('active');
+    if (s4Btn) s4Btn.classList.remove('active');
+    if (sidebarS5Btn) {
+      sidebarS5Btn.style.background = 'var(--accent)';
+      sidebarS5Btn.style.color = '#fff';
+    }
+    if (sidebarS4Btn) {
+      sidebarS4Btn.style.background = 'none';
+      sidebarS4Btn.style.color = 'var(--text-main)';
+    }
   }
-  applyArchiveMode(activeSeason === 'S4');
-  updateUIForSeason(activeSeason === 'S4');
-  s5Btn.onclick = () => {
-    if (localStorage.getItem('activeSeason') !== 'S5') {
-      localStorage.setItem('activeSeason', 'S5');
+  
+  applyArchiveMode(isS4);
+  updateUIForSeason(isS4);
+  
+  const setSeason = (season) => {
+    if (localStorage.getItem('activeSeason') !== season) {
+      localStorage.setItem('activeSeason', season);
       window.location.reload();
     }
   };
-  s4Btn.onclick = () => {
-    if (localStorage.getItem('activeSeason') !== 'S4') {
-      localStorage.setItem('activeSeason', 'S4');
-      window.location.reload();
-    }
-  };
+  
+  if (s5Btn) s5Btn.onclick = () => setSeason('S5');
+  if (s4Btn) s4Btn.onclick = () => setSeason('S4');
+  if (sidebarS5Btn) sidebarS5Btn.onclick = () => setSeason('S5');
+  if (sidebarS4Btn) sidebarS4Btn.onclick = () => setSeason('S4');
 });
 
 let db_teams = [];
@@ -1219,17 +1278,36 @@ function toggleTheme() {
     document.documentElement.setAttribute('data-theme', newTheme);
     localStorage.setItem('theme', newTheme);
     
-    document.getElementById('themeToggleBtn').textContent = newTheme === 'dark' ? '☀️' : '🌙';
+    const themeIcon = newTheme === 'dark' ? '☀️' : '🌙';
+    const themeLabel = newTheme === 'dark' ? 'Light' : 'Dark';
+    
+    const headerBtn = document.getElementById('themeToggleBtn');
+    if (headerBtn) headerBtn.textContent = themeIcon;
     const themeText = document.getElementById('themeToggleText');
-    if (themeText) themeText.textContent = newTheme === 'dark' ? 'Light' : 'Dark';
+    if (themeText) themeText.textContent = themeLabel;
+    
+    const sidebarBtn = document.getElementById('sidebarThemeToggleBtn');
+    if (sidebarBtn) sidebarBtn.textContent = themeIcon;
+    const sidebarThemeText = document.getElementById('sidebarThemeToggleText');
+    if (sidebarThemeText) sidebarThemeText.textContent = themeLabel;
 }
 
 window.addEventListener('DOMContentLoaded', () => {
     const savedTheme = localStorage.getItem('theme') || 'light';
     document.documentElement.setAttribute('data-theme', savedTheme);
-    document.getElementById('themeToggleBtn').textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+    
+    const themeIcon = savedTheme === 'dark' ? '☀️' : '🌙';
+    const themeLabel = savedTheme === 'dark' ? 'Light' : 'Dark';
+    
+    const headerBtn = document.getElementById('themeToggleBtn');
+    if (headerBtn) headerBtn.textContent = themeIcon;
     const themeText = document.getElementById('themeToggleText');
-    if (themeText) themeText.textContent = savedTheme === 'dark' ? 'Light' : 'Dark';
+    if (themeText) themeText.textContent = themeLabel;
+    
+    const sidebarBtn = document.getElementById('sidebarThemeToggleBtn');
+    if (sidebarBtn) sidebarBtn.textContent = themeIcon;
+    const sidebarThemeText = document.getElementById('sidebarThemeToggleText');
+    if (sidebarThemeText) sidebarThemeText.textContent = themeLabel;
 });
 
 // ==========================================
