@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>EFL Season 5 — Jahangirnagar University · Dept. of English</title>
 <link rel="icon" type="image/png" href="https://i.postimg.cc/j5DTGgSg/EFL.png">
 <!-- Modern, Premium Font Pairing: Montserrat for headings, Inter for body -->
@@ -51,14 +51,14 @@
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     border-bottom: 1px solid var(--border);
-    padding: 0 1rem;
+    padding: calc(env(safe-area-inset-top, 0px) + 6px) 1rem 6px 1rem;
     position: sticky;
     top: 0;
     z-index: 100;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    min-height: 64px;
+    min-height: calc(env(safe-area-inset-top, 0px) + 64px);
     box-shadow: 0 4px 20px rgba(0,0,0,0.05);
     transition: background-color 0.3s, border-color 0.3s;
     flex-wrap: nowrap;
@@ -130,16 +130,87 @@
   .nav-title { font-family: 'Montserrat', sans-serif; font-weight: 800; text-transform: uppercase; font-size: 20px; letter-spacing: 1px; color: var(--brand); line-height: 1.1; }
   .nav-sub { font-size: 10px; color: var(--text-muted); letter-spacing: 1px; text-transform: uppercase; margin-top: 2px; font-weight: 600; }
   
-  /* Hamburger Sidebar CSS */
-  .hamburger-btn { display: flex; flex-direction: column; gap: 5px; cursor: pointer; padding: 8px; margin-left: 10px; z-index: 2600; position: relative; }
-  .hamburger-btn span { display: block; width: 24px; height: 2px; background: var(--text-main); border-radius: 2px; transition: 0.3s; }
+  /* FUTURISTIC CYBERNETIC HAMBURGER BUTTON (OPTIMUS ROBOTIC STYLE) */
+  .hamburger-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    background: linear-gradient(135deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.95));
+    border: 2px solid var(--accent);
+    border-radius: 10px;
+    padding: 6px;
+    width: 42px;
+    height: 42px;
+    z-index: 2600;
+    position: relative;
+    color: var(--accent);
+    box-shadow: 0 0 10px rgba(230, 57, 70, 0.3);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .hamburger-btn svg {
+    width: 100%;
+    height: 100%;
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .hamburger-btn .robot-eye {
+    transition: fill 0.3s, filter 0.3s;
+    filter: drop-shadow(0 0 2px #00E5FF);
+  }
+  .hamburger-btn .bar-top {
+    transform-origin: 50px 58px;
+    transition: transform 0.3s;
+  }
+  .hamburger-btn .bar-middle {
+    transform-origin: 50px 68px;
+    transition: opacity 0.3s;
+  }
+  .hamburger-btn .bar-bottom {
+    transform-origin: 50px 78px;
+    transition: transform 0.3s;
+  }
+  
+  /* Cybertech glowing state on hover */
+  .hamburger-btn:hover {
+    transform: translateY(-2px);
+    border-color: #6366f1;
+    box-shadow: 0 0 14px rgba(99, 102, 241, 0.6);
+    color: #6366f1;
+  }
+  .hamburger-btn:hover .robot-eye {
+    fill: #EF4444; /* Battle mode: glowing red on hover */
+    filter: drop-shadow(0 0 4px #EF4444);
+  }
+  
+  /* Active states when menu is open */
+  .hamburger-btn.active {
+    border-color: #10B981;
+    box-shadow: 0 0 14px rgba(16, 185, 129, 0.6);
+    color: #10B981;
+  }
+  .hamburger-btn.active svg {
+    transform: rotate(180deg);
+  }
+  .hamburger-btn.active .robot-eye {
+    fill: #10B981; /* Green glow when active */
+    filter: drop-shadow(0 0 4px #10B981);
+  }
+  .hamburger-btn.active .bar-top {
+    transform: translate(0px, 10px) rotate(45deg);
+  }
+  .hamburger-btn.active .bar-middle {
+    opacity: 0;
+  }
+  .hamburger-btn.active .bar-bottom {
+    transform: translate(0px, -10px) rotate(-45deg);
+  }
   
   .sidebar-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 2500; display: none; opacity: 0; transition: 0.3s; }
   .sidebar-overlay.active { display: block; opacity: 1; }
   
-  .sidebar-menu { position: fixed; top: 0; right: -300px; width: 280px; height: 100vh; background: var(--glass-bg); backdrop-filter: blur(16px); z-index: 2600; box-shadow: -10px 0 30px rgba(0,0,0,0.1); padding: 5rem 1.5rem 2rem 1.5rem; transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; gap: 12px; border-left: 1px solid var(--border); overflow-y: auto; }
+  .sidebar-menu { position: fixed; top: 0; right: -300px; width: 280px; height: 100vh; background: var(--glass-bg); backdrop-filter: blur(16px); z-index: 2600; box-shadow: -10px 0 30px rgba(0,0,0,0.1); padding: calc(env(safe-area-inset-top, 0px) + 5rem) 1.5rem 2rem 1.5rem; transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; gap: 12px; border-left: 1px solid var(--border); overflow-y: auto; }
   .sidebar-menu.active { right: 0; }
-  .sidebar-close { position: absolute; top: 20px; right: 24px; font-size: 32px; background: none; border: none; color: var(--text-main); cursor: pointer; line-height: 1; }
+  .sidebar-close { position: absolute; top: calc(env(safe-area-inset-top, 0px) + 20px); right: 24px; font-size: 32px; background: none; border: none; color: var(--text-main); cursor: pointer; line-height: 1; }
   
   .sidebar-btn { background: transparent; border: none; font-family: 'Inter', sans-serif; font-size: 16px; font-weight: 600; color: var(--text-muted); text-align: left; padding: 12px 16px; border-radius: 8px; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 12px; }
   .sidebar-btn:hover, .sidebar-btn.active { background: var(--bg-input); color: var(--brand); }
@@ -520,12 +591,24 @@
       <button class="theme-toggle-btn" onclick="toggleTheme()" id="themeToggleBtn" title="Toggle Dark/Light Mode">🌙</button>
       <span id="themeToggleText" style="font-size: 9px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Dark</span>
     </div>
-    <a href="/EFL/efl3d/" class="nav-3d-btn" title="Enter the EFL Universe in 3D">
+    <a href="efl3d/" class="nav-3d-btn" title="Enter the EFL Universe in 3D">
       <span>🌌 EFL Universe (3D)</span>
     </a>
     <span id="navCtaContainer"></span>
-    <div class="hamburger-btn" onclick="toggleSidebar()">
-      <span></span><span></span><span></span>
+    <div class="hamburger-btn" onclick="toggleSidebar()" title="Toggle Sidebar Menu">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+        <!-- Hex shield glowing border -->
+        <path d="M50 8 L88 28 L88 72 L50 92 L12 72 L12 28 Z" fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round" />
+        <!-- Forehead crest -->
+        <polygon points="50,18 44,32 56,32" fill="currentColor" />
+        <!-- Robot eyes (cyan glow) -->
+        <polygon points="32,42 46,42 42,49 28,49" fill="#00E5FF" class="robot-eye" />
+        <polygon points="68,42 54,42 58,49 72,49" fill="#00E5FF" class="robot-eye" />
+        <!-- Faceplate menu lines (X transformer) -->
+        <line x1="28" y1="58" x2="72" y2="58" stroke="currentColor" stroke-width="5" stroke-linecap="round" class="bar-top" />
+        <line x1="32" y1="68" x2="68" y2="68" stroke="currentColor" stroke-width="5" stroke-linecap="round" class="bar-middle" />
+        <line x1="36" y1="78" x2="64" y2="78" stroke="currentColor" stroke-width="5" stroke-linecap="round" class="bar-bottom" />
+      </svg>
     </div>
   </div>
 </nav>
@@ -546,8 +629,8 @@
     <button class="sidebar-btn" onclick="showPage('standings'); toggleSidebar()">🏆 Points Table</button>
     <button class="sidebar-btn" onclick="showPage('supporters'); toggleSidebar()">🤝 Supporters</button>
     <button class="sidebar-btn" onclick="showPage('about'); toggleSidebar()">ℹ️ About</button>
-    <button class="sidebar-btn" onclick="window.open('/EFL/fpl/', '_blank'); toggleSidebar()">🎮 EFL - FPL</button>
-    <a href="/EFL/efl3d/" class="sidebar-btn" style="background: linear-gradient(135deg, rgba(124,58,237,0.1), rgba(14,165,233,0.1)); color: #6366f1; font-weight: 700; border: 1px solid var(--border);" onclick="toggleSidebar()">🌌 EFL Universe (3D)</a>
+    <button class="sidebar-btn" onclick="window.open('fpl/', '_blank'); toggleSidebar()">🎮 EFL - FPL</button>
+    <a href="efl3d/" class="sidebar-btn" style="background: linear-gradient(135deg, rgba(124,58,237,0.1), rgba(14,165,233,0.1)); color: #6366f1; font-weight: 700; border: 1px solid var(--border);" onclick="toggleSidebar()">🌌 EFL Universe (3D)</a>
     
     <!-- Mobile Season Switcher & Theme Toggle inside Sidebar -->
     <div class="sidebar-mobile-only" style="border-top: 1px solid var(--border); padding-top: 15px; margin-top: 10px; display: none; flex-direction: column; gap: 15px;">
@@ -580,7 +663,7 @@
     <div class="hero-title animate-on-scroll">English<br>Football<br>League</div>
     <div class="hero-sub animate-on-scroll">The most anticipated football tournament of the Department of English is back. Six elite squads. One champion. <span id="dynamic-season-text">Season 5</span> begins soon.</div>
     <div class="hero-actions animate-on-scroll">
-      <button class="btn-primary" id="heroSupportBtn" onclick="window.open('/EFL/support/', '_blank')" style="text-transform: none; min-width: 220px;">Register as a supporter of the tournament/any team (not player)</button>
+      <button class="btn-primary" id="heroSupportBtn" onclick="window.open('support/', '_blank')" style="text-transform: none; min-width: 220px;">Register as a supporter of the tournament/any team (not player)</button>
       <button class="btn-outline" onclick="showPage('teams')" style="min-width: 180px;">View All Teams</button>
     </div>
     <div id="archiveNotice" class="archive-note" style="display:none; margin: 1.25rem auto 0; max-width: 560px; font-size: 14px; color: #f97316; line-height:1.6;">Viewing Season 4 archive content. Live Season 5 details and registration are available when Season 5 is selected.</div>
@@ -1120,7 +1203,7 @@ function applyArchiveMode(isArchive) {
     if (isArchive) {
       ctaContainer.innerHTML = `<button class="nav-cta" style="background: var(--text-muted); cursor: default; box-shadow: none;" disabled>Registration Closed</button>`;
     } else {
-      ctaContainer.innerHTML = `<a href="/EFL/registration/" class="nav-cta">Register Now</a>`;
+      ctaContainer.innerHTML = `<a href="registration/" class="nav-cta">Register Now</a>`;
     }
   }
 
@@ -1130,7 +1213,7 @@ function applyArchiveMode(isArchive) {
     if (isArchive) {
       sidebarCtaContainer.innerHTML = `<button class="sidebar-btn" style="color: var(--text-muted); font-weight: 700; width: 100%; border: 1.5px dashed var(--border); display: flex; align-items: center; justify-content: center;" disabled>🔒 Registration Closed</button>`;
     } else {
-      sidebarCtaContainer.innerHTML = `<a href="/EFL/registration/" class="sidebar-btn" style="background: #E63946; color: #fff; font-weight: 700; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(230, 57, 70, 0.2);" onclick="toggleSidebar()">📝 Register Now</a>`;
+      sidebarCtaContainer.innerHTML = `<a href="registration/" class="sidebar-btn" style="background: #E63946; color: #fff; font-weight: 700; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(230, 57, 70, 0.2);" onclick="toggleSidebar()">📝 Register Now</a>`;
     }
   }
 }
@@ -1205,12 +1288,15 @@ let db_supporters = [];
 function toggleSidebar() {
   const menu = document.getElementById('sidebarMenu');
   const overlay = document.getElementById('sidebarOverlay');
+  const btn = document.querySelector('.hamburger-btn');
   if(menu.classList.contains('active')) {
       menu.classList.remove('active');
       overlay.classList.remove('active');
+      if (btn) btn.classList.remove('active');
   } else {
       menu.classList.add('active');
       overlay.classList.add('active');
+      if (btn) btn.classList.add('active');
   }
 }
 
